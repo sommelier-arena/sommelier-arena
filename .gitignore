@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.astro/
+.docusaurus/
+
+# Test coverage
+coverage/
+
+# Env (keep example, ignore actual)
+.env
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*

@@ -1,0 +1,29 @@
+services:
+  back:
+    build:
+      context: ./back
+    ports:
+      - '3001:3001'
+    environment:
+      NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+  front:
+    build:
+      context: ./front
+    ports:
+      - '3000:80'
+    depends_on:
+      back:
+        condition: service_healthy
+
+  docs:
+    build:
+      context: ./docs-site
+    ports:
+      - '3002:80'
