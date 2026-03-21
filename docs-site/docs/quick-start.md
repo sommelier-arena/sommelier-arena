@@ -35,6 +35,10 @@ Stop everything:
 docker-compose down
 ```
 
+> **Troubleshooting — "localhost refused to connect" on `/host` or `/play`**
+>
+> If you see the browser navigate to `http://localhost/host/` (port 80) with a "refused to connect" error, your browser has cached an old HTTP 301 redirect from a previous version of the app. The Docker stack now also listens on port 80, so this cached redirect will automatically resolve correctly — just make sure the stack is running with `docker-compose up -d`.
+
 ---
 
 ## Option B — Local development
@@ -52,7 +56,7 @@ npm run start:dev   # hot-reload on :3001
 ```bash
 cd front
 npm install
-npm run dev         # hot-reload on :3000
+npm run dev         # hot-reload on :4321 (Astro 4 default)
 ```
 
 ### Terminal 3 — Docs (optional)
