@@ -16,6 +16,44 @@ export type HostPhase =
   | 'finalLeaderboard';
 
 const HOST_ID_KEY = 'sommelierArena:hostId';
+const SESSIONS_KEY_PREFIX = 'sommelierArena:sessions:';
+
+function sessionsStorageKey(hostId: string): string {
+  return `${SESSIONS_KEY_PREFIX}${hostId}`;
+}
+
+export function saveSessionLocally(
+  hostId: string,
+  entry: SessionListEntry,
+): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const key = sessionsStorageKey(hostId);
+    const existing: SessionListEntry[] = JSON.parse(
+      window.localStorage.getItem(key) ?? '[]',
+    );
+    const idx = existing.findIndex((s) => s.code === entry.code);
+    if (idx >= 0) {
+      existing[idx] = entry;
+    } else {
+      existing.push(entry);
+    }
+    window.localStorage.setItem(key, JSON.stringify(existing));
+  } catch {
+    // localStorage may be unavailable (private browsing, storage quota)
+  }
+}
+
+export function loadSessionsLocally(hostId: string): SessionListEntry[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    return JSON.parse(
+      window.localStorage.getItem(sessionsStorageKey(hostId)) ?? '[]',
+    );
+  } catch {
+    return [];
+  }
+}
 
 const ADJECTIVES = [
   'TANNIC', 'FRUITY', 'OAKY', 'CRISP', 'BOLD',

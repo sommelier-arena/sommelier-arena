@@ -25,10 +25,11 @@ describe('SessionForm', () => {
 
   it('color distractors have default values pre-filled', () => {
     render(<SessionForm onSubmit={vi.fn()} />);
-    // Rouge appears twice: once as the color correct answer, once as distractor 1
-    expect(screen.getAllByDisplayValue('Rouge').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByDisplayValue('Blanc')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Rosé')).toBeInTheDocument();
+    // Correct answer and distractors are all distinct
+    expect(screen.getByDisplayValue('Rouge')).toBeInTheDocument();  // correct answer
+    expect(screen.getByDisplayValue('Blanc')).toBeInTheDocument();   // distractor 1
+    expect(screen.getByDisplayValue('Rosé')).toBeInTheDocument();    // distractor 2
+    expect(screen.getByDisplayValue('Orange')).toBeInTheDocument();  // distractor 3
   });
 
   it('vintage_year distractors have default values pre-filled', () => {

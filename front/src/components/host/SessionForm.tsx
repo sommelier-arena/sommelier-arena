@@ -11,7 +11,7 @@ const CATEGORIES: { key: QuestionCategory; label: string }[] = [
 
 // Autocomplete defaults per category — host edits to match their actual wine
 const DISTRACTOR_DEFAULTS: Record<QuestionCategory, [string, string, string]> = {
-  color: ['Rouge', 'Blanc', 'Rosé'],
+  color: ['Blanc', 'Rosé', 'Orange'],
   country: ['Bordeaux (France)', 'Burgundy (France)', 'Tuscany (Italy)'],
   grape_variety: ['Pinot Noir', 'Syrah', 'Merlot'],
   vintage_year: ['2015', '2016', '2018'],
@@ -20,10 +20,10 @@ const DISTRACTOR_DEFAULTS: Record<QuestionCategory, [string, string, string]> = 
 
 const CORRECT_ANSWER_DEFAULTS: Record<QuestionCategory, string> = {
   color: 'Rouge',
-  country: 'Bordeaux (France)',
+  country: 'Champagne (France)',
   grape_variety: 'Cabernet Sauvignon',
   vintage_year: '2019',
-  wine_name: 'Château Margaux',
+  wine_name: 'Château Pétrus',
 };
 
 interface QuestionFormData {

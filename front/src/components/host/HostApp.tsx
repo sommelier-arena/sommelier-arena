@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { useHostStore } from '../../stores/hostStore';
+import { useHostStore, loadSessionsLocally } from '../../stores/hostStore';
 import { useHostSocket } from '../../hooks/useHostSocket';
+import { NavBar } from '../common/NavBar';
 import { SessionForm } from './SessionForm';
 import { SessionCreated } from './SessionCreated';
 import { HostDashboard } from './HostDashboard';
@@ -43,15 +44,27 @@ export function HostApp() {
     headingRef.current?.focus();
   }, [phase]);
 
-  // On mount: check ?id= param to restore host identity, then show dashboard
+  // On mount: check ?id= and ?code= params to restore host identity and session
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const idParam = params.get('id');
+    const codeParam = params.get('code');
+    const store = useHostStore.getState();
     if (idParam) {
-      useHostStore.getState().setHostId(idParam);
+      store.setHostId(idParam);
     }
-    // Start in dashboard phase so host sees their sessions
-    useHostStore.getState().setPhase('dashboard');
+    if (codeParam) {
+      // Direct link to a specific session — reconnect immediately
+      store.setCode(codeParam);
+      store.setPhase('lobby');
+    } else {
+      // No session in URL — show dashboard, load local sessions as KV fallback
+      const localSessions = loadSessionsLocally(store.hostId);
+      if (localSessions.length > 0) {
+        store.setSessions(localSessions);
+      }
+      store.setPhase('dashboard');
+    }
   }, []);
 
   const handleNewSession = () => {
@@ -66,6 +79,7 @@ export function HostApp() {
   if (phase === 'dashboard') {
     return (
       <div className="min-h-screen bg-slate-50">
+        <NavBar currentUrl={typeof window !== 'undefined' ? window.location.href : undefined} />
         <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Host Dashboard</h1>
         <HostDashboard
           hostId={hostId}
@@ -88,88 +102,112 @@ export function HostApp() {
 
   if (phase === 'setup') {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10">
-        <h1 className="sr-only" tabIndex={-1} ref={headingRef}>New Session</h1>
-        <SessionForm onSubmit={createSession} hostId={hostId} />
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
+        <div className="px-4 py-10">
+          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>New Session</h1>
+          <SessionForm onSubmit={createSession} hostId={hostId} />
+        </div>
       </div>
     );
   }
 
   if (phase === 'lobby' && code) {
+    const hostLink = typeof window !== 'undefined'
+      ? `${window.location.origin}/host?code=${encodeURIComponent(code)}&id=${encodeURIComponent(hostId)}`
+      : undefined;
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10 space-y-6">
-        <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Session Lobby</h1>
-        <SessionCreated code={code} hostId={hostId} />
-        <HostLobby
-          code={code}
-          participants={participants}
-          onStart={startGame}
-        />
+      <div className="min-h-screen bg-slate-50">
+        <NavBar currentUrl={hostLink} />
+        <div className="px-4 py-10 space-y-6">
+          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Session Lobby</h1>
+          <SessionCreated code={code} hostId={hostId} />
+          <HostLobby
+            code={code}
+            participants={participants}
+            onStart={startGame}
+          />
+        </div>
       </div>
     );
   }
 
   if (phase === 'question' && currentQuestion) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10">
-        <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Question {currentQuestion.questionIndex + 1}</h1>
-        <HostQuestion
-          question={currentQuestion}
-          answeredCount={answeredCount}
-          totalCount={totalCount}
-          timerMs={timerMs}
-          isPaused={isPaused}
-          onPause={pauseGame}
-          onResume={resumeGame}
-          onReveal={revealAnswer}
-          onEnd={endSession}
-        />
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
+        <div className="px-4 py-10">
+          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Question {currentQuestion.questionIndex + 1}</h1>
+          <HostQuestion
+            question={currentQuestion}
+            answeredCount={answeredCount}
+            totalCount={totalCount}
+            timerMs={timerMs}
+            isPaused={isPaused}
+            onPause={pauseGame}
+            onResume={resumeGame}
+            onReveal={revealAnswer}
+            onEnd={endSession}
+          />
+        </div>
       </div>
     );
   }
 
   if (phase === 'revealed' && currentQuestion && revealData) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10">
-        <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Answer Revealed</h1>
-        <HostReveal
-          question={currentQuestion}
-          revealData={revealData}
-          onNext={nextQuestion}
-          onEnd={endSession}
-        />
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
+        <div className="px-4 py-10">
+          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Answer Revealed</h1>
+          <HostReveal
+            question={currentQuestion}
+            revealData={revealData}
+            onNext={nextQuestion}
+            onEnd={endSession}
+          />
+        </div>
       </div>
     );
   }
 
   if (phase === 'roundLeaderboard' && currentQuestion) {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10">
-        <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Round Leaderboard</h1>
-        <HostRoundLeaderboard
-          rankings={rankings}
-          roundIndex={roundIndex}
-          totalRounds={currentQuestion.totalRounds}
-          onNext={nextQuestion}
-          onEnd={endSession}
-        />
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
+        <div className="px-4 py-10">
+          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Round Leaderboard</h1>
+          <HostRoundLeaderboard
+            rankings={rankings}
+            roundIndex={roundIndex}
+            totalRounds={currentQuestion.totalRounds}
+            onNext={nextQuestion}
+            onEnd={endSession}
+          />
+        </div>
       </div>
     );
   }
 
   if (phase === 'finalLeaderboard') {
     return (
-      <div className="min-h-screen bg-slate-50 px-4 py-10">
-        <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Final Leaderboard</h1>
-        <HostFinalLeaderboard rankings={rankings} />
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
+        <div className="px-4 py-10">
+          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Final Leaderboard</h1>
+          <HostFinalLeaderboard rankings={rankings} />
+        </div>
       </div>
     );
   }
 
   // Fallback loading
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <p className="text-slate-400">Connecting…</p>
+    <div className="min-h-screen bg-slate-50">
+      <NavBar />
+      <div className="flex items-center justify-center min-h-[80vh]">
+        <p className="text-slate-400">Connecting…</p>
+      </div>
     </div>
   );
 }

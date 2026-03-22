@@ -33,9 +33,10 @@ describe('SessionCreated', () => {
     expect(link.getAttribute('href')).toContain('sms:');
   });
 
-  it('share URL contains the hostId', () => {
+  it('share URL contains the session code and hostId', () => {
     render(<SessionCreated code="4829" hostId="TANNIC-FALCON" />);
-    const urlEl = screen.getByText(/sommelier-arena\.ducatillon\.net.*TANNIC-FALCON/);
+    // The URL uses window.location.origin in the browser; in jsdom it's 'http://localhost'
+    const urlEl = screen.getByText(/\/host\?code=4829.*TANNIC-FALCON/);
     expect(urlEl).toBeInTheDocument();
   });
 

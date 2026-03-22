@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useRef } from 'react';
 import type PartySocket from 'partysocket';
 import { createSocket } from '../lib/socket';
-import { useHostStore } from '../stores/hostStore';
+import { useHostStore, saveSessionLocally } from '../stores/hostStore';
 import type {
   CreateSessionPayload,
   LobbyUpdatedPayload,
@@ -17,6 +17,7 @@ import type {
 /** Host socket hook — connects to a specific session room (4-digit code). */
 export function useHostSocket(code: string) {
   const socketRef = useRef<PartySocket | null>(null);
+  const pendingTitleRef = useRef<string>('');
 
   useEffect(() => {
     if (!code) return;
@@ -51,6 +52,15 @@ export function useHostSocket(code: string) {
           store.setCode(sessionCode);
           if (returnedHostId) store.setHostId(returnedHostId);
           store.setPhase('lobby');
+          // Persist to localStorage so the dashboard can show this session
+          // even when KV is not configured (local dev).
+          saveSessionLocally(returnedHostId ?? store.hostId, {
+            code: sessionCode,
+            title: pendingTitleRef.current || sessionCode,
+            createdAt: new Date().toISOString(),
+            status: 'waiting',
+            participantCount: 0,
+          });
           break;
         }
         case 'host:state_snapshot': {
@@ -124,8 +134,20 @@ export function useHostSocket(code: string) {
           break;
         }
         case 'game:final_leaderboard': {
-          store.setRankings((msg as unknown as FinalLeaderboardPayload).rankings);
+          const finalData = msg as unknown as FinalLeaderboardPayload;
+          store.setRankings(finalData.rankings);
           store.setPhase('finalLeaderboard');
+          // Update localStorage entry to reflect ended status
+          if (store.code) {
+            saveSessionLocally(store.hostId, {
+              code: store.code,
+              title: store.code,
+              createdAt: new Date().toISOString(),
+              status: 'ended',
+              participantCount: store.participants.length,
+              finalRankings: finalData.rankings,
+            });
+          }
           break;
         }
       }
@@ -145,6 +167,7 @@ export function useHostSocket(code: string) {
   }, []);
 
   const createSession = useCallback((payload: CreateSessionPayload) => {
+    pendingTitleRef.current = payload.title ?? payload.wines[0]?.name ?? '';
     send({ type: 'create_session', ...payload });
   }, [send]);
 

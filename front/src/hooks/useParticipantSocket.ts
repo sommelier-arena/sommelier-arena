@@ -99,7 +99,12 @@ export function useParticipantSocket(code: string) {
           break;
         }
         case 'session:ended': {
-          store.setPhase('ended');
+          // Don't overwrite finalLeaderboard — if the host ended the game
+          // normally the participant already received game:final_leaderboard
+          // and should stay on the leaderboard screen.
+          if (useParticipantStore.getState().phase !== 'finalLeaderboard') {
+            store.setPhase('ended');
+          }
           store.clearRejoin();
           break;
         }

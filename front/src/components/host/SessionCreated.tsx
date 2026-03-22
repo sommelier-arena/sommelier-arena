@@ -5,10 +5,14 @@ interface SessionCreatedProps {
   hostId: string;
 }
 
-const BASE_URL = 'https://sommelier-arena.ducatillon.net';
-
 export function SessionCreated({ code, hostId }: SessionCreatedProps) {
-  const shareUrl = `${BASE_URL}/host?id=${encodeURIComponent(hostId)}`;
+  // Use the current origin so the link works in both local dev and production.
+  // Include the session code so the host can reconnect directly from the link.
+  const origin = typeof window !== 'undefined'
+    ? window.location.origin
+    : 'https://sommelier-arena.ducatillon.net';
+  const shareUrl = `${origin}/host?code=${encodeURIComponent(code)}&id=${encodeURIComponent(hostId)}`;
+  const participantUrl = `${origin}/play`;
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -22,11 +26,11 @@ export function SessionCreated({ code, hostId }: SessionCreatedProps) {
   };
 
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
-    `Join my wine tasting at Sommelier Arena!\n👉 ${shareUrl}`,
+    `Join my wine tasting at Sommelier Arena!\nCode: ${code}\n👉 ${participantUrl}`,
   )}`;
 
   const iMessageUrl = `sms:?&body=${encodeURIComponent(
-    `Join my wine tasting at Sommelier Arena!\n👉 ${shareUrl}`,
+    `Join my wine tasting at Sommelier Arena!\nCode: ${code}\n👉 ${participantUrl}`,
   )}`;
 
   return (
@@ -41,6 +45,10 @@ export function SessionCreated({ code, hostId }: SessionCreatedProps) {
           aria-label={`Session code: ${code.split('').join(' ')}`}
         >
           {code}
+        </p>
+        <p className="text-xs text-slate-500 mt-2">
+          Participants join at{' '}
+          <span className="font-mono text-violet-600">{participantUrl}</span>
         </p>
       </div>
 

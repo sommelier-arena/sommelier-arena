@@ -167,7 +167,7 @@ Correct answer field always blank — host must explicitly mark it. Distractor f
 | Wine Name | Château Margaux, Domaine de la Romanée-Conti, Château Lafite Rothschild, Château Latour |
 | Grape Variety | No defaults — host fills in manually |
 
-### 3. Shuffled answer order
+### 3.  answer order
 
 Fisher-Yates shuffle applied to options before each broadcast. Correct answer is never always position A. Identified server-side by ID, not position.
 

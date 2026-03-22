@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParticipantStore, loadRejoinData } from '../../stores/participantStore';
 import { useParticipantSocket } from '../../hooks/useParticipantSocket';
+import { NavBar } from '../common/NavBar';
 import { JoinForm } from './JoinForm';
 import { ParticipantLobby } from './ParticipantLobby';
 import { QuestionView } from './QuestionView';
@@ -61,28 +62,38 @@ export function ParticipantApp() {
 
   if (isRejoining) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <p className="text-slate-400 animate-pulse">Rejoining session…</p>
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
+        <div className="flex items-center justify-center min-h-[80vh]">
+          <p className="text-slate-400 animate-pulse">Rejoining session…</p>
+        </div>
       </div>
     );
   }
 
   if (phase === 'join') {
-    return <JoinForm onJoin={handleJoin} error={joinError} />;
+    return (
+      <div className="min-h-screen bg-slate-50">
+        <NavBar currentUrl={typeof window !== 'undefined' ? window.location.href : undefined} />
+        <JoinForm onJoin={handleJoin} error={joinError} />
+      </div>
+    );
   }
 
   if (phase === 'lobby' && pseudonym) {
     return (
-      <>
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
         <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Waiting for host to start</h1>
         <ParticipantLobby pseudonym={pseudonym} />
-      </>
+      </div>
     );
   }
 
   if (phase === 'question' && currentQuestion) {
     return (
-      <>
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
         <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Question {currentQuestion.questionIndex + 1}</h1>
         <QuestionView
           question={currentQuestion}
@@ -90,53 +101,60 @@ export function ParticipantApp() {
           timerMs={timerMs}
           onSelect={handleSelect}
         />
-      </>
+      </div>
     );
   }
 
   if (phase === 'revealed' && currentQuestion && revealData) {
     return (
-      <>
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
         <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Answer Revealed</h1>
         <RevealView
           question={currentQuestion}
           revealData={revealData}
           selectedOptionId={selectedOptionId}
         />
-      </>
+      </div>
     );
   }
 
   if (phase === 'roundLeaderboard') {
     return (
-      <>
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
         <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Round Leaderboard</h1>
         <RoundLeaderboard rankings={rankings} pseudonym={pseudonym} />
-      </>
+      </div>
     );
   }
 
   if (phase === 'finalLeaderboard') {
     return (
-      <>
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
         <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Final Leaderboard</h1>
         <FinalLeaderboard rankings={rankings} pseudonym={pseudonym} />
-      </>
+      </div>
     );
   }
 
   if (phase === 'ended') {
     return (
-      <>
+      <div className="min-h-screen bg-slate-50">
+        <NavBar />
         <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Session Ended</h1>
         <SessionEnded />
-      </>
+      </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-      <p className="text-slate-400">Connecting…</p>
+    <div className="min-h-screen bg-slate-50">
+      <NavBar />
+      <div className="flex items-center justify-center min-h-[80vh]">
+        <p className="text-slate-400">Connecting…</p>
+      </div>
     </div>
   );
 }
