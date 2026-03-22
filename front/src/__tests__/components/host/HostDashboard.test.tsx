@@ -21,7 +21,7 @@ const endedSessions: SessionListEntry[] = [
     createdAt: new Date().toISOString(),
     status: 'ended',
     participantCount: 8,
-    finalRankings: [{ pseudonym: 'Alice', score: 300, rank: 1 }],
+    finalRankings: [{ pseudonym: 'Alice', score: 300 }],
   },
 ];
 

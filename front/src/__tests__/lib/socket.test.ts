@@ -30,7 +30,7 @@ describe('createSocket', () => {
   it('uses PUBLIC_PARTYKIT_HOST as the host', async () => {
     const PartySocket = (await import('partysocket')).default;
     createSocket('5678');
-    const callArg = (PartySocket as ReturnType<typeof vi.fn>).mock.calls.at(-1)?.[0];
+    const callArg = (PartySocket as unknown as ReturnType<typeof vi.fn>).mock.calls.at(-1)?.[0];
     expect(callArg).toHaveProperty('host');
   });
 
