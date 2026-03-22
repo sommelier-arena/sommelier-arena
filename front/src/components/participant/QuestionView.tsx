@@ -7,6 +7,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   country: 'Country',
   grape_variety: 'Grape Variety',
   vintage_year: 'Vintage Year',
+  wine_name: 'Wine Name',
 };
 
 interface QuestionViewProps {
@@ -22,8 +23,6 @@ export function QuestionView({
   timerMs,
   onSelect,
 }: QuestionViewProps) {
-  const isLocked = selectedOptionId !== null;
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col px-4 py-8">
       <div className="w-full max-w-lg mx-auto flex-1 flex flex-col gap-5">
@@ -42,29 +41,29 @@ export function QuestionView({
           <Timer remainingMs={timerMs} />
         </div>
 
-        {/* Question */}
+        {/* Question prompt */}
         <div className="bg-white border border-slate-200 rounded-2xl p-5">
           <p className="text-xl font-semibold text-slate-800 text-center">
             {question.prompt}
           </p>
         </div>
 
-        {/* Options */}
-        <div className="grid grid-cols-1 gap-3 flex-1">
+        {/* Options — 2×2 grid: A+B on row 1, C+D on row 2 */}
+        <div className="grid grid-cols-2 gap-3 flex-1">
           {question.options.map((opt, i) => {
             const isSelected = opt.id === selectedOptionId;
             return (
               <button
                 key={opt.id}
-                onClick={() => !isLocked && onSelect(opt.id)}
-                disabled={isLocked}
-                className={`w-full text-left rounded-xl border px-5 py-4 font-medium text-base transition-colors min-h-[56px] ${
+                onClick={() => onSelect(opt.id)}
+                aria-pressed={isSelected}
+                className={`w-full text-left rounded-xl border px-4 py-4 font-medium text-sm transition-colors min-h-[72px] ${
                   isSelected
-                    ? 'border-violet-400 bg-violet-50 text-violet-800'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:bg-violet-50 disabled:cursor-default disabled:hover:border-slate-200 disabled:hover:bg-white'
+                    ? 'border-violet-400 bg-violet-100 text-violet-800 ring-2 ring-violet-400'
+                    : 'border-slate-200 bg-white text-slate-700 hover:border-violet-300 hover:bg-violet-50'
                 }`}
               >
-                <span className="font-bold text-slate-400 mr-3">
+                <span className="font-bold text-slate-400 mr-2">
                   {String.fromCharCode(65 + i)}.
                 </span>
                 {opt.text}
@@ -73,12 +72,13 @@ export function QuestionView({
           })}
         </div>
 
-        {isLocked && (
+        {selectedOptionId && (
           <p className="text-center text-slate-400 text-sm">
-            Answer locked in — waiting for the host to reveal.
+            Selection recorded — you can change it until the host reveals.
           </p>
         )}
       </div>
     </div>
   );
 }
+

@@ -1,0 +1,122 @@
+import React from 'react';
+import type { SessionListEntry } from '../../types/events';
+
+interface HostDashboardProps {
+  hostId: string;
+  sessions: SessionListEntry[];
+  onOpenSession: (code: string) => void;
+  onViewResults: (session: SessionListEntry) => void;
+  onNewSession: () => void;
+}
+
+export function HostDashboard({
+  hostId,
+  sessions,
+  onOpenSession,
+  onViewResults,
+  onNewSession,
+}: HostDashboardProps) {
+  const activeSessions = sessions.filter(
+    (s) => s.status === 'waiting' || s.status === 'active',
+  );
+  const endedSessions = sessions.filter((s) => s.status === 'ended');
+
+  return (
+    <div className="min-h-screen bg-slate-50 px-4 py-10">
+      <div className="w-full max-w-2xl mx-auto space-y-8">
+        {/* Host identity */}
+        <div className="text-center">
+          <p className="text-4xl mb-2">🍷</p>
+          <h1 className="text-3xl font-bold text-slate-800">Sommelier Arena</h1>
+          <p className="text-sm text-slate-500 mt-1">
+            Your host ID:{' '}
+            <span className="font-mono font-bold text-violet-600">{hostId}</span>
+          </p>
+        </div>
+
+        {/* New session button */}
+        <button
+          onClick={onNewSession}
+          className="w-full bg-violet-600 text-white rounded-xl py-4 font-semibold text-lg hover:bg-violet-700 transition-colors"
+        >
+          + New Session
+        </button>
+
+        {/* Active sessions */}
+        {activeSessions.length > 0 && (
+          <section aria-labelledby="active-sessions-heading">
+            <h2 id="active-sessions-heading" className="text-lg font-semibold text-slate-700 mb-3">
+              Active Sessions
+            </h2>
+            <ul className="space-y-3">
+              {activeSessions.map((session) => (
+                <li
+                  key={session.code}
+                  className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4"
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-800 truncate">{session.title}</p>
+                    <p className="text-sm text-slate-500">
+                      Code:{' '}
+                      <span className="font-mono font-bold text-slate-700">{session.code}</span>
+                      {' · '}
+                      {session.participantCount} player{session.participantCount !== 1 ? 's' : ''}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {new Date(session.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => onOpenSession(session.code)}
+                    className="flex-shrink-0 bg-violet-600 text-white rounded-xl px-5 py-2 font-semibold hover:bg-violet-700 transition-colors text-sm"
+                  >
+                    Open
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {/* Ended sessions */}
+        {endedSessions.length > 0 && (
+          <section aria-labelledby="ended-sessions-heading">
+            <h2 id="ended-sessions-heading" className="text-lg font-semibold text-slate-700 mb-3">
+              Past Sessions
+            </h2>
+            <ul className="space-y-3">
+              {endedSessions.map((session) => (
+                <li
+                  key={session.code}
+                  className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4"
+                >
+                  <div className="min-w-0">
+                    <p className="font-semibold text-slate-800 truncate">{session.title}</p>
+                    <p className="text-sm text-slate-500">
+                      {session.participantCount} player{session.participantCount !== 1 ? 's' : ''}
+                    </p>
+                    <p className="text-xs text-slate-400">
+                      {new Date(session.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => onViewResults(session)}
+                    className="flex-shrink-0 border border-slate-300 text-slate-600 rounded-xl px-5 py-2 font-semibold hover:bg-slate-50 transition-colors text-sm"
+                  >
+                    Results
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {sessions.length === 0 && (
+          <p className="text-center text-slate-400 py-8">
+            No sessions yet. Create your first one!
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
