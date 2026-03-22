@@ -129,6 +129,16 @@ test.describe('Full Game Flow', () => {
         // Participant also sees the final leaderboard
         await expect(participantPage.getByText(/final/i)).toBeVisible();
       });
+
+      await test.step('Participant sees "Play Another Session" button after game ends @full', async () => {
+        await expect(participantPage.getByRole('button', { name: /play another session/i })).toBeVisible({ timeout: 5000 });
+      });
+
+      await test.step('Participant clicks "Play Another Session" — arrives at clean join form @full', async () => {
+        await participantPage.getByRole('button', { name: /play another session/i }).click();
+        await expect(participantPage).toHaveURL(/\/play/);
+        await expect(participantPage.getByRole('textbox')).toHaveValue('');
+      });
     } finally {
       await participantCtx.close();
       await hostCtx.close();
@@ -168,6 +178,39 @@ test.describe('Full Game Flow', () => {
       await participantCtx.close();
       await lateCtx.close();
       await hostCtx.close();
+    }
+  });
+
+  test('CUJ-9: Host closes tab mid-game — participants see ended screen, no crash @full', async ({ browser }) => {
+    const { hostPage, hostCtx, code } = await test.step('Host creates session', async () => {
+      return hostCreateSession(browser);
+    });
+
+    const participantCtx = await browser.newContext();
+    try {
+      const participantPage = await participantCtx.newPage();
+      await participantPage.goto('/play');
+      await participantPage.getByLabel('Session code').fill(code);
+      await participantPage.getByRole('button', { name: /join/i }).click();
+      await expect(participantPage.getByText(/waiting for the host/i)).toBeVisible();
+
+      await test.step('Host starts game', async () => {
+        await hostPage.getByRole('button', { name: /start game/i }).click();
+        await expect(hostPage.getByRole('button', { name: /reveal answer/i })).toBeVisible();
+      });
+
+      await test.step('Host closes their tab (context close simulates tab close)', async () => {
+        await hostCtx.close();
+      });
+
+      await test.step('Participant transitions to ended state (no blank screen / crash)', async () => {
+        // Participant should see either the final leaderboard or a session-ended message
+        await expect(
+          participantPage.getByText(/final|ended|session has ended/i)
+        ).toBeVisible({ timeout: 10000 });
+      });
+    } finally {
+      await participantCtx.close();
     }
   });
 });

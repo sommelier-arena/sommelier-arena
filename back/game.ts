@@ -239,11 +239,11 @@ export default class GameSession implements Party.Server {
   onClose(conn: Party.Connection) {
     if (conn.id === this.hostConnectionId) {
       this.hostConnectionId = null;
-      // Host disconnected — if game was active, end it
+      // Host disconnected — if game was active, end it gracefully so
+      // participants receive final scores before the session:ended message.
       if (this.phase !== 'waiting' && this.phase !== 'ended') {
         this.clearTimer();
-        this.phase = 'ended';
-        this.broadcast('session:ended', {});
+        void this.endGame();
       }
       return;
     }
@@ -614,6 +614,7 @@ export default class GameSession implements Party.Server {
       this.broadcast('game:round_leaderboard', {
         rankings: this.buildRankings(),
         roundIndex: this.currentRound,
+        totalRounds: this.wines.length,
       });
     } else {
       this.currentQuestion++;

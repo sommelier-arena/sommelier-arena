@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { useHostStore, loadSessionsLocally } from '../../stores/hostStore';
+import { useHostStore } from '../../stores/hostStore';
+import { loadSessions } from '../../lib/sessionStorage';
 import { useHostSocket } from '../../hooks/useHostSocket';
+import { useHostUrlSync } from '../../hooks/useUrlSync';
 import { NavBar } from '../common/NavBar';
 import { SessionForm } from './SessionForm';
 import { SessionCreated } from './SessionCreated';
@@ -25,6 +27,7 @@ export function HostApp() {
   const revealData = useHostStore((s) => s.revealData);
   const rankings = useHostStore((s) => s.rankings);
   const roundIndex = useHostStore((s) => s.roundIndex);
+  const totalRounds = useHostStore((s) => s.totalRounds);
   const timerMs = useHostStore((s) => s.timerMs);
 
   // Socket connects to the active session room (empty string = no connection yet)
@@ -59,13 +62,16 @@ export function HostApp() {
       store.setPhase('lobby');
     } else {
       // No session in URL — show dashboard, load local sessions as KV fallback
-      const localSessions = loadSessionsLocally(store.hostId);
+      const localSessions = loadSessions(store.hostId);
       if (localSessions.length > 0) {
         store.setSessions(localSessions);
       }
       store.setPhase('dashboard');
     }
   }, []);
+
+  // Keep browser address bar in sync with current phase (enables share/bookmark)
+  useHostUrlSync(phase, code, hostId);
 
   const handleNewSession = () => {
     // Generate a 4-digit code and set it now so useHostSocket can connect
@@ -79,7 +85,7 @@ export function HostApp() {
   if (phase === 'dashboard') {
     return (
       <div className="min-h-screen bg-slate-50">
-        <NavBar currentUrl={typeof window !== 'undefined' ? window.location.href : undefined} />
+        <NavBar />
         <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Host Dashboard</h1>
         <HostDashboard
           hostId={hostId}
@@ -113,12 +119,9 @@ export function HostApp() {
   }
 
   if (phase === 'lobby' && code) {
-    const hostLink = typeof window !== 'undefined'
-      ? `${window.location.origin}/host?code=${encodeURIComponent(code)}&id=${encodeURIComponent(hostId)}`
-      : undefined;
     return (
       <div className="min-h-screen bg-slate-50">
-        <NavBar currentUrl={hostLink} />
+        <NavBar />
         <div className="px-4 py-10 space-y-6">
           <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Session Lobby</h1>
           <SessionCreated code={code} hostId={hostId} />
@@ -171,7 +174,7 @@ export function HostApp() {
     );
   }
 
-  if (phase === 'roundLeaderboard' && currentQuestion) {
+  if (phase === 'roundLeaderboard') {
     return (
       <div className="min-h-screen bg-slate-50">
         <NavBar />
@@ -180,7 +183,7 @@ export function HostApp() {
           <HostRoundLeaderboard
             rankings={rankings}
             roundIndex={roundIndex}
-            totalRounds={currentQuestion.totalRounds}
+            totalRounds={totalRounds}
             onNext={nextQuestion}
             onEnd={endSession}
           />

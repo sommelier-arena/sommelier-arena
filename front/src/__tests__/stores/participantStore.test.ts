@@ -64,11 +64,47 @@ describe('participantStore', () => {
       expect(useParticipantStore.getState().sessionCode).toBeNull();
     });
 
+    it('clearRejoin also clears pseudonym from store', () => {
+      useParticipantStore.getState().setPseudonym('Alice');
+      useParticipantStore.getState().setRejoinToken('tok123', '4567', 'Alice');
+      useParticipantStore.getState().clearRejoin();
+      expect(useParticipantStore.getState().pseudonym).toBeNull();
+    });
+
     it('clearRejoin removes token and code from state', () => {
       useParticipantStore.getState().setRejoinToken('tok123', '4567', 'Alice');
       useParticipantStore.getState().clearRejoin();
       expect(useParticipantStore.getState().rejoinToken).toBeNull();
       expect(useParticipantStore.getState().sessionCode).toBeNull();
+    });
+  });
+
+  describe('resetGame', () => {
+    it('resets phase to join', () => {
+      useParticipantStore.getState().setPhase('question');
+      useParticipantStore.getState().resetGame();
+      expect(useParticipantStore.getState().phase).toBe('join');
+    });
+
+    it('clears pseudonym, rejoinToken, sessionCode', () => {
+      useParticipantStore.getState().setPseudonym('Alice');
+      useParticipantStore.getState().setRejoinToken('tok', '1234', 'Alice');
+      useParticipantStore.getState().resetGame();
+      expect(useParticipantStore.getState().pseudonym).toBeNull();
+      expect(useParticipantStore.getState().rejoinToken).toBeNull();
+      expect(useParticipantStore.getState().sessionCode).toBeNull();
+    });
+
+    it('clears rankings and revealData', () => {
+      useParticipantStore.getState().setRankings([{ pseudonym: 'Alice', score: 100 }]);
+      useParticipantStore.getState().resetGame();
+      expect(useParticipantStore.getState().rankings).toEqual([]);
+    });
+
+    it('removes localStorage rejoin entry', () => {
+      localStorage.setItem(REJOIN_KEY, JSON.stringify({ rejoinToken: 'tok', code: '1234', pseudonym: 'Alice' }));
+      useParticipantStore.getState().resetGame();
+      expect(localStorage.getItem(REJOIN_KEY)).toBeNull();
     });
   });
 

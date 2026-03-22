@@ -97,6 +97,46 @@ describe('HostDashboard', () => {
     expect(onViewResults).toHaveBeenCalledWith(endedSessions[0]);
   });
 
+  it('Results button is disabled when session has no finalRankings', () => {
+    render(
+      <HostDashboard
+        hostId="TANNIC-FALCON"
+        sessions={[{ ...endedSessions[0], finalRankings: undefined }]}
+        onOpenSession={vi.fn()}
+        onViewResults={vi.fn()}
+        onNewSession={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('button', { name: /results/i })).toBeDisabled();
+  });
+
+  it('shows "🟢 Open" badge on active sessions', () => {
+    render(
+      <HostDashboard
+        hostId="TANNIC-FALCON"
+        sessions={activeSessions}
+        onOpenSession={vi.fn()}
+        onViewResults={vi.fn()}
+        onNewSession={vi.fn()}
+      />,
+    );
+    // The badge text "🟢 Open" appears in a span inside the card
+    expect(screen.getByText(/🟢 Open/)).toBeInTheDocument();
+  });
+
+  it('shows "⚪ Ended" badge on ended sessions', () => {
+    render(
+      <HostDashboard
+        hostId="TANNIC-FALCON"
+        sessions={endedSessions}
+        onOpenSession={vi.fn()}
+        onViewResults={vi.fn()}
+        onNewSession={vi.fn()}
+      />,
+    );
+    expect(screen.getByText(/ended/i)).toBeInTheDocument();
+  });
+
   it('shows "No sessions yet" message when sessions list is empty', () => {
     render(
       <HostDashboard

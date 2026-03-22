@@ -1,5 +1,6 @@
 import React from 'react';
 import { Leaderboard } from '../common/Leaderboard';
+import { useParticipantStore } from '../../stores/participantStore';
 import type { RankingEntry } from '../../types/events';
 
 interface FinalLeaderboardProps {
@@ -9,6 +10,11 @@ interface FinalLeaderboardProps {
 
 export function FinalLeaderboard({ rankings, pseudonym }: FinalLeaderboardProps) {
   const myRank = rankings.findIndex((r) => r.pseudonym === pseudonym) + 1;
+
+  const handlePlayAgain = () => {
+    useParticipantStore.getState().resetGame();
+    window.location.href = '/play';
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-10">
@@ -30,7 +36,12 @@ export function FinalLeaderboard({ rankings, pseudonym }: FinalLeaderboardProps)
           highlightPseudonym={pseudonym ?? undefined}
         />
 
-        <p className="text-slate-400 text-xs">You can close this tab.</p>
+        <button
+          onClick={handlePlayAgain}
+          className="w-full bg-violet-600 text-white rounded-xl py-3 font-semibold hover:bg-violet-700 transition-colors"
+        >
+          Play Another Session
+        </button>
       </div>
     </div>
   );

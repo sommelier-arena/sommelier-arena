@@ -5,6 +5,7 @@ import type {
   RankingEntry,
   SessionListEntry,
 } from '../types/events';
+export { saveSession, loadSessions, mergeSession } from '../lib/sessionStorage';
 
 export type HostPhase =
   | 'setup'
@@ -16,44 +17,6 @@ export type HostPhase =
   | 'finalLeaderboard';
 
 const HOST_ID_KEY = 'sommelierArena:hostId';
-const SESSIONS_KEY_PREFIX = 'sommelierArena:sessions:';
-
-function sessionsStorageKey(hostId: string): string {
-  return `${SESSIONS_KEY_PREFIX}${hostId}`;
-}
-
-export function saveSessionLocally(
-  hostId: string,
-  entry: SessionListEntry,
-): void {
-  if (typeof window === 'undefined') return;
-  try {
-    const key = sessionsStorageKey(hostId);
-    const existing: SessionListEntry[] = JSON.parse(
-      window.localStorage.getItem(key) ?? '[]',
-    );
-    const idx = existing.findIndex((s) => s.code === entry.code);
-    if (idx >= 0) {
-      existing[idx] = entry;
-    } else {
-      existing.push(entry);
-    }
-    window.localStorage.setItem(key, JSON.stringify(existing));
-  } catch {
-    // localStorage may be unavailable (private browsing, storage quota)
-  }
-}
-
-export function loadSessionsLocally(hostId: string): SessionListEntry[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    return JSON.parse(
-      window.localStorage.getItem(sessionsStorageKey(hostId)) ?? '[]',
-    );
-  } catch {
-    return [];
-  }
-}
 
 const ADJECTIVES = [
   'TANNIC', 'FRUITY', 'OAKY', 'CRISP', 'BOLD',
@@ -96,6 +59,7 @@ interface HostState {
   revealData: HostRevealPayload | null;
   rankings: RankingEntry[];
   roundIndex: number;
+  totalRounds: number;
   timerMs: number;
 
   setPhase: (phase: HostPhase) => void;
@@ -108,6 +72,7 @@ interface HostState {
   setCurrentQuestion: (q: QuestionPayload) => void;
   setRevealData: (data: HostRevealPayload) => void;
   setRankings: (rankings: RankingEntry[], roundIndex?: number) => void;
+  setTotalRounds: (totalRounds: number) => void;
   setTimerMs: (ms: number) => void;
   resetAnsweredStats: () => void;
 }
@@ -125,6 +90,7 @@ export const useHostStore = create<HostState>((set) => ({
   revealData: null,
   rankings: [],
   roundIndex: 0,
+  totalRounds: 0,
   timerMs: 60000,
 
   setPhase: (phase) => set({ phase }),
@@ -145,6 +111,7 @@ export const useHostStore = create<HostState>((set) => ({
   setRevealData: (revealData) => set({ revealData }),
   setRankings: (rankings, roundIndex) =>
     set((s) => ({ rankings, roundIndex: roundIndex ?? s.roundIndex })),
+  setTotalRounds: (totalRounds) => set({ totalRounds }),
   setTimerMs: (timerMs) => set({ timerMs }),
   resetAnsweredStats: () => set({ answeredCount: 0 }),
 }));

@@ -51,7 +51,10 @@ interface ParticipantState {
   setRevealData: (data: ParticipantRevealPayload) => void;
   setRankings: (rankings: RankingEntry[]) => void;
   setTimerMs: (ms: number) => void;
+  /** Clears the rejoin token, session code, and pseudonym from store and localStorage. */
   clearRejoin: () => void;
+  /** Resets all in-game state so the participant can start a fresh session. */
+  resetGame: () => void;
 }
 
 export const useParticipantStore = create<ParticipantState>((set) => ({
@@ -86,7 +89,23 @@ export const useParticipantStore = create<ParticipantState>((set) => ({
     if (typeof window !== 'undefined') {
       window.localStorage.removeItem(REJOIN_KEY);
     }
-    set({ rejoinToken: null, sessionCode: null });
+    set({ rejoinToken: null, sessionCode: null, pseudonym: null });
+  },
+  resetGame: () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(REJOIN_KEY);
+    }
+    set({
+      phase: 'join',
+      pseudonym: null,
+      rejoinToken: null,
+      sessionCode: null,
+      currentQuestion: null,
+      selectedOptionId: null,
+      revealData: null,
+      rankings: [],
+      timerMs: 60000,
+    });
   },
 }));
 

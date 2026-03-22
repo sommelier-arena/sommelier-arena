@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParticipantStore, loadRejoinData } from '../../stores/participantStore';
 import { useParticipantSocket } from '../../hooks/useParticipantSocket';
+import { useParticipantUrlSync } from '../../hooks/useUrlSync';
 import { NavBar } from '../common/NavBar';
 import { JoinForm } from './JoinForm';
 import { ParticipantLobby } from './ParticipantLobby';
@@ -13,6 +14,7 @@ import { SessionEnded } from './SessionEnded';
 export function ParticipantApp() {
   const phase = useParticipantStore((s) => s.phase);
   const pseudonym = useParticipantStore((s) => s.pseudonym);
+  const sessionCode = useParticipantStore((s) => s.sessionCode);
   const currentQuestion = useParticipantStore((s) => s.currentQuestion);
   const selectedOptionId = useParticipantStore((s) => s.selectedOptionId);
   const revealData = useParticipantStore((s) => s.revealData);
@@ -28,6 +30,9 @@ export function ParticipantApp() {
   const [isRejoining, setIsRejoining] = useState(false);
 
   const { joinSession, submitAnswer } = useParticipantSocket(activeCode);
+
+  // Keep browser address bar in sync with session phase
+  useParticipantUrlSync(phase, sessionCode);
 
   // Move focus to new heading on phase change (WCAG 2.4.3)
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -74,7 +79,7 @@ export function ParticipantApp() {
   if (phase === 'join') {
     return (
       <div className="min-h-screen bg-slate-50">
-        <NavBar currentUrl={typeof window !== 'undefined' ? window.location.href : undefined} />
+        <NavBar />
         <JoinForm onJoin={handleJoin} error={joinError} />
       </div>
     );

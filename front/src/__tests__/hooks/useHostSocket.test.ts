@@ -112,8 +112,14 @@ describe('useHostSocket', () => {
 
   it('sets phase to roundLeaderboard on game:round_leaderboard', () => {
     renderHook(() => useHostSocket('1234'));
-    emitMessage('game:round_leaderboard', { rankings: [], roundIndex: 0 });
+    emitMessage('game:round_leaderboard', { rankings: [], roundIndex: 0, totalRounds: 2 });
     expect(useHostStore.getState().phase).toBe('roundLeaderboard');
+  });
+
+  it('stores totalRounds from game:round_leaderboard payload', () => {
+    renderHook(() => useHostSocket('1234'));
+    emitMessage('game:round_leaderboard', { rankings: [], roundIndex: 0, totalRounds: 3 });
+    expect(useHostStore.getState().totalRounds).toBe(3);
   });
 
   it('sets phase to finalLeaderboard on game:final_leaderboard', () => {

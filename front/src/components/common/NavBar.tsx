@@ -1,20 +1,16 @@
 import React from 'react';
-
-interface NavBarProps {
-  /** Optional URL to display as the current page's share URL. */
-  currentUrl?: string;
-}
+import { useCurrentUrl } from '../../hooks/useCurrentUrl';
 
 const DOCS_URL =
   typeof window !== 'undefined' && window.location.hostname === 'localhost'
     ? `http://localhost:3002`
     : 'https://sommelier-arena.ducatillon.net/docs';
 
-export function NavBar({ currentUrl }: NavBarProps) {
+export function NavBar() {
+  const currentUrl = useCurrentUrl();
   const [copied, setCopied] = React.useState(false);
 
   const handleCopy = async () => {
-    if (!currentUrl) return;
     try {
       await navigator.clipboard.writeText(currentUrl);
       setCopied(true);
@@ -68,24 +64,22 @@ export function NavBar({ currentUrl }: NavBarProps) {
         </a>
       </div>
 
-      {/* Current URL display */}
-      {currentUrl && (
-        <div className="ml-auto flex items-center gap-2 min-w-0">
-          <span
-            className="font-mono text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 truncate max-w-xs hidden sm:block"
-            title={currentUrl}
-          >
-            {currentUrl}
-          </span>
-          <button
-            onClick={handleCopy}
-            className="shrink-0 text-xs border border-slate-300 text-slate-600 rounded-lg px-2 py-1 hover:bg-slate-100 transition-colors"
-            aria-label="Copy current URL to clipboard"
-          >
-            {copied ? '✓' : '📋'}
-          </button>
-        </div>
-      )}
+      {/* Current URL display — always visible, auto-tracks via useCurrentUrl() */}
+      <div className="ml-auto flex items-center gap-2 min-w-0">
+        <span
+          className="font-mono text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 truncate max-w-[200px] sm:max-w-xs"
+          title={currentUrl}
+        >
+          {currentUrl}
+        </span>
+        <button
+          onClick={handleCopy}
+          className="shrink-0 text-xs border border-slate-300 text-slate-600 rounded-lg px-2 py-1 hover:bg-slate-100 transition-colors"
+          aria-label="Copy current URL to clipboard"
+        >
+          {copied ? '✓' : '📋'}
+        </button>
+      </div>
     </nav>
   );
 }

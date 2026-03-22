@@ -91,6 +91,10 @@ test.describe('Participant Join', () => {
           participantPage.getByRole('heading')
         )).toBeVisible();
       });
+
+      await test.step('URL updates to include ?code= after joining @smoke', async () => {
+        await expect(participantPage).toHaveURL(/[?&]code=\d{4}/);
+      });
     } finally {
       await hostContext.close();
       await participantContext.close();

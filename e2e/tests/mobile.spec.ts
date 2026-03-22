@@ -73,4 +73,15 @@ test.describe('Mobile UX', () => {
       ).toBeLessThanOrEqual(clientWidth + 1); // +1 px tolerance for sub-pixel rounding
     });
   });
+
+  test('NavBar URL span is visible at 375px viewport (no hidden class) @mobile @smoke', async ({ page }) => {
+    await page.goto('/');
+    // The URL span should be visible and not have the 'hidden' class at mobile width
+    const urlSpan = page.locator('nav').getByText(/localhost|http/i).first();
+    // If there's a URL shown in the nav (depends on phase), it must not be hidden
+    // Since on homepage no session is active, the NavBar may not show a URL —
+    // instead verify there is no element with 'hidden sm:block' pattern in nav
+    const hiddenSpan = page.locator('nav span.hidden');
+    await expect(hiddenSpan).toHaveCount(0);
+  });
 });

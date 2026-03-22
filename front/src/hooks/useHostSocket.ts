@@ -1,7 +1,8 @@
 import { useEffect, useCallback, useRef } from 'react';
 import type PartySocket from 'partysocket';
 import { createSocket } from '../lib/socket';
-import { useHostStore, saveSessionLocally } from '../stores/hostStore';
+import { useHostStore } from '../stores/hostStore';
+import { saveSession, mergeSession } from '../lib/sessionStorage';
 import type {
   CreateSessionPayload,
   LobbyUpdatedPayload,
@@ -54,7 +55,7 @@ export function useHostSocket(code: string) {
           store.setPhase('lobby');
           // Persist to localStorage so the dashboard can show this session
           // even when KV is not configured (local dev).
-          saveSessionLocally(returnedHostId ?? store.hostId, {
+          saveSession(returnedHostId ?? store.hostId, {
             code: sessionCode,
             title: pendingTitleRef.current || sessionCode,
             createdAt: new Date().toISOString(),
@@ -72,6 +73,10 @@ export function useHostSocket(code: string) {
             store.setCurrentQuestion(snap.question as QuestionPayload);
           }
           store.setRankings(snap.rankings);
+          // Restore totalRounds from wines list in the snapshot
+          if (snap.wines?.length) {
+            store.setTotalRounds(snap.wines.length);
+          }
           // Restore phase
           const phaseMap: Record<string, ReturnType<typeof store.setPhase> extends void ? Parameters<typeof store.setPhase>[0] : never> = {
             waiting: 'lobby',
@@ -128,8 +133,9 @@ export function useHostSocket(code: string) {
           break;
         }
         case 'game:round_leaderboard': {
-          const { rankings, roundIndex } = msg as unknown as RoundLeaderboardPayload;
+          const { rankings, roundIndex, totalRounds } = msg as unknown as RoundLeaderboardPayload;
           store.setRankings(rankings, roundIndex);
+          if (totalRounds !== undefined) store.setTotalRounds(totalRounds);
           store.setPhase('roundLeaderboard');
           break;
         }
@@ -137,12 +143,10 @@ export function useHostSocket(code: string) {
           const finalData = msg as unknown as FinalLeaderboardPayload;
           store.setRankings(finalData.rankings);
           store.setPhase('finalLeaderboard');
-          // Update localStorage entry to reflect ended status
+          // Merge-update localStorage: only overwrite status, participantCount, finalRankings.
+          // title and createdAt from the original session:created entry are preserved.
           if (store.code) {
-            saveSessionLocally(store.hostId, {
-              code: store.code,
-              title: store.code,
-              createdAt: new Date().toISOString(),
+            mergeSession(store.hostId, store.code, {
               status: 'ended',
               participantCount: store.participants.length,
               finalRankings: finalData.rankings,

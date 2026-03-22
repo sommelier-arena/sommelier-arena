@@ -46,6 +46,7 @@ export interface ParticipantRevealPayload {
 export interface RoundLeaderboardPayload {
   rankings: RankingEntry[];
   roundIndex: number;
+  totalRounds: number;
 }
 
 export interface FinalLeaderboardPayload {

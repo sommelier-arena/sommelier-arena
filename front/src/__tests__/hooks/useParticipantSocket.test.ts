@@ -4,6 +4,7 @@ import { useParticipantStore } from '../../stores/participantStore';
 
 let mockListeners: Record<string, Array<(e: MessageEvent) => void>> = {};
 let openListeners: Array<() => void> = [];
+let closeListeners: Array<() => void> = [];
 const mockSend = vi.fn();
 
 vi.mock('partysocket', () => ({
@@ -14,6 +15,8 @@ vi.mock('partysocket', () => ({
         mockListeners['message'].push(cb as (e: MessageEvent) => void);
       } else if (event === 'open') {
         openListeners.push(cb as () => void);
+      } else if (event === 'close') {
+        closeListeners.push(cb as () => void);
       }
     }),
     removeEventListener: vi.fn(),
@@ -37,6 +40,7 @@ describe('useParticipantSocket', () => {
   beforeEach(() => {
     mockListeners = {};
     openListeners = [];
+    closeListeners = [];
     mockSend.mockClear();
     localStorage.clear();
     useParticipantStore.setState({
@@ -113,5 +117,33 @@ describe('useParticipantSocket', () => {
     renderHook(() => useParticipantSocket('1234'));
     emitMessage('game:round_leaderboard', { rankings: [] });
     expect(useParticipantStore.getState().phase).toBe('roundLeaderboard');
+  });
+
+  it('socket close clears localStorage rejoin token', () => {
+    localStorage.setItem(REJOIN_KEY, JSON.stringify({ rejoinToken: 'tok', code: '1234', pseudonym: 'Alice' }));
+    renderHook(() => useParticipantSocket('1234'));
+    closeListeners.forEach((cb) => cb());
+    expect(localStorage.getItem(REJOIN_KEY)).toBeNull();
+  });
+
+  it('socket close sets phase to ended when not already in finalLeaderboard', () => {
+    renderHook(() => useParticipantSocket('1234'));
+    useParticipantStore.getState().setPhase('question');
+    closeListeners.forEach((cb) => cb());
+    expect(useParticipantStore.getState().phase).toBe('ended');
+  });
+
+  it('socket close does not overwrite finalLeaderboard phase', () => {
+    renderHook(() => useParticipantSocket('1234'));
+    useParticipantStore.getState().setPhase('finalLeaderboard');
+    closeListeners.forEach((cb) => cb());
+    expect(useParticipantStore.getState().phase).toBe('finalLeaderboard');
+  });
+
+  it('session:ended while in finalLeaderboard keeps finalLeaderboard phase', () => {
+    renderHook(() => useParticipantSocket('1234'));
+    useParticipantStore.getState().setPhase('finalLeaderboard');
+    emitMessage('session:ended', {});
+    expect(useParticipantStore.getState().phase).toBe('finalLeaderboard');
   });
 });

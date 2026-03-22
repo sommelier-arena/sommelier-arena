@@ -116,6 +116,9 @@ export function useParticipantSocket(code: string) {
     socket.addEventListener('close', () => {
       const phase = useParticipantStore.getState().phase;
       if (phase !== 'finalLeaderboard' && phase !== 'ended') {
+        // Host crashed or network dropped — clear stale rejoin token so
+        // the participant can join a new session on next visit.
+        useParticipantStore.getState().clearRejoin();
         useParticipantStore.getState().setPhase('ended');
       }
     });

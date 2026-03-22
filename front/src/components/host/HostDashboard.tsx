@@ -55,7 +55,12 @@ export function HostDashboard({
                   className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4"
                 >
                   <div className="min-w-0">
-                    <p className="font-semibold text-slate-800 truncate">{session.title}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-semibold text-slate-800 truncate">{session.title}</p>
+                      <span className="shrink-0 text-xs font-medium bg-green-100 text-green-700 rounded-full px-2 py-0.5">
+                        🟢 Open
+                      </span>
+                    </div>
                     <p className="text-sm text-slate-500">
                       Code:{' '}
                       <span className="font-mono font-bold text-slate-700">{session.code}</span>
@@ -91,7 +96,12 @@ export function HostDashboard({
                   className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4"
                 >
                   <div className="min-w-0">
-                    <p className="font-semibold text-slate-800 truncate">{session.title}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="font-semibold text-slate-800 truncate">{session.title}</p>
+                      <span className="shrink-0 text-xs font-medium bg-slate-100 text-slate-500 rounded-full px-2 py-0.5">
+                        ⚪ Ended
+                      </span>
+                    </div>
                     <p className="text-sm text-slate-500">
                       {session.participantCount} player{session.participantCount !== 1 ? 's' : ''}
                     </p>
@@ -101,7 +111,8 @@ export function HostDashboard({
                   </div>
                   <button
                     onClick={() => onViewResults(session)}
-                    className="flex-shrink-0 border border-slate-300 text-slate-600 rounded-xl px-5 py-2 font-semibold hover:bg-slate-50 transition-colors text-sm"
+                    disabled={!session.finalRankings}
+                    className="flex-shrink-0 border border-slate-300 text-slate-600 rounded-xl px-5 py-2 font-semibold hover:bg-slate-50 transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Results
                   </button>
