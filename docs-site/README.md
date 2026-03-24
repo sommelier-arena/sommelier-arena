@@ -11,9 +11,15 @@ Quick start (local):
 
 2. Start the dev server:
 
-   npm run start
+   npm run start:local
 
 3. Open http://localhost:3002 (or your DOCS_BASE_URL) and use the search box in the navbar.
+
+Preview built site:
+
+   npm run serve
+
+This serves the built static site on port 3002 by default.
 
 Notes
 - The plugin dependency (@cmfcmf/docusaurus-search-local) is declared in package.json and will be installed by `npm ci`.
