@@ -37,26 +37,15 @@ Bind the namespace to the project
 
 1. The repository contains `partykit.json` committed in the repo. This file should include the KV binding for `HOSTS_KV` with the Namespace ID already populated.
 
-2. No `partykit.json.template` is required anymore. CI (app-ci.yml) assumes `partykit.json` is already present in the repo and uses it directly when running `npx partykit deploy`.
+2. Local developers who need to perform a manual deploy (rare) can edit `partykit.json` directly or use a local copy. If you do modify `partykit.json` locally, ensure you intend to commit changes back to the repo.
 
-3. Local developers who need to perform a manual deploy (rare) can edit `partykit.json` directly or use a local copy. If you do modify `partykit.json` locally, ensure you intend to commit changes back to the repo.
-
-Template & CI workflow (updated)
-
-- `docs-ci.yml` remains a docs-only workflow and does NOT touch `partykit.json`.
-- `app-ci.yml` is the canonical deploy workflow and runs `npx partykit deploy` using the committed `partykit.json`. It also requires `CF_API_TOKEN` in GitHub Secrets for authenticated deploys.
 
 CI & deploy notes
 
 - This repo uses two GitHub Actions workflows:
-  - `docs-ci.yml` — docs-only workflow. Runs when files under `docs-site/**` change. It builds the Docusaurus site and uploads the `docs-site/build` artifact. It does NOT perform any PartyKit or Cloudflare deploys and does NOT inject KV IDs.
-  - `app-ci.yml` — app-focused workflow. Responsible for E2E, PartyKit deploy, and Wrangler publish. It is triggered on pushes to `main` and `cloudflare-migration` and can be started manually via `workflow_dispatch`.
+  - `docs-ci.yml` — docs-only workflow. Runs when files under `docs-site/**` change. It builds the Docusaurus site and uploads the `docs-site/build` artifact.
+  - `app-ci.yml` — app-focused workflow. Responsible for E2E, PartyKit deploy, and Proxy Publication with Wrangler. It is triggered on pushes to `main`.
 
-Deploy (app-ci is canonical)
-
-- The repository now keeps a committed `partykit.json` file at the repo root. `app-ci.yml` is the canonical CI workflow that runs `npx partykit deploy` and `wrangler publish` for production deployment.
-
-- Do NOT add partykit.json generation steps to `docs-ci.yml`. Docs CI builds are independent and should not touch deploy configuration.
 
 Example `app-ci.yml` deploy snippet (no template manipulation):
 
@@ -75,10 +64,6 @@ Example `app-ci.yml` deploy snippet (no template manipulation):
   run: npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
 ```
 
-Required GitHub Secrets for app-ci
-
-- `CF_API_TOKEN` — Cloudflare API token with permissions to deploy Workers/Pages and manage routes. Required for `npx partykit deploy` and `wrangler publish`.
-
 Manual local deploys (rare)
 
 If you must deploy from a local machine, edit `partykit.json` directly in the repo root (or use a local copy) and run:
@@ -89,18 +74,10 @@ cd /path/to/SommelierArena
 npx partykit deploy
 ```
 
-Notes
-
-- Committing `partykit.json` with the Namespace ID is acceptable in this repo (the Namespace ID is non-secret). The CI workflow uses the committed file and only requires `CF_API_TOKEN` to authenticate the publish.
-- Keeping `partykit.json` in the repo simplifies CI and reduces the number of moving parts.
-
-
-
 
 Where `npx partykit deploy` runs (locally vs CI)
 
-- CI (recommended): The preferred approach is to let `app-ci.yml` perform `npx partykit deploy` in GitHub Actions after tests pass. The app workflow prepares `partykit.json` from `partykit.json.template` using the `CF_HOSTS_NAMESPACE_ID` secret and runs the deploy with `CF_API_TOKEN` available in the environment.
-
+- CI (recommended): The preferred approach is to let `app-ci.yml` perform `npx partykit deploy` in GitHub Actions after tests pass. The app workflow uses `partykit.json`.
 - Locally (for manual deploys): Run from the repository root where `partykit.json` lives:
 
 ```bash
@@ -183,7 +160,131 @@ Repeat Step 2 with different settings:
 
 ---
 
-## 5. Deploy the proxy Worker
+## 5. Deploy the proxy Worker — step-by-step (recommended)
+
+This section documents a minimal, repeatable flow to publish the proxy Worker that routes `/docs/*` to the Docusaurus Pages site. Two flows are shown: Manual (wrangler) and CI (non-interactive) — CI (app-ci.yml) is recommended for production.
+
+Prerequisites
+
+- `CF_API_TOKEN` stored in GitHub Secrets (scoped Account token with Workers:Edit and Zones:Edit).
+- `CF_HOSTS_NAMESPACE_ID` in GitHub Secrets only if you want CI to inject the KV namespace into `partykit.json` (optional; the worker itself does not need this unless it references KV).
+- Cloudflare Account ID and Zone ID (for API route creation; optional if using the Dashboard GUI).
+- `proxy-worker/index.ts` present in the repo (it is).
+
+A) Manual (local) publish — using Wrangler (interactive)
+
+1. Authenticate (interactive):
+
+   npx wrangler login
+
+   This opens a browser and authorizes wrangler with your Cloudflare account.
+
+2. Publish the worker script from the repo root:
+
+   cd /path/to/SommelierArena
+   npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
+
+   Expected output: success message with the worker name and script URL.
+
+3. Create the route (Dashboard):
+   - Cloudflare Dashboard → Workers & Pages → Workers → open `sommelier-arena-proxy` → Triggers → Add route:
+     - Route: `sommelier-arena.ducatillon.net/docs*`
+     - Zone: `ducatillon.net`
+   - Save. The route is applied immediately.
+
+4. Quick verification (browser): open https://sommelier-arena.ducatillon.net/docs and confirm the docs site loads.
+
+B) Non-interactive (CI) publish — recommended for production
+
+Use the `app-ci.yml` workflow to publish the worker automatically after E2E tests pass. The workflow must have `CF_API_TOKEN` in repository secrets.
+
+Example job step (YAML snippet):
+
+```yaml
+- name: Publish proxy worker via Wrangler
+  if: ${{ secrets.CF_API_TOKEN != '' }}
+  env:
+    CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+  run: |
+    # publish the worker script non-interactively
+    npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
+```
+
+Notes for CI:
+- Wrangler reads `CF_API_TOKEN` from the environment for non-interactive auth. No `npx wrangler login` is needed in CI.
+- If you need to create/update routes from CI, use the Cloudflare REST API (requires `CF_API_TOKEN` and `ZONE_ID`) or manage routes in `wrangler.toml` and let `npx wrangler publish` apply them.
+
+C) Programmatic route creation (optional)
+
+Use the Cloudflare REST API to add the `/docs*` route for your zone. Example (replace placeholders):
+
+```bash
+CF_API_TOKEN=...
+ZONE_ID=ducatillon_net_zone_id
+curl -X POST "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/workers/routes" \
+  -H "Authorization: Bearer ${CF_API_TOKEN}" \
+  -H "Content-Type: application/json" \
+  --data '{"pattern":"sommelier-arena.ducatillon.net/docs*","script":"sommelier-arena-proxy"}'
+```
+
+You can also automate route creation from CI. Add `CF_ZONE_ID` (the Zone ID for `ducatillon.net`) as a GitHub secret, then add a step to `app-ci.yml` after the worker publish step:
+
+```yaml
+- name: Create /docs route (Cloudflare API)
+  if: ${{ secrets.CF_API_TOKEN != '' && secrets.CF_ZONE_ID != '' }}
+  env:
+    CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+    ZONE_ID: ${{ secrets.CF_ZONE_ID }}
+  run: |
+    set -euo pipefail
+    curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/workers/routes" \
+      -H "Authorization: Bearer ${CF_API_TOKEN}" \
+      -H "Content-Type: application/json" \
+      --data '{"pattern":"sommelier-arena.ducatillon.net/docs*","script":"sommelier-arena-proxy"}' \
+    | jq -r '.success'
+    echo "Route creation finished"
+```
+
+Notes:
+- Secret names used: `CF_API_TOKEN` (already required), `CF_ZONE_ID` (new — set to the Zone ID for `ducatillon.net`).
+- If you prefer to manage routes in `wrangler.toml`, `npx wrangler publish` can apply them as well (see Wrangler docs).
+
+D) Verification steps (after publish + route)
+
+1. Browser test: open https://sommelier-arena.ducatillon.net/docs — pages should load and assets must be served.
+2. Curl test (checks HTTP 200 and content-type):
+
+```bash
+curl -I https://sommelier-arena.ducatillon.net/docs | head -n 10
+# Expect: HTTP/2 200, Content-Type: text/html
+```
+
+3. Worker logs: Cloudflare Dashboard → Workers → View logs (or use `wrangler tail` with `CF_API_TOKEN` to stream logs locally).
+
+4. CI logs: verify the `npx wrangler publish` step succeeded and API output shows the correct script name.
+
+E) Rollback guidance
+
+- Cloudflare does not expose a one-click "rollback" for Workers. To rollback:
+  1. Identify the previous commit/tag that contained the last-known-good worker code.
+  2. In CI or locally, `git checkout <good-commit>` and run `npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy`.
+  3. Alternatively, if using a CI artifact store, republish the saved artifact from the previous successful run.
+
+F) Bindings & Secrets for the Worker
+
+- If the proxy worker requires any KV or other bindings, declare them in `wrangler.toml` or in the Dashboard's **Variables & Bindings** for the worker. Document bindings as needed.
+
+G) Security & minimal perms
+
+- Use a scoped `CF_API_TOKEN` with minimal permissions: Account → Workers Scripts: Edit and Zone → Zone:Edit (or specific zone permissions). Do not use Global API keys in CI.
+
+H) Example troubleshooting checklist
+
+- 403 or 401 on publish → verify `CF_API_TOKEN` permissions and that the token is set in GitHub Secrets.
+- 404 on route → verify route pattern (`sommelier-arena.ducatillon.net/docs*`) and that it is attached to `sommelier-arena-proxy`.
+- Broken assets / CORS issues → ensure Pages site is accessible directly and worker forwards requests correctly.
+
+---
 
 **Workers & Pages → Create application → Worker**
 
