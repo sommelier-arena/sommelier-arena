@@ -281,12 +281,22 @@ A) Manual (local) publish — using Wrangler (interactive)
 
    This opens a browser and authorizes wrangler with your Cloudflare account.
 
-2. Publish the worker script from the repo root:
+2. Publish the worker script from the repo root (or use the Dashboard editor):
 
    cd /path/to/SommelierArena
    npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
 
    Expected output: success message with the worker name and script URL.
+
+   Notes about `proxy-worker/index.ts`:
+
+   - The repository contains `proxy-worker/index.ts`. Use this file when you want to publish the exact, versioned worker code via Wrangler (recommended).
+   - If you prefer the Dashboard UI, open Cloudflare Dashboard → Workers & Pages → Workers → Create Worker and paste the contents of `proxy-worker/index.ts` into the editor.
+
+   Setting `DOCS_ORIGIN`:
+
+   - Recommended (no code edits): set `DOCS_ORIGIN` as a Worker variable in the Dashboard (Workers → select worker → Settings → Variables & Bindings → Add). This avoids modifying repository files.
+   - One-time alternative: create a temporary local copy of `proxy-worker/index.ts`, replace the placeholder `DOCS_ORIGIN_PLACEHOLDER` with the Pages URL, and publish that copy with Wrangler. Do not commit this temporary file.
 
 3. Create the route (Dashboard):
    - Cloudflare Dashboard → Workers & Pages → Workers → open `sommelier-arena-proxy` → Triggers → Add route:
