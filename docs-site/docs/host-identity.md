@@ -37,12 +37,8 @@ This list is populated by `sessions:list` from the server, which reads the KV ke
 
 ## Participant rejoin
 
-Participants get a `rejoinToken` (UUID) on joining. The frontend stores:
+When a participant joins, the server issues rejoin credentials which the frontend stores in localStorage under the key `sommelierArena:rejoin`. These credentials allow the client to re-authenticate automatically if the user reloads the page or briefly loses connection.
 
-```json
-{ "rejoinToken": "abc-123", "code": "4829", "pseudonym": "EARTHY-VINE" }
-```
+On page load, if `sommelierArena:rejoin` exists, the client (`useParticipantSocket`) auto-sends a `rejoin_session` event when the socket opens. The server replies with a `participant:state_snapshot` so the participant is restored to the correct phase and state.
 
-…in `localStorage` under `sommelierArena:rejoin`. On any page load, if this key is present, `useParticipantSocket` auto-sends `rejoin_session` when the socket opens. The server responds with `participant:state_snapshot` so the participant seamlessly re-enters the game at the correct phase.
-
-On `session:ended`, the frontend clears the `sommelierArena:rejoin` key.
+When the session ends (`session:ended`), the frontend clears the `sommelierArena:rejoin` key.
