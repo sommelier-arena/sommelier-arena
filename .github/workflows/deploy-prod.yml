@@ -1,0 +1,56 @@
+name: Deploy to Production (Cloudflare)
+
+on:
+  push:
+    branches: [ cloudflare-migration, main ]
+    paths:
+      - 'partykit.json.template'
+      - 'proxy-worker/**'
+      - 'docs-site/**'
+
+jobs:
+  deploy:
+    name: Deploy backend & proxy worker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Prepare partykit.json (inject KV ID)
+        if: ${{ secrets.CF_HOSTS_NAMESPACE_ID != '' }}
+        run: |
+          cp partykit.json.template partykit.json
+          node -e "let fs=require('fs');let p='partykit.json';let c=fs.readFileSync(p,'utf8');c=c.replace('PASTE_NAMESPACE_ID_HERE', process.env.CF_HOSTS_NAMESPACE_ID);fs.writeFileSync(p,c);"
+        env:
+          CF_HOSTS_NAMESPACE_ID: ${{ secrets.CF_HOSTS_NAMESPACE_ID }}
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Deploy PartyKit (backend)
+        if: ${{ secrets.CF_API_TOKEN != '' }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          npx partykit deploy
+
+      - name: Publish proxy worker via Wrangler
+        if: ${{ secrets.CF_API_TOKEN != '' }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
+
+      - name: Build docs (optional)
+        working-directory: ./docs-site
+        run: |
+          npm ci
+          npm run build:prod
+
+      - name: Notify
+        run: echo "Production deploy steps completed."

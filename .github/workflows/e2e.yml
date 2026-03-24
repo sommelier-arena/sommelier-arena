@@ -41,6 +41,15 @@ jobs:
         env:
           CF_HOSTS_NAMESPACE_ID: ${{ secrets.CF_HOSTS_NAMESPACE_ID }}
 
+      - name: Deploy PartyKit to Cloudflare
+        if: ${{ secrets.CF_API_TOKEN != '' }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          # Use npx partykit deploy; ensure auth token is available via CF_API_TOKEN
+          npm ci
+          npx partykit deploy
+
       - name: Build docs for /docs (production parity)
         working-directory: ./docs-site
         run: |
