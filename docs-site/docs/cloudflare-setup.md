@@ -231,7 +231,46 @@ Prerequisites
 - `CF_HOSTS_NAMESPACE_ID` in GitHub Secrets only if you want CI to inject the KV namespace into `partykit.json` (optional; the worker itself does not need this unless it references KV).
 - Cloudflare Account ID and Zone ID (for API route creation; optional if using the Dashboard GUI).
 - `proxy-worker/index.ts` present in the repo (it is).
-- `DOCS_ORIGIN` — the origin (protocol+host) where the docs Pages project is served (for example: `https://sommelier-arena-docs.pages.dev`). This value should be set after you create/deploy the docs Pages project (see section 3). Prefer injecting it via CI rather than hard-coding.
+
+Setting DOCS_ORIGIN (Manual one-shot — recommended)
+
+`DOCS_ORIGIN` is the full origin (protocol + host) where the docs Pages project is served (for example: `https://sommelier-arena-docs.pages.dev`). In most cases this is a one-time value created when you first deploy the Docusaurus site, so the simplest, lowest-risk approach is to set it manually once.
+
+Manual one-shot steps:
+
+1. Deploy the Docusaurus docs to Cloudflare Pages (see Section 3 — Deploy the frontend to Cloudflare Pages):
+   - Workers & Pages → Create application → Pages → Connect to Git
+   - Project name: `sommelier-arena-docs`
+   - Root directory: `docs-site`
+   - Build command: `npm run build`
+   - Output directory: `build`
+   - Save and deploy.
+
+2. Copy the Pages URL (pages.dev):
+   - After deployment, open the Pages project Overview or Settings → Domains.
+   - Copy the default domain, e.g. `https://sommelier-arena-docs.pages.dev`.
+
+3. Set DOCS_ORIGIN in the Worker (one-time):
+   - Option A (Dashboard — recommended):
+     - Cloudflare Dashboard → Workers & Pages → Workers → select `sommelier-arena-proxy` → Settings → Variables & Bindings → Add variable:
+       - Name: `DOCS_ORIGIN`
+       - Value: the pages.dev URL you copied (include protocol)
+     - Save. No git changes required.
+
+   - Option B (one-time wrangler publish):
+     - Create a temporary local copy of `proxy-worker/index.ts` and replace the placeholder `DOCS_ORIGIN_PLACEHOLDER` with the Pages URL.
+     - Run: `npx wrangler publish temp/proxy-worker/index.ts --name sommelier-arena-proxy`
+     - This publishes the worker with the correct DOCS_ORIGIN baked in. Do not commit the temporary file.
+
+Verification
+
+- Open https://sommelier-arena.ducatillon.net/docs and confirm the docs site loads.
+- Inspect the worker in Dashboard: Settings → Variables & Bindings should show DOCS_ORIGIN (if set via Dashboard).
+
+Rationale
+
+- DOCS_ORIGIN is rarely changed. A manual one-shot avoids added CI complexity and keeps the deploy footprint minimal. If you later prefer automation, a small workflow_dispatch job can be implemented to run on-demand.
+
 
 
 A) Manual (local) publish — using Wrangler (interactive)
