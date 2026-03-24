@@ -141,11 +141,47 @@ Note about PUBLIC_PARTYKIT_HOST and CI
 
   2) Automated CI (recommended): have the app CI capture the PartyKit URL from the deploy output and update the Pages project's environment variable before or after the Pages build. Example capture snippet (add to app-ci.yml before or after the partykit deploy step):
 
-     # Capture the PartyKit URL produced by the deploy
-     PARTYKIT_URL=$(npx partykit deploy 2>&1 | grep -Eo 'https?://[^ ]+partykit.dev' | head -n1)
-     # Normalise to hostname only (strip protocol)
-     PUBLIC_PARTYKIT_HOST=${PARTYKIT_URL#https://}
-     echo "PUBLIC_PARTYKIT_HOST=$PUBLIC_PARTYKIT_HOST"
+```bash
+# Capture the PartyKit URL produced by the deploy
+PARTYKIT_URL=$(npx partykit deploy 2>&1 | grep -Eo 'https?://[^ ]+partykit.dev' | head -n1)
+# Normalise to hostname only (strip protocol)
+PUBLIC_PARTYKIT_HOST=${PARTYKIT_URL#https://}
+echo "PUBLIC_PARTYKIT_HOST=$PUBLIC_PARTYKIT_HOST"
+```
+
+To apply `PUBLIC_PARTYKIT_HOST` to Cloudflare Pages automatically you can either:
+
+- Build the frontend in CI using the captured `PUBLIC_PARTYKIT_HOST` and then publish the built static site to Pages. This approach avoids mutating Pages project environment variables: the CI build bakes the correct host into the static assets and then runs `npx wrangler pages publish` to deploy them. Required secrets: `CF_API_TOKEN` and `CF_PAGES_PROJECT_NAME`.
+
+CI example (build + publish with wrangler):
+
+```yaml
+- name: Deploy PartyKit
+  if: ${{ secrets.CF_API_TOKEN != '' }}
+  env:
+    CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+  run: |
+    PARTYKIT_OUTPUT=$(npx partykit deploy 2>&1)
+    echo "$PARTYKIT_OUTPUT"
+    PARTYKIT_URL=$(echo "$PARTYKIT_OUTPUT" | grep -Eo 'https?://[^ ]+partykit.dev' | head -n1 || true)
+    if [ -n "$PARTYKIT_URL" ]; then
+      HOSTNAME=${PARTYKIT_URL#https://}
+      echo "PUBLIC_PARTYKIT_HOST=$HOSTNAME" >> $GITHUB_ENV
+    fi
+
+- name: Build frontend and publish to Pages
+  if: ${{ secrets.CF_API_TOKEN != '' && secrets.CF_PAGES_PROJECT_NAME != '' }}
+  env:
+    CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+  run: |
+    npm --prefix front ci
+    PUBLIC_PARTYKIT_HOST=$PUBLIC_PARTYKIT_HOST npm --prefix front run build
+    npx wrangler pages publish front/dist --project-name ${{ secrets.CF_PAGES_PROJECT_NAME }} --branch main
+```
+
+- Or, if you prefer to update the Pages project environment variable (`PUBLIC_PARTYKIT_HOST`) directly via the Pages API, add the `CF_ACCOUNT_ID` and `CF_PAGES_PROJECT_NAME` secrets and use the Pages REST API to upsert the variable. This requires additional Pages API permissions for the `CF_API_TOKEN`. The build+publish approach is simpler and idempotent.
+
+See the CI snippets above for a working example.
 
   To apply `PUBLIC_PARTYKIT_HOST` to Cloudflare Pages automatically you can:
   - Use the Cloudflare Pages REST API to set environment variables for the project (requires CF_API_TOKEN and the account + project identifiers). Add a CI step that calls the Pages API to update or create the `PUBLIC_PARTYKIT_HOST` variable and then trigger a Pages redeploy; or

@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - cloudflare-migration
 
 jobs:
   app:
@@ -74,7 +73,29 @@ jobs:
           CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
         run: |
           npm ci
-          npx partykit deploy
+          set -euo pipefail
+          PARTYKIT_OUTPUT=$(npx partykit deploy 2>&1)
+          echo "$PARTYKIT_OUTPUT"
+          PARTYKIT_URL=$(echo "$PARTYKIT_OUTPUT" | grep -Eo 'https?://[^ ]+partykit.dev' | head -n1 || true)
+          if [ -n "$PARTYKIT_URL" ]; then
+            HOSTNAME=${PARTYKIT_URL#https://}
+            echo "PUBLIC_PARTYKIT_HOST=$HOSTNAME" >> $GITHUB_ENV
+            echo "Captured PUBLIC_PARTYKIT_HOST=$HOSTNAME"
+          else
+            echo "Warning: PARTYKIT_URL not found in partykit deploy output"
+          fi
+
+      - name: Build frontend and publish to Pages (if configured)
+        if: ${{ secrets.CF_API_TOKEN != '' && secrets.CF_PAGES_PROJECT_NAME != '' }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          echo "PUBLIC_PARTYKIT_HOST=$PUBLIC_PARTYKIT_HOST"
+          npm --prefix front ci
+          # Build frontend with the captured PUBLIC_PARTYKIT_HOST available as env var
+          PUBLIC_PARTYKIT_HOST=$PUBLIC_PARTYKIT_HOST npm --prefix front run build
+          # Publish the built static site to Cloudflare Pages using wrangler
+          npx wrangler pages publish front/dist --project-name ${{ secrets.CF_PAGES_PROJECT_NAME }} --branch main
 
       - name: Publish proxy worker via Wrangler
         if: ${{ secrets.CF_API_TOKEN != '' }}
