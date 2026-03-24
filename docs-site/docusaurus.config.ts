@@ -80,16 +80,7 @@ const config: Config = {
   ],
 
   themeConfig: {
-    // Algolia DocSearch configuration (fallback if local plugin isn't present).
-    // Set DOCSEARCH_APP_ID, DOCSEARCH_API_KEY and DOCSEARCH_INDEX_NAME in
-    // environment for Algolia to activate. Leave unset to disable Algolia.
-    algolia: process.env.DOCSEARCH_API_KEY
-      ? {
-          appId: process.env.DOCSEARCH_APP_ID ?? '',
-          apiKey: process.env.DOCSEARCH_API_KEY ?? '',
-          indexName: process.env.DOCSEARCH_INDEX_NAME ?? '',
-        }
-      : undefined,
+    // Local search only: the local plugin injects a search bar into the navbar.
 
     navbar: {
       title: '🍷 Sommelier Arena',
