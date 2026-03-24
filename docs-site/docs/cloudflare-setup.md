@@ -362,6 +362,20 @@ curl -X GET "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/workers/route
 
 If you need to update `PUBLIC_PARTYKIT_HOST` after initial deploy:
 
+- How to obtain `PUBLIC_PARTYKIT_HOST` (PartyKit project URL):
+
+  1. Run `npx partykit deploy` from the repository root. The CLI prints a deploy summary that includes the project URL. Example:
+
+     Project 'sommelier-arena' deployed at: https://sommelier-arena.<your-account>.partykit.dev
+
+     You can extract it programmatically in CI or locally:
+
+     npx partykit deploy 2>&1 | grep -Eo 'https?://[^ ]+partykit.dev' | head -n1
+
+  2. Alternatively, open the PartyKit web dashboard for your account and go to Projects → `sommelier-arena` to find the project URL in the project details.
+
+- Once you have the URL, set `PUBLIC_PARTYKIT_HOST` in Pages settings to the hostname only (no trailing slash), e.g. `sommelier-arena.<your-account>.partykit.dev`. Then trigger a redeploy to apply the env var.
+
 1. Pages → `sommelier-arena` → **Settings** → **Environment variables**
 2. Click **Add variable** or edit the existing one
 3. Save → then go to **Deployments** → click **⋯** next to the latest deploy → **Retry deployment** to apply the new variable
