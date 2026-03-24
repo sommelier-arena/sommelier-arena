@@ -28,7 +28,7 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 | [Data Persistence](data-persistence) | DO storage keys, KV schema, what survives a restart |
 | [Deployment](deployment) | Cloudflare Pages + PartyKit deploy guide |
 | [Cloudflare Setup](cloudflare-setup) | Step-by-step Cloudflare dashboard walkthrough |
-| [Contributing](contributing) | Dev workflow, branch strategy, PR checklist |
+| [Contributing & Env](env) | Dev workflow, branch strategy, PR checklist, and environment setup |
 
 ## What's new in v2.0 (PartyKit)
 

@@ -34,7 +34,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Development',
       collapsed: true,
-      items: ['contributing', 'prd'],
+      items: ['env', 'prd'],
     },
   ],
 };
