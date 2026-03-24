@@ -127,21 +127,63 @@ Repeat Step 2 with different settings:
 
 **Workers & Pages → Create application → Worker**
 
-1. Click **Workers & Pages** → **Create application** → **Worker** tab
-2. Name: `sommelier-arena-proxy`
-3. Click **Deploy** (deploys the default hello-world worker first)
-4. Click **Edit code**
-5. Replace the default code with the contents of `proxy-worker/index.ts` from the repo
-6. Click **Deploy** (top right)
+There are two repeatable ways to deploy the proxy worker from the repository: (A) Cloudflare Dashboard (manual GUI) — already documented above; (B) Wrangler CLI (scriptable). The Wrangler approach is shown here so deployments can be automated from your machine or CI.
 
-**Add the /docs route:**
+Prerequisites (for CLI)
 
-1. Go to your Worker → **Triggers** tab
-2. Under **Routes** → click **Add route**
-3. Route: `sommelier-arena.ducatillon.net/docs*`
-4. Zone: `ducatillon.net`
-5. Click **Save**
+- `wrangler` available via npx (no global install required): npx wrangler
+- A Cloudflare API token (recommended) or global API key with permissions to edit Workers and Routes
+- Your Cloudflare Account ID (can be found on the Cloudflare dashboard)
 
+A) Publish the worker script with Wrangler (CLI)
+
+1. Authenticate with Cloudflare if not already authenticated:
+
+   npx wrangler login
+
+   This opens a browser to authenticate and grants wrangler access to your account.
+
+2. From the repository root, publish the worker script located at `proxy-worker/index.ts` and give it the name `sommelier-arena-proxy`:
+
+   cd /Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena
+   npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
+
+   Successful output will include the worker URL and script name.
+
+B) Create a route for the worker (two options)
+
+Option 1 — Dashboard (manual, reliable)
+- After publishing, go to Cloudflare Dashboard → Workers & Pages → your Worker → Triggers and add a route with:
+  - Route: `sommelier-arena.ducatillon.net/docs*`
+  - Zone: `ducatillon.net`
+
+Option 2 — API (scriptable)
+
+- Use the Cloudflare REST API to create a route programmatically. You need:
+  - CF_ACCOUNT_ID (your Cloudflare account id)
+  - CF_API_TOKEN (a scoped API token with `Workers:Edit` and `Zone:Edit` on the target zone)
+
+Example (replace placeholders):
+
+```bash
+# Create a route that sends /docs* to the worker
+CF_ACCOUNT_ID=your_account_id
+CF_API_TOKEN=your_api_token
+ZONE_ID=ducatillon_net_zone_id   # find this on Cloudflare dashboard under the domain
+WORKER_SCRIPT_NAME=sommelier-arena-proxy
+
+curl -X POST "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/workers/routes" \
+  -H "Authorization: Bearer ${CF_API_TOKEN}" \
+  -H "Content-Type: application/json" \
+  --data '{"pattern":"sommelier-arena.ducatillon.net/docs*","script":"sommelier-arena-proxy"}'
+
+# Verify the route was created (response.ok === true)
+# Example: list routes for the zone and grep for the pattern
+curl -X GET "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/workers/routes" \
+  -H "Authorization: Bearer ${CF_API_TOKEN}" \
+  -H "Content-Type: application/json" | jq '.result[] | select(.pattern=="sommelier-arena.ducatillon.net/docs*")'
+
+# If you prefer to bind routes to a Worker via wrangler TOML, you can also manage routes in wrangler.toml and use `npx wrangler publish` from the worker directory. See Wrangler docs for `routes` configuration.
 ---
 
 ## 6. Verify DNS records
