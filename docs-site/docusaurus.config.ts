@@ -6,6 +6,19 @@ import type * as Preset from '@docusaurus/preset-classic';
 //   - Production Cloudflare: set to "/docs/" — served via proxy worker at your-domain/docs/
 const baseUrl = process.env.DOCS_BASE_URL ?? '/';
 
+// Attempt to load the local search plugin if installed. In CI or local
+// environments where the package isn't available, fall back to Algolia
+// configuration (if provided via environment) or no-search.
+let localSearchPlugin: any = null;
+try {
+  // Require will throw if the plugin isn't installed — that's OK.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unsafe-assignment
+  localSearchPlugin = require('@cmfcmf/docusaurus-search-local');
+} catch (e) {
+  // plugin not installed; proceed without it
+}
+
+
 const config: Config = {
   title: 'Sommelier Arena',
   tagline: 'Real-time blind wine tasting quiz — developer docs',
@@ -21,6 +34,22 @@ const config: Config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
+
+  plugins: localSearchPlugin
+    ? [
+        // Local, file-based search plugin — works without external services.
+        [
+          localSearchPlugin,
+          {
+            indexDocs: true,
+            indexPages: true,
+            indexBlog: false,
+            language: 'en',
+          },
+        ],
+      ]
+    : [],
+
 
   presets: [
     [
@@ -51,6 +80,17 @@ const config: Config = {
   ],
 
   themeConfig: {
+    // Algolia DocSearch configuration (fallback if local plugin isn't present).
+    // Set DOCSEARCH_APP_ID, DOCSEARCH_API_KEY and DOCSEARCH_INDEX_NAME in
+    // environment for Algolia to activate. Leave unset to disable Algolia.
+    algolia: process.env.DOCSEARCH_API_KEY
+      ? {
+          appId: process.env.DOCSEARCH_APP_ID ?? '',
+          apiKey: process.env.DOCSEARCH_API_KEY ?? '',
+          indexName: process.env.DOCSEARCH_INDEX_NAME ?? '',
+        }
+      : undefined,
+
     navbar: {
       title: '🍷 Sommelier Arena',
       items: [
@@ -64,6 +104,9 @@ const config: Config = {
           type: 'docsVersionDropdown',
           position: 'right',
         },
+        // The local search plugin injects a search bar automatically. No
+        // additional navbar item is required. If Algolia is configured via
+        // environment variables, Docusaurus will prefer it.
       ],
     },
     footer: {

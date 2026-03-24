@@ -1,7 +1,7 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm ci --silent
 COPY . .
 # Docker mode: docs are served at root (localhost:3002/), not under /docs/.
 # Production: set DOCS_BASE_URL=/docs/ in your deployment build args.
