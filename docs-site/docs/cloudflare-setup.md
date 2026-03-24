@@ -130,8 +130,33 @@ Security note
    - **Build output directory**: `dist`
 5. Click **Environment variables (advanced)** → **Add variable**:
    - Variable name: `PUBLIC_PARTYKIT_HOST`
-   - Value: `sommelier-arena.USERNAME.partykit.dev` (your PartyKit project URL)
+   - Value: the PartyKit project URL (see note below). This must be the hostname only (no protocol or trailing slash), for example: `sommelier-arena.<your-account>.partykit.dev`.
 6. Click **Save and Deploy**
+
+Note about PUBLIC_PARTYKIT_HOST and CI
+
+- In this repository `app-ci.yml` runs `npx partykit deploy` as part of the CI deploy job. That command produces the PartyKit project URL (the value you must set for `PUBLIC_PARTYKIT_HOST`). The simplest ways to ensure the Pages project receives the correct value are:
+
+  1) Manual one-time: run `npx partykit deploy` locally, copy the printed URL, and set `PUBLIC_PARTYKIT_HOST` in the Pages project's Environment variables. Then trigger a redeploy.
+
+  2) Automated CI (recommended): have the app CI capture the PartyKit URL from the deploy output and update the Pages project's environment variable before or after the Pages build. Example capture snippet (add to app-ci.yml before or after the partykit deploy step):
+
+     # Capture the PartyKit URL produced by the deploy
+     PARTYKIT_URL=$(npx partykit deploy 2>&1 | grep -Eo 'https?://[^ ]+partykit.dev' | head -n1)
+     # Normalise to hostname only (strip protocol)
+     PUBLIC_PARTYKIT_HOST=${PARTYKIT_URL#https://}
+     echo "PUBLIC_PARTYKIT_HOST=$PUBLIC_PARTYKIT_HOST"
+
+  To apply `PUBLIC_PARTYKIT_HOST` to Cloudflare Pages automatically you can:
+  - Use the Cloudflare Pages REST API to set environment variables for the project (requires CF_API_TOKEN and the account + project identifiers). Add a CI step that calls the Pages API to update or create the `PUBLIC_PARTYKIT_HOST` variable and then trigger a Pages redeploy; or
+  - Build the frontend within the same CI job after capturing `PUBLIC_PARTYKIT_HOST` by invoking the front build using the env var in-process (e.g. `PUBLIC_PARTYKIT_HOST=$PUBLIC_PARTYKIT_HOST npm --prefix front run build`) and then deploy that built artifact to Pages via the Pages Deployments API (more complex).
+
+- If you want the repository to perform this automatically, I can add a small, safe CI step that:
+  1. Captures the PartyKit URL (as above)
+  2. Calls the Pages API to upsert `PUBLIC_PARTYKIT_HOST` using `CF_API_TOKEN` + `CF_ACCOUNT_ID` + `CF_PAGES_PROJECT_NAME` (these need adding as GitHub Secrets)
+  3. Optionally triggers a Pages redeploy or builds the front artifact inline and uploads via the Pages Deployments API.
+
+- Let me know if you want me to implement the automated Pages env var update (I will add the snippet to `app-ci.yml` and document the required secrets).
 
 ---
 
