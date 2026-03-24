@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Prevent accidentally committing env files
+STAGED_FILES=$(git diff --cached --name-only --relative)
+for file in $STAGED_FILES; do
+  if [[ "$file" =~ (^|/)\.env($|\.) ]] || [[ "$file" =~ (^|/)\.env.local($|\.) ]] || [[ "$file" =~ \.env$ ]] || [[ "$file" =~ \.env.local$ ]]; then
+    echo "Error: Attempting to commit a .env file: $file"
+    echo "Please remove it from the commit (git reset HEAD $file) and add a per-service .env.example instead."
+    exit 1
+  fi
+done
+exit 0
