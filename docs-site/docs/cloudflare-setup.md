@@ -231,6 +231,8 @@ Prerequisites
 - `CF_HOSTS_NAMESPACE_ID` in GitHub Secrets only if you want CI to inject the KV namespace into `partykit.json` (optional; the worker itself does not need this unless it references KV).
 - Cloudflare Account ID and Zone ID (for API route creation; optional if using the Dashboard GUI).
 - `proxy-worker/index.ts` present in the repo (it is).
+- `DOCS_ORIGIN` — the origin (protocol+host) where the docs Pages project is served (for example: `https://sommelier-arena-docs.pages.dev`). This value should be set after you create/deploy the docs Pages project (see section 3). Prefer injecting it via CI rather than hard-coding.
+
 
 A) Manual (local) publish — using Wrangler (interactive)
 

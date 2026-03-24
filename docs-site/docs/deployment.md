@@ -72,6 +72,12 @@ In Cloudflare Pages → your front project → **Custom domains** → Add domain
 4. Go to **Triggers** → **Routes** → Add route: `sommelier-arena.ducatillon.net/docs*`
 5. Set the `DOCS_ORIGIN` environment variable to the URL of your Docusaurus Pages project (e.g. `https://sommelier-arena-docs.pages.dev`). This controls where `/docs/*` requests are proxied.
 
+Notes and CI recommendation:
+- `DOCS_ORIGIN` must match the Pages project you deployed in Step 4. The Pages default domain is `https://<project-name>.pages.dev` once created and deployed.
+- Recommended: do not hard-code `DOCS_ORIGIN` in `proxy-worker/index.ts`. Instead capture the Pages URL in CI after docs deploy and publish the worker with `DOCS_ORIGIN` injected (or set as a worker environment variable). This makes deployments reproducible and avoids manual edits.
+- Manual quick fix: deploy the docs Pages project, copy the pages.dev URL, then publish the worker and set `DOCS_ORIGIN` via the Dashboard (Worker settings → Variables & Bindings) or by editing `proxy-worker/index.ts` then running `npx wrangler publish`.
+
+
 The proxy worker also routes `/docs/*` to the Docusaurus Pages project, keeping everything under one domain. See [Proxy Worker](proxy-worker) for full details.
 
 > See [Cloudflare Setup](cloudflare-setup) for a step-by-step dashboard walkthrough with UI labels.
