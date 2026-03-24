@@ -1,0 +1,11 @@
+{
+  "name": "sommelier-arena",
+  "main": "back/game.ts",
+  "compatibilityDate": "2026-03-22",
+  "bindings": [
+    {
+      "binding": "HOSTS_KV",
+      "id": "PASTE_NAMESPACE_ID_HERE"
+    }
+  ]
+}

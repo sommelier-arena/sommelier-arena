@@ -25,3 +25,4 @@ e2e/test-results/
 # Logs
 *.log
 npm-debug.log*
+partykit.json

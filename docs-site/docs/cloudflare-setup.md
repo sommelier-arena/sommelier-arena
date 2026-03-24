@@ -47,6 +47,32 @@ Bind the namespace to the project
 
 3. Save the file.
 
+Template & CI workflow (recommended)
+
+To avoid committing environment-specific namespace IDs into the repository, follow this workflow:
+
+- Add `partykit.json.template` to the repo (contains the same structure as `partykit.json` but with the placeholder `PASTE_NAMESPACE_ID_HERE`). Developers copy this to `partykit.json` locally and paste the real Namespace ID.
+- Add `partykit.json` to `.gitignore` so local copies are not committed.
+- In CI (GitHub Actions example below), inject the real Namespace ID from a secret (e.g., `CF_HOSTS_NAMESPACE_ID`) into `partykit.json` at build time before running `npx partykit deploy`.
+
+Example GitHub Actions snippet (insert into your docs or CI workflow):
+
+```yaml
+- name: Prepare partykit.json from template
+  env:
+    CF_HOSTS_NAMESPACE_ID: ${{ secrets.CF_HOSTS_NAMESPACE_ID }}
+  run: |
+    cp partykit.json.template partykit.json
+    node -e "let fs=require('fs');let p='partykit.json';let c=fs.readFileSync(p,'utf8');c=c.replace('PASTE_NAMESPACE_ID_HERE', process.env.CF_HOSTS_NAMESPACE_ID);fs.writeFileSync(p,c);"
+
+- name: Deploy PartyKit
+  run: npx partykit deploy
+```
+
+Notes:
+- The Namespace ID itself is not secret and may be committed if you choose; however, storing it in CI secrets and injecting at build time avoids accidental leaks and keeps local files untracked.
+- If you prefer to keep the Namespace ID committed, use `partykit.json` directly and skip the template/CI steps.
+
 Important: where to run `npx partykit deploy`
 
 - Run this from the repository root (the directory that contains `partykit.json`). Example:
