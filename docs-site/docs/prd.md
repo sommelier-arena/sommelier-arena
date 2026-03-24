@@ -12,7 +12,6 @@ Single source of truth for the Sommelier Arena MVP.
 - [Features](features) — full feature specification with host controls table and question flow
 - [User Stories](user-stories) — host and participant stories, edge cases
 - [Tech Stack & Principles](tech-stack) — stack choices, persistence policy, design principles
-- [Database Model](database-model) — ER diagram with field-level annotations
 - [Architecture](architecture) — repo structure, runtime communication
 - [Quick Start](quick-start) — local dev setup
 

@@ -6,7 +6,7 @@ sidebar_label: Cloudflare Setup
 
 # Cloudflare Dashboard Setup
 
-Step-by-step guide for setting up Sommelier Arena through the Cloudflare web UI. No Wrangler CLI needed (except for initial `partykit deploy`).
+Step-by-step guide for setting up Sommelier Arena through the Cloudflare web UI. Note: Wrangler CLI is required to publish the TypeScript proxy worker (`proxy-worker/index.ts`) because the Cloudflare Dashboard editor cannot build TypeScript or run the project's build step. Keep `wrangler` available locally or in CI (see examples below).
 
 ---
 
@@ -57,11 +57,16 @@ Example `app-ci.yml` deploy snippet (no template manipulation):
     npm ci
     npx partykit deploy
 
-- name: Publish proxy worker via Wrangler
+- name: Publish proxy worker via Wrangler (required for TypeScript)
   if: ${{ secrets.CF_API_TOKEN != '' }}
   env:
     CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-  run: npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
+  run: |
+    # Ensure wrangler is available and authenticated (CI should provide CF_API_TOKEN)
+    npx wrangler whoami || true
+    # Recommended: add a wrangler.toml to the repo and run 'npx wrangler deploy'.
+    # Pass DOCS_ORIGIN to the worker via --var (example uses an env var set earlier in the job)
+    npx wrangler deploy proxy-worker/index.ts --var DOCS_ORIGIN=$DOCS_ORIGIN
 ```
 
 Manual local deploys (rare)
@@ -251,15 +256,15 @@ Manual one-shot steps:
    - Copy the default domain, e.g. `https://sommelier-arena-docs.pages.dev`.
 
 3. Set DOCS_ORIGIN in the Worker (one-time):
-   - Option A (Dashboard — recommended):
+   - Recommended: set `DOCS_ORIGIN` in the Worker using the Dashboard Variables & Bindings after you have published the worker with Wrangler. Note: publishing the TypeScript worker requires Wrangler because the Dashboard cannot build TypeScript projects.
      - Cloudflare Dashboard → Workers & Pages → Workers → select `sommelier-arena-proxy` → Settings → Variables & Bindings → Add variable:
        - Name: `DOCS_ORIGIN`
        - Value: the pages.dev URL you copied (include protocol)
      - Save. No git changes required.
 
-   - Option B (one-time wrangler publish):
+   - Option B (one-time wrangler deploy):
      - Create a temporary local copy of `proxy-worker/index.ts` and replace the placeholder `DOCS_ORIGIN_PLACEHOLDER` with the Pages URL.
-     - Run: `npx wrangler publish temp/proxy-worker/index.ts --name sommelier-arena-proxy`
+     - Run: `npx wrangler deploy temp/proxy-worker/index.ts` (or use a `wrangler.toml` and `npx wrangler deploy`).
      - This publishes the worker with the correct DOCS_ORIGIN baked in. Do not commit the temporary file.
 
 Verification
@@ -288,15 +293,15 @@ Recommended (Wrangler, reproducible):
 ```bash
 cd /path/to/SommelierArena
 npx wrangler whoami   # verify auth
-npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
+# Quick one-shot (manual): set DOCS_ORIGIN to the pages URL you copied
+npx wrangler deploy proxy-worker/index.ts --var DOCS_ORIGIN=https://sommelier-arena-docs.pages.dev
 ```
 
 - Wrangler compiles TypeScript and publishes the named worker; this is the recommended, reproducible path.
 
 Dashboard UI (editor):
 
-- Dashboard → Workers & Pages → Workers → Create Worker
-- Paste the contents of `proxy-worker/index.ts` into the editor and Save & Deploy.
+- The Dashboard editor does not run a build and therefore cannot compile TypeScript projects. If you have a plain compiled JS worker you may paste it into the editor, but for this repository's TypeScript `proxy-worker/index.ts` use Wrangler (recommended). To use the Dashboard with this repo you'd need to compile/bundle to plain JS locally and paste that JS into the editor (not recommended).
 
 2. Set DOCS_ORIGIN (one-time)
 
@@ -330,7 +335,7 @@ curl -I https://sommelier-arena.ducatillon.net/docs
 
 Troubleshooting
 
-- If Wrangler publish doesn't create the worker, ensure `npx wrangler whoami` returns the correct account and your CF API token has Workers:Edit permission.
+- If `npx wrangler deploy` doesn't create the worker, ensure `npx wrangler whoami` returns the correct account and your CF API token has Workers:Edit permission.
 - If the worker exists but route is missing, add the route via Dashboard or create it programmatically (requires `CF_ZONE_ID`).
 - Dashboard variable bindings are recommended for DOCS_ORIGIN to avoid committing environment-specific values.
 
@@ -346,13 +351,14 @@ Example job step (YAML snippet):
   env:
     CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
   run: |
-    # publish the worker script non-interactively
-    npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
+    # Ensure wrangler can run non-interactively in CI and authenticate using CF_API_TOKEN
+    # Recommended: commit a wrangler.toml and run 'npx wrangler deploy' from the repo root
+    npx wrangler deploy proxy-worker/index.ts --var DOCS_ORIGIN=$DOCS_ORIGIN
 ```
 
 Notes for CI:
 - Wrangler reads `CF_API_TOKEN` from the environment for non-interactive auth. No `npx wrangler login` is needed in CI.
-- If you need to create/update routes from CI, use the Cloudflare REST API (requires `CF_API_TOKEN` and `ZONE_ID`) or manage routes in `wrangler.toml` and let `npx wrangler publish` apply them.
+- If you need to create/update routes from CI, use the Cloudflare REST API (requires `CF_API_TOKEN` and `ZONE_ID`) or manage routes in `wrangler.toml` and let `npx wrangler deploy` apply them.
 
 C) Programmatic route creation (optional)
 
@@ -387,7 +393,7 @@ You can also automate route creation from CI. Add `CF_ZONE_ID` (the Zone ID for 
 
 Notes:
 - Secret names used: `CF_API_TOKEN` (already required), `CF_ZONE_ID` (new — set to the Zone ID for `ducatillon.net`).
-- If you prefer to manage routes in `wrangler.toml`, `npx wrangler publish` can apply them as well (see Wrangler docs).
+- If you prefer to manage routes in `wrangler.toml`, `npx wrangler deploy` can apply them as well (see Wrangler docs).
 
 D) Verification steps (after publish + route)
 
@@ -401,13 +407,13 @@ curl -I https://sommelier-arena.ducatillon.net/docs | head -n 10
 
 3. Worker logs: Cloudflare Dashboard → Workers → View logs (or use `wrangler tail` with `CF_API_TOKEN` to stream logs locally).
 
-4. CI logs: verify the `npx wrangler publish` step succeeded and API output shows the correct script name.
+4. CI logs: verify the `npx wrangler deploy` step succeeded and API output shows the correct script name.
 
 E) Rollback guidance
 
 - Cloudflare does not expose a one-click "rollback" for Workers. To rollback:
   1. Identify the previous commit/tag that contained the last-known-good worker code.
-  2. In CI or locally, `git checkout <good-commit>` and run `npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy`.
+  2. In CI or locally, `git checkout <good-commit>` and run `npx wrangler deploy proxy-worker/index.ts` (or use a `wrangler.toml` and `npx wrangler deploy`).
   3. Alternatively, if using a CI artifact store, republish the saved artifact from the previous successful run.
 
 F) Bindings & Secrets for the Worker
@@ -447,7 +453,7 @@ A) Publish the worker script with Wrangler (CLI)
 2. From the repository root, publish the worker script located at `proxy-worker/index.ts` and give it the name `sommelier-arena-proxy`:
 
    cd /Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena
-   npx wrangler publish proxy-worker/index.ts --name sommelier-arena-proxy
+   npx wrangler deploy proxy-worker/index.ts
 
    Successful output will include the worker URL and script name.
 
@@ -484,7 +490,7 @@ curl -X GET "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/workers/route
   -H "Authorization: Bearer ${CF_API_TOKEN}" \
   -H "Content-Type: application/json" | jq '.result[] | select(.pattern=="sommelier-arena.ducatillon.net/docs*")'
 
-# If you prefer to bind routes to a Worker via wrangler TOML, you can also manage routes in wrangler.toml and use `npx wrangler publish` from the worker directory. See Wrangler docs for `routes` configuration.
+# If you prefer to bind routes to a Worker via wrangler TOML, you can also manage routes in wrangler.toml and use `npx wrangler deploy` from the worker directory. See Wrangler docs for `routes` configuration.
 ---
 
 ## 6. Verify DNS records

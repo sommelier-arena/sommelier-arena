@@ -25,3 +25,13 @@ e2e/test-results/
 # Logs
 *.log
 npm-debug.log*
+
+.entire/
+**/entire.json
+.gemini/
+
+.vscode/
+
+.wrangler/
+
+package-lock.json

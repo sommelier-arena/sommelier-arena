@@ -22,6 +22,8 @@ const sidebars: SidebarsConfig = {
       items: [
         'architecture',
         'tech-stack',
+        'env',
+        'testing-and-preview',
         'networking',
         'event-reference',
         'data-persistence',
@@ -34,7 +36,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Development',
       collapsed: true,
-      items: ['env', 'prd'],
+      items: ['prd'],
     },
   ],
 };

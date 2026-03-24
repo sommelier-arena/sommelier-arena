@@ -2,7 +2,7 @@ name: Docs CI
 
 on:
   push:
-    branches: [ main, cloudflare-migration ]
+    branches: [ main ]
     paths:
       - 'docs-site/**'
   pull_request:
@@ -21,14 +21,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Prepare partykit.json (inject KV ID)
-        if: ${{ secrets.CF_HOSTS_NAMESPACE_ID != '' }}
-        run: |
-          cp partykit.json.template partykit.json
-          node -e "let fs=require('fs');let p='partykit.json';let c=fs.readFileSync(p,'utf8');c=c.replace('PASTE_NAMESPACE_ID_HERE', process.env.CF_HOSTS_NAMESPACE_ID);fs.writeFileSync(p,c);"
-        env:
-          CF_HOSTS_NAMESPACE_ID: ${{ secrets.CF_HOSTS_NAMESPACE_ID }}
 
       - name: Install and build docs
         working-directory: ./docs-site
