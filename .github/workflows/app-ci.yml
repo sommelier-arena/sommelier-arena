@@ -33,26 +33,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Note about docs build
-        run: |
-          echo "Docs are built by docs-ci. app-ci does NOT depend on docs and will proceed regardless."
-
-      - name: Prepare partykit.json (inject KV ID)
-        if: ${{ secrets.CF_HOSTS_NAMESPACE_ID != '' }}
-        run: |
-          cp partykit.json.template partykit.json
-          node -e "let fs=require('fs');let p='partykit.json';let c=fs.readFileSync(p,'utf8');c=c.replace('PASTE_NAMESPACE_ID_HERE', process.env.CF_HOSTS_NAMESPACE_ID);fs.writeFileSync(p,c);"
-        env:
-          CF_HOSTS_NAMESPACE_ID: ${{ secrets.CF_HOSTS_NAMESPACE_ID }}
-
-      - name: Deploy PartyKit to Cloudflare (if token)
-        if: ${{ secrets.CF_API_TOKEN != '' }}
-        env:
-          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
-        run: |
-          npm ci
-          npx partykit deploy
-
       - name: Start Docker stack (compose)
         run: |
           docker-compose --profile full up --build -d
@@ -70,10 +50,28 @@ jobs:
           npm ci
           npx playwright install --with-deps
 
-      - name: Run Playwright tests
+      - name: Run Playwright E2E tests
         working-directory: ./e2e
         run: |
           npm test -- --reporter=dot
+
+      # If E2E tests pass, proceed to deployment steps. If tests fail the job will stop here and deployment won't run.
+
+      - name: Prepare partykit.json (inject KV ID)
+        if: ${{ secrets.CF_HOSTS_NAMESPACE_ID != '' }}
+        run: |
+          cp partykit.json.template partykit.json
+          node -e "let fs=require('fs');let p='partykit.json';let c=fs.readFileSync(p,'utf8');c=c.replace('PASTE_NAMESPACE_ID_HERE', process.env.CF_HOSTS_NAMESPACE_ID);fs.writeFileSync(p,c);"
+        env:
+          CF_HOSTS_NAMESPACE_ID: ${{ secrets.CF_HOSTS_NAMESPACE_ID }}
+
+      - name: Deploy PartyKit to Cloudflare (if token)
+        if: ${{ secrets.CF_API_TOKEN != '' }}
+        env:
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+        run: |
+          npm ci
+          npx partykit deploy
 
       - name: Publish proxy worker via Wrangler
         if: ${{ secrets.CF_API_TOKEN != '' }}
@@ -85,4 +83,5 @@ jobs:
       - name: Tear down docker stack
         if: always()
         run: |
+          # Tear down the docker-compose stack to free resources. This runs even if earlier steps fail.
           docker-compose --profile full down
