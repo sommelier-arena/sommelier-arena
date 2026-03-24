@@ -57,13 +57,16 @@ jobs:
 
       # If E2E tests pass, proceed to deployment steps. If tests fail the job will stop here and deployment won't run.
 
-      - name: Prepare partykit.json (inject KV ID)
+      - name: Inject CF_HOSTS_NAMESPACE_ID into partykit.json
         if: ${{ secrets.CF_HOSTS_NAMESPACE_ID != '' }}
-        run: |
-          cp partykit.json.template partykit.json
-          node -e "let fs=require('fs');let p='partykit.json';let c=fs.readFileSync(p,'utf8');c=c.replace('PASTE_NAMESPACE_ID_HERE', process.env.CF_HOSTS_NAMESPACE_ID);fs.writeFileSync(p,c);"
         env:
           CF_HOSTS_NAMESPACE_ID: ${{ secrets.CF_HOSTS_NAMESPACE_ID }}
+        run: |
+          if [ -f partykit.json ]; then
+            node -e "const fs=require('fs');const p='partykit.json';let c=fs.readFileSync(p,'utf8');c=c.replace(/PASTE_NAMESPACE_ID_HERE/g, process.env.CF_HOSTS_NAMESPACE_ID);fs.writeFileSync(p,c);"
+          else
+            echo 'partykit.json not found in repo root'; exit 1
+          fi
 
       - name: Deploy PartyKit to Cloudflare (if token)
         if: ${{ secrets.CF_API_TOKEN != '' }}
