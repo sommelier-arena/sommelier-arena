@@ -84,7 +84,7 @@ No Docker required. PartyKit dev server emulates Durable Objects and KV locally.
 
 ```bash
 # Requires Docker Desktop
-docker-compose --profile full up --build
+docker-compose up --build
 ```
 
 | Service | URL |
@@ -145,7 +145,7 @@ No `DATABASE_URL`. No `RENDER_API_KEY`. No external services.
 - Replace `back` service (NestJS) with `partykit` service running `npx partykit dev`
 - Remove `postgres` service — no longer needed
 - Keep `front` and `docs` services unchanged
-- Keep `--profile full` flag for optional full-stack mode
+- Use plain `docker-compose up` to run the full-stack mode
 
 ---
 

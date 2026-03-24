@@ -1,6 +1,6 @@
 services:
   # ── Mode B: full-stack with PartyKit ─────────────────────────────────────────
-  # Run with: docker-compose --profile full up --build
+  # Run with: docker-compose up --build
   # For daily dev (Mode A), use: npx partykit dev + cd front && npm run dev
 
   back:
@@ -18,7 +18,6 @@ services:
       timeout: 5s
       retries: 10
       start_period: 20s
-    profiles: [full]
 
   front:
     build:
@@ -33,12 +32,10 @@ services:
     depends_on:
       back:
         condition: service_healthy
-    profiles: [full]
 
   docs:
     build:
       context: ./docs-site
     ports:
       - '3002:80'
-    profiles: [full]
 

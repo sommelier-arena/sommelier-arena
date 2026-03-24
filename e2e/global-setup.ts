@@ -5,7 +5,7 @@
  * running before any tests start. Fails fast with a clear message rather than
  * letting tests time out one by one.
  *
- * Start the stack first: docker-compose --profile full up -d
+ * Start the stack first: docker-compose up -d
  */
 import { chromium } from '@playwright/test';
 
@@ -36,7 +36,7 @@ async function waitFor(url: string): Promise<void> {
   await browser.close();
   throw new Error(
     `Docker stack not reachable at ${url} after ${TIMEOUT_MS / 1000}s.\n` +
-    `Start it with: docker-compose --profile full up -d\n` +
+    `Start it with: docker-compose up -d\n` +
     `Last error: ${lastError}`,
   );
 }

@@ -40,10 +40,10 @@ The browser connects **directly** to `ws://localhost:1999/parties/main/{code}`. 
 
 ---
 
-## Mode B — Docker (`docker-compose --profile full up`)
+## Mode B — Docker (`docker-compose up`)
 
 ```
-docker-compose --profile full up --build -d
+docker-compose up --build -d
 # front (nginx) → localhost:4321
 # back (PartyKit) → localhost:1999  (internal only, not exposed to the browser directly)
 # docs (Docusaurus) → localhost:3002

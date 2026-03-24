@@ -9,7 +9,7 @@ A lightweight Cloudflare Worker that routes `/docs/*` to the Docusaurus Pages pr
 | Mode | Docs URL | Worker needed? |
 |------|----------|---------------|
 | Mode A — local dev (`npx partykit dev` + `npm run dev`) | `http://localhost:3002` (run `cd docs-site && npm start`) | ❌ No |
-| Mode B — Docker (`docker-compose --profile full up`) | `http://localhost:3002` (separate container) | ❌ No |
+| Mode B — Docker (`docker-compose up`) | `http://localhost:3002` (separate container) | ❌ No |
 | Production — Cloudflare Pages | `https://sommelier-arena.ducatillon.net/docs/` | ✅ Yes |
 
 In local development the docs site runs as its own server on port 3002. The proxy worker is only needed in production to serve both the frontend and the docs under the same domain.

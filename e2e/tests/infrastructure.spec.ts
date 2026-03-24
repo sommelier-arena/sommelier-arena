@@ -36,7 +36,7 @@ test.describe('Infrastructure', () => {
     const res = await request.get('http://localhost:1999/');
     expect(
       res.status(),
-      'GET http://localhost:1999/ must return 2xx or 4xx (not connection refused). Is docker-compose --profile full up running?',
+      'GET http://localhost:1999/ must return 2xx or 4xx (not connection refused). Is docker-compose up running?',
     ).toBeLessThan(500);
   });
 

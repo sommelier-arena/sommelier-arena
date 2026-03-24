@@ -39,7 +39,7 @@ Open `http://localhost:4321/host` (host) and `http://localhost:4321/play` (parti
 Best for E2E tests and nginx/proxy validation.
 
 ```bash
-docker-compose --profile full up --build
+docker-compose up --build
 ```
 
 | Service | URL |
@@ -52,19 +52,19 @@ docker-compose --profile full up --build
 
 ```bash
 # Start the full stack
-docker-compose --profile full up --build -d
+docker-compose up --build -d
 
-# Stop the full stack (MUST use --profile full)
-docker-compose --profile full down
+# Stop the full stack
+docker-compose down
 
 # Rebuild a single service
-docker-compose --profile full up --build -d front
+docker-compose up --build -d front
 
 # View logs
-docker-compose --profile full logs -f
+docker-compose logs -f
 ```
 
-> ⚠️ **Important:** Running `docker-compose down` (without `--profile full`) does **not** stop containers started with `--profile full`. Always include `--profile full` in both `up` and `down` commands.
+> ⚠️ **Important:** Use `docker-compose down` to stop the running stack. If you started the stack with additional flags or in a different context, ensure you stop the correct compose project instance.
 
 ## Mode C — Docs only
 

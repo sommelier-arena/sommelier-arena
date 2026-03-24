@@ -35,7 +35,7 @@ jobs:
 
       - name: Start Docker stack (compose)
         run: |
-          docker-compose --profile full up --build -d
+          docker-compose up --build -d
 
       - name: Wait for frontend to be ready
         run: |
@@ -84,4 +84,4 @@ jobs:
         if: always()
         run: |
           # Tear down the docker-compose stack to free resources. This runs even if earlier steps fail.
-          docker-compose --profile full down
+          docker-compose down

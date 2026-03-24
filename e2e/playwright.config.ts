@@ -10,7 +10,7 @@ export default defineConfig({
   reporter: [['list'], ['html', { open: 'never' }]],
 
   // Checks that the Docker stack is up before any tests run.
-  // Start it with: docker-compose --profile full up -d
+  // Start it with: docker-compose up -d
   globalSetup: './global-setup.ts',
 
   use: {
