@@ -1,6 +1,6 @@
 ---
 id: deployment
-title: Deployment
+title: Prod Deployment
 sidebar_label: Deployment
 ---
 
@@ -17,7 +17,7 @@ The production stack runs entirely on Cloudflare's free tier. No servers to mana
 | Docs | Cloudflare Pages (`docs-site/`) | Git push → auto-deploy |
 | Proxy Worker | Cloudflare Workers | Deploy via Wrangler (see below) |
 
-## Step 1 — PartyKit deploy
+## Step 1 — PartyKit deploy (Backend)
 
 ```bash
 # From repo root
@@ -43,13 +43,13 @@ In the Cloudflare dashboard:
 ## Step 3 — Frontend on Cloudflare Pages
 
 1. Workers & Pages → **Create application** → Pages → Connect to Git
-2. Select repository, branch: `cloudflare-migration`
+2. Select repository, branch: `main`
 3. Build settings:
    - Root directory: `front`
    - Build command: `npm run build`
    - Output directory: `dist`
 4. Environment variables:
-   - `PUBLIC_PARTYKIT_HOST` = `sommelier-arena.USERNAME.partykit.dev`
+   - `PUBLIC_PARTYKIT_HOST` = `sommelier-arena.francoiducat.partykit.dev`
 5. Deploy
 
 ## Step 4 — Docs on Cloudflare Pages
@@ -62,15 +62,13 @@ Same as Step 3 but:
 
 ## Step 5 — Custom domain
 
-In Cloudflare Pages → your front project → **Custom domains** → Add domain → `sommelier-arena.ducatillon.net`
+In Cloudflare Pages → front/docs project → **Custom domains** → Add domain → `sommelier-arena.ducatillon.net`
 
 ## Step 6 — Proxy Worker for /docs route
 
-1. Workers & Pages → **Create Worker**
+1. **Create Worker**
 
-Wrangler (required for TypeScript / reproducible builds)
-
-- The Cloudflare Dashboard editor cannot build or publish TypeScript worker projects. To publish the repo's TypeScript worker (`proxy-worker/index.ts`) use Wrangler.
+Wrangler required.
 
 Recommended (wrangler.toml + deploy):
 
@@ -92,17 +90,16 @@ npx wrangler deploy --var DOCS_ORIGIN=https://sommelier-arena-docs.pages.dev
 
 Notes:
 - Wrangler will compile TypeScript and bundle dependencies.
-- If you insist on using the Dashboard editor, compile/bundle the worker to plain JS locally and paste the compiled JS into the Dashboard editor (not recommended).
 
 After the worker exists:
 
-3. Create the route (Dashboard):
+2. Create the route (Dashboard):
    - Cloudflare Dashboard → Workers & Pages → Workers → open `sommelier-arena-proxy` → Triggers → Add route:
      - Route: `sommelier-arena.ducatillon.net/docs*`
      - Zone: `ducatillon.net`
    - Save. The route is applied immediately.
 
-4. Set the `DOCS_ORIGIN` environment variable (one-time):
+3. Verify or add the `DOCS_ORIGIN` environment variable (one-time):
    - Dashboard → Workers → select `sommelier-arena-proxy` → Settings → Variables & Bindings → Add:
      - Name: `DOCS_ORIGIN`
      - Value: `https://sommelier-arena-docs.pages.dev`
@@ -111,18 +108,5 @@ After the worker exists:
 Verification
 - Open https://sommelier-arena.ducatillon.net/docs and confirm the docs site loads.
 
-Notes and CI recommendation:
-- `DOCS_ORIGIN` must match the Pages project you deployed in Step 4. The Pages default domain is `https://<project-name>.pages.dev` once created and deployed.
-- Recommended: do not hard-code `DOCS_ORIGIN` in `proxy-worker/index.ts`. Instead capture the Pages URL in CI after docs deploy and publish the worker with `DOCS_ORIGIN` injected (or set as a worker environment variable). This makes deployments reproducible and avoids manual edits.
-- Manual quick fix: deploy the docs Pages project, copy the pages.dev URL, then publish the worker and set `DOCS_ORIGIN` via the Dashboard (Worker settings → Variables & Bindings) or by editing `proxy-worker/index.ts` then running `npx wrangler deploy`.
-
 
 The proxy worker also routes `/docs/*` to the Docusaurus Pages project, keeping everything under one domain. See [Proxy Worker](proxy-worker) for full details.
-
-> See [Cloudflare Setup](cloudflare-setup) for a step-by-step dashboard walkthrough with UI labels.
-
-## Rollback
-
-Cloudflare Pages keeps deployment history. Roll back via dashboard → Deployments → select older deployment → **Rollback to this deployment**.
-
-For PartyKit, there is no built-in rollback — redeploy the previous git commit.
