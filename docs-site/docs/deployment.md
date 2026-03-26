@@ -24,7 +24,7 @@ The production stack runs entirely on Cloudflare's free tier.
 npx partykit deploy
 ```
 
-This deploys `back/game.ts` as a Durable Object class to `sommelier-arena.francoiducat.partykit.dev`.
+This deploys `back/game.ts` as a Durable Object class to `sommelier-arena.francoiducat.partykit.dev` using the `partykit.json` file.
 
 > **First time**: `npx partykit login` to authenticate with your Cloudflare account.
 
