@@ -84,5 +84,3 @@ Browser (Host)          Browser (Participant)
 | Backend | `npx partykit dev` on `:1999` | `partykit` Docker container on `:1999` |
 | Frontend | `npm run dev` on `:4321` | nginx on `:4321` |
 | Docs | `cd docs-site && npm start` | Docker container on `:3002` |
-| Requires Docker | ❌ | ✅ |
-| Hot-reload backend | ✅ | ❌ |
