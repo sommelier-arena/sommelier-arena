@@ -1,12 +1,12 @@
 ---
 id: deployment
 title: Prod Deployment
-sidebar_label: Deployment
+sidebar_label: Prod Deployment
 ---
 
-# Deployment
+# Prod Deployment
 
-The production stack runs entirely on Cloudflare's free tier. No servers to manage.
+The production stack runs entirely on Cloudflare's free tier.
 
 ## Services
 
@@ -24,7 +24,7 @@ The production stack runs entirely on Cloudflare's free tier. No servers to mana
 npx partykit deploy
 ```
 
-This deploys `back/game.ts` as a Durable Object class to `sommelier-arena.USERNAME.partykit.dev`.
+This deploys `back/game.ts` as a Durable Object class to `sommelier-arena.francoiducat.partykit.dev`.
 
 > **First time**: `npx partykit login` to authenticate with your Cloudflare account.
 
@@ -39,6 +39,10 @@ In the Cloudflare dashboard:
    { "binding": "HOSTS_KV", "id": "YOUR_KV_NAMESPACE_ID" }
    ```
 5. Re-deploy PartyKit
+```bash
+# From repo root
+npx partykit deploy
+```
 
 ## Step 3 — Frontend on Cloudflare Pages
 
@@ -94,19 +98,16 @@ Notes:
 After the worker exists:
 
 2. Create the route (Dashboard):
-   - Cloudflare Dashboard → Workers & Pages → Workers → open `sommelier-arena-proxy` → Triggers → Add route:
+   - Cloudflare Dashboard → Workers → open `sommelier-arena-proxy` → Triggers → Add route:
      - Route: `sommelier-arena.ducatillon.net/docs*`
      - Zone: `ducatillon.net`
    - Save. The route is applied immediately.
 
-3. Verify or add the `DOCS_ORIGIN` environment variable (one-time):
-   - Dashboard → Workers → select `sommelier-arena-proxy` → Settings → Variables & Bindings → Add:
+3. Verify or add the `DOCS_ORIGIN` environment variable (Dashboard)
+   - Cloudflare Dashboard → Workers → select `sommelier-arena-proxy` → Settings → Variables & Bindings → Add:
      - Name: `DOCS_ORIGIN`
      - Value: `https://sommelier-arena-docs.pages.dev`
    - Save.
 
 Verification
 - Open https://sommelier-arena.ducatillon.net/docs and confirm the docs site loads.
-
-
-The proxy worker also routes `/docs/*` to the Docusaurus Pages project, keeping everything under one domain. See [Proxy Worker](proxy-worker) for full details.
