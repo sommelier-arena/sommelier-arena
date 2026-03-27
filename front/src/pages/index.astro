@@ -1,5 +1,4 @@
 ---
-import { NavBar } from '../components/common/NavBar';
 import Footer from '../components/common/Footer.astro';
 ---
 <!DOCTYPE html>
@@ -10,8 +9,7 @@ import Footer from '../components/common/Footer.astro';
     <title>Sommelier Arena</title>
   </head>
   <body class="bg-slate-50 min-h-screen flex flex-col">
-    <NavBar client:only="react" />
-    <main class="flex-1 flex items-center justify-center px-4 py-8">
+    <main class="flex-1 flex items-center justify-center px-4">
       <div class="text-center space-y-8 max-w-sm w-full">
         <div>
           <p class="text-6xl mb-4">🍷</p>
@@ -22,7 +20,7 @@ import Footer from '../components/common/Footer.astro';
         <div class="flex flex-col gap-4">
           <a
             href="/host"
-            class="block w-full bg-wine-600 text-white rounded-xl py-4 font-semibold text-lg hover:bg-wine-700 transition-colors text-center"
+            class="block w-full bg-gradient-to-br from-wine-700 to-wine-500 text-white rounded-xl py-4 font-semibold text-lg hover:from-wine-800 hover:to-wine-600 transition-all text-center"
           >
             I'm the Host
           </a>
@@ -40,33 +38,5 @@ import Footer from '../components/common/Footer.astro';
       </div>
     </main>
     <Footer />
-  </body>
-</html>
-
-      <div>
-        <p class="text-6xl mb-4">🍷</p>
-        <h1 class="text-4xl font-bold text-slate-800">Sommelier Arena</h1>
-        <p class="text-slate-500 mt-2">A real-time blind wine tasting quiz.</p>
-      </div>
-
-      <div class="flex flex-col gap-4">
-        <a
-          href="/host"
-          class="block w-full bg-wine-600 text-white rounded-xl py-4 font-semibold text-lg hover:bg-wine-700 transition-colors text-center"
-        >
-          I'm the Host
-        </a>
-        <a
-          href="/play"
-          class="block w-full border border-wine-300 text-wine-600 rounded-xl py-4 font-semibold text-lg hover:bg-wine-50 transition-colors text-center"
-        >
-          Join as Participant
-        </a>
-      </div>
-
-      <p class="text-slate-400 text-sm">
-        No account needed. Pick a role and start tasting!
-      </p>
-    </main>
   </body>
 </html>

@@ -28,9 +28,9 @@ Sommelier Arena is a browser-based blind wine tasting game. No app to install, n
 
 Key links:
 
-- [Features](./features) — full feature specification with host controls and question flow
-- [Gameplay Workflow](./gameplay-workflow) — session state machine and scoring rules
-- [User Stories](./user-stories) — host and participant stories, edge cases
+- [Features](./features.md) — full feature specification with host controls and question flow
+- [Gameplay Workflow](./gameplay-workflow.md) — session state machine and scoring rules
+- [Features & User Stories](./features.md) — host and participant stories, edge cases
 - [Overview & Rules](/) — key constraints and what's new
 
 ## For partners & investors
@@ -44,6 +44,6 @@ Key links:
 | Availability | 99.9%+ (Cloudflare global edge) |
 | Data storage | Per-session in Cloudflare Durable Objects (SQLite); no external DB |
 | Custom domain | Yes — `sommelier-arena.ducatillon.net` on Cloudflare |
-| Integration points | WebSocket event API (see [Event Reference](./event-reference)) |
+| Integration points | WebSocket event API (see [Event Reference](./event-reference.md)) |
 
-For technical details see [Tech Stack](./tech-stack) and [Deployment Guide](./deployment-and-deploy).
+For technical details see [Tech Stack](./tech-stack.md) and [Deployment Guide](./deployment-and-deploy.md).

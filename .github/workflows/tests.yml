@@ -38,10 +38,10 @@ jobs:
 
       # Build and start the full Docker stack (back + front + docs)
       - name: Build Docker stack
-        run: docker-compose build
+        run: docker compose build
 
       - name: Start Docker stack
-        run: docker-compose up -d
+        run: docker compose up -d
 
       # Wait for front (port 4321) and back (port 1999) to become healthy
       - name: Wait for frontend to be ready
@@ -88,4 +88,4 @@ jobs:
 
       - name: Stop Docker stack
         if: always()
-        run: docker-compose down
+        run: docker compose down

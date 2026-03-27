@@ -8,9 +8,63 @@
   --ifm-color-primary-lightest: #fff5f5;
   --ifm-code-font-size: 95%;
   --docusaurus-highlighted-code-line-bg: rgba(201,63,63,0.08);
+
+  /* Align navbar with Astro NavBar.tsx */
+  --ifm-navbar-height: 2.75rem;           /* ~44px — matches py-2 + content */
+  --ifm-navbar-shadow: none;
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-navbar-item-padding-horizontal: 0.5rem;  /* px-2 */
+  --ifm-navbar-item-padding-vertical: 0.25rem;   /* py-1 */
+  --ifm-navbar-link-color: #64748b;       /* slate-500 */
+  --ifm-navbar-link-hover-color: #1e293b; /* slate-800 */
+  --ifm-font-size-base: 0.875rem;         /* text-sm = 14px */
+
+  /* Align footer with Astro Footer.astro */
+  --ifm-footer-background-color: #ffffff;
+  --ifm-footer-color: #94a3b8;            /* slate-400 */
+  --ifm-footer-link-color: #94a3b8;
+  --ifm-footer-link-hover-color: #c93f3f; /* wine-600 */
+  --ifm-footer-padding-vertical: 1rem;    /* py-4 */
+  --ifm-footer-padding-horizontal: 1.5rem; /* px-6 */
 }
 
 .navbar__brand .navbar__logo,
 .navbar__brand .navbar__logo img {
   display: none !important;
+}
+
+/* Navbar border-bottom matching Astro NavBar (border-slate-200 = #e2e8f0) */
+.navbar {
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.875rem;
+}
+
+/* Navbar link hover: slate-800 text + slate-100 pill background */
+.navbar__link:hover,
+.navbar__link--active {
+  color: #1e293b;
+  background-color: #f1f5f9;
+  border-radius: 0.5rem;
+}
+
+/* Footer: match Astro Footer.astro exactly */
+.footer--light {
+  background-color: #ffffff;
+  border-top: 1px solid #f1f5f9;  /* border-slate-100 */
+  padding: 1rem 1.5rem;
+  text-align: center;
+}
+
+.footer__copyright {
+  font-size: 0.875rem;            /* text-sm */
+  color: #94a3b8;                 /* slate-400 */
+}
+
+.footer__copyright a {
+  color: #94a3b8;
+  text-decoration: none;
+}
+
+.footer__copyright a:hover {
+  color: #c93f3f;                 /* wine-600 */
 }

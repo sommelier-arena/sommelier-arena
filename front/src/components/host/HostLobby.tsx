@@ -73,7 +73,7 @@ export function HostLobby({ code, participants, onStart }: HostLobbyProps) {
       <button
         onClick={onStart}
         disabled={participants.length === 0}
-        className="w-full bg-wine-600 text-white rounded-xl py-4 font-semibold text-lg hover:bg-wine-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full bg-gradient-to-br from-wine-700 to-wine-500 text-white rounded-xl py-4 font-semibold text-lg hover:from-wine-800 hover:to-wine-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Start Game
       </button>

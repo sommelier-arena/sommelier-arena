@@ -269,7 +269,7 @@ export function SessionForm({ onSubmit, hostId }: SessionFormProps) {
         </button>
         <button
           type="submit"
-          className="flex-1 bg-wine-600 text-white rounded-xl py-3 font-semibold hover:bg-wine-700 transition-colors"
+          className="flex-1 bg-gradient-to-br from-wine-700 to-wine-500 text-white rounded-xl py-3 font-semibold hover:from-wine-800 hover:to-wine-600 transition-colors"
         >
           Create Session
         </button>

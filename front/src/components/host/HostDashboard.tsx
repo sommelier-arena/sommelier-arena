@@ -39,7 +39,7 @@ export function HostDashboard({
         {/* New session button */}
         <button
           onClick={onNewSession}
-          className="w-full bg-wine-600 text-white rounded-xl py-4 font-semibold text-lg hover:bg-wine-700 transition-colors"
+          className="w-full bg-gradient-to-br from-wine-700 to-wine-500 text-white rounded-xl py-4 font-semibold text-lg hover:from-wine-800 hover:to-wine-600 transition-colors"
         >
           + New Session
         </button>
@@ -76,7 +76,7 @@ export function HostDashboard({
                   <div className="flex gap-2 flex-shrink-0">
                     <button
                       onClick={() => onOpenSession(session.code)}
-                      className="bg-wine-600 text-white rounded-xl px-5 py-2 font-semibold hover:bg-wine-700 transition-colors text-sm"
+                      className="bg-gradient-to-br from-wine-700 to-wine-500 text-white rounded-xl px-5 py-2 font-semibold hover:from-wine-800 hover:to-wine-600 transition-colors text-sm"
                     >
                       Open
                     </button>

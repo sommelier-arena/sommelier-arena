@@ -13,7 +13,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Game Design',
       collapsed: false,
-      items: ['features', 'gameplay-workflow', 'user-stories'],
+      items: ['features', 'gameplay-workflow'],
     },
     {
       type: 'category',

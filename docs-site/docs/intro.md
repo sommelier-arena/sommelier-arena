@@ -48,22 +48,22 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 
 | I am… | Start here |
 |-------|-----------|
-| A **developer** setting up locally | [Quick Start](quick-start) |
-| A **developer** understanding the system | [Architecture](architecture) · [Tech Stack](tech-stack) |
-| A **product person / user** | [Features](features) · [Gameplay Workflow](gameplay-workflow) |
-| **Deploying** to Cloudflare | [Deployment Guide](deployment-and-deploy) |
-| An **automation agent / AI** | [For Automation](for-automation) |
+| A **developer** setting up locally | [Quick Start](quick-start.md) |
+| A **developer** understanding the system | [Architecture](architecture.md) · [Tech Stack](tech-stack.md) |
+| A **product person / user** | [Features](features.md) · [Gameplay Workflow](gameplay-workflow.md) |
+| **Deploying** to Cloudflare | [Deployment Guide](deployment-and-deploy.md) |
+| An **automation agent / AI** | [For Automation](for-automation.md) |
 
 ## Quick reference
 
 | Doc | What it covers |
 |-----|----------------|
-| [Quick Start](quick-start) | Run locally in under 2 minutes |
-| [Architecture](architecture) | Repo layout, runtime communication, DO lifecycle |
-| [Tech Stack](tech-stack) | Stack choices and design principles |
-| [Gameplay Workflow](gameplay-workflow) | Phase machine, event flow, answer/scoring rules |
-| [Event Reference](event-reference) | All WebSocket message types (client ↔ server) |
-| [Host Identity](host-identity) | `TANNIC-FALCON`-style IDs, session dashboard, rejoin |
-| [Data Persistence](data-persistence) | DO storage keys, KV schema, what survives a restart |
-| [Deployment Guide](deployment-and-deploy) | Cloudflare Pages + PartyKit + Wrangler deploy |
-| [Configuration & Environments](configuration) | Env vars, local vs prod, nginx explanation, testing preview |
+| [Quick Start](quick-start.md) | Run locally in under 2 minutes |
+| [Architecture](architecture.md) | Repo layout, runtime communication, DO lifecycle |
+| [Tech Stack](tech-stack.md) | Stack choices and design principles |
+| [Gameplay Workflow](gameplay-workflow.md) | Phase machine, event flow, answer/scoring rules |
+| [Event Reference](event-reference.md) | All WebSocket message types (client ↔ server) |
+| [Host Identity](host-identity.md) | `TANNIC-FALCON`-style IDs, session dashboard, rejoin |
+| [Data Persistence](data-persistence.md) | DO storage keys, KV schema, what survives a restart |
+| [Deployment Guide](deployment-and-deploy.md) | Cloudflare Pages + PartyKit + Wrangler deploy |
+| [Configuration & Environments](configuration.md) | Env vars, local vs prod, nginx explanation, testing preview |

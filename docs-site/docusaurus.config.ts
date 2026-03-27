@@ -29,6 +29,7 @@ const config: Config = {
 
   onBrokenLinks: 'warn',
   markdown: {
+    mermaid: true,
     hooks: {
       onBrokenMarkdownLinks: 'warn',
     },
@@ -55,6 +56,8 @@ const config: Config = {
       ]
     : [],
 
+
+  themes: ['@docusaurus/theme-mermaid'],
 
   presets: [
     [
@@ -93,6 +96,7 @@ const config: Config = {
         alt: 'Sommelier Arena',
         src: 'img/favicon.svg',
         href: 'https://sommelier-arena.ducatillon.net/',
+        target: '_self',
       },
       items: [
         {
@@ -105,11 +109,6 @@ const config: Config = {
           href: 'https://github.com/francoiducat/sommelier-arena',
           label: 'Git Repository',
           position: 'left',
-        },
-        {
-          href: 'https://sommelier-arena.ducatillon.net/',
-          label: '🍷 Play the Game',
-          position: 'right',
         },
         {
           type: 'docsVersionDropdown',
