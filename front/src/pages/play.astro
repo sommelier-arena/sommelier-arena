@@ -9,10 +9,10 @@ import Footer from '../components/common/Footer.astro';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Play — Sommelier Arena</title>
   </head>
-  <body class="flex flex-col min-h-screen">
-    <main class="flex-1 flex flex-col">
+  <body class="bg-slate-50 min-h-screen flex flex-col">
+    <main class="flex-1">
       <ParticipantApp client:only="react">
-        <div slot="fallback" class="flex-1 flex items-center justify-center min-h-[60vh] text-slate-400">
+        <div slot="fallback" class="flex items-center justify-center h-40 text-slate-400">
           Loading…
         </div>
       </ParticipantApp>

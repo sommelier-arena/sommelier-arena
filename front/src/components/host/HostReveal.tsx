@@ -95,7 +95,7 @@ export function HostReveal({
       <div className="flex gap-3">
         <button
           onClick={onNext}
-          className="flex-1 bg-gradient-to-b from-wine-500 to-wine-800 text-white rounded-xl py-3 font-semibold hover:from-wine-600 hover:to-wine-900 transition-colors"
+          className="flex-1 bg-wine-600 text-white rounded-xl py-3 font-semibold hover:bg-wine-700 transition-colors"
         >
           Next
         </button>

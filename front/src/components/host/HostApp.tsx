@@ -84,7 +84,7 @@ export function HostApp() {
 
   if (phase === 'dashboard') {
     return (
-      <div className="flex-1 bg-slate-50">
+      <div className="bg-slate-50">
         <NavBar />
         <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Host Dashboard</h1>
         <HostDashboard
@@ -111,7 +111,7 @@ export function HostApp() {
 
   if (phase === 'setup') {
     return (
-      <div className="flex-1 bg-slate-50">
+      <div className="bg-slate-50">
         <NavBar />
         <div className="px-4 py-10">
           <h1 className="sr-only" tabIndex={-1} ref={headingRef}>New Session</h1>
@@ -123,7 +123,7 @@ export function HostApp() {
 
   if (phase === 'lobby' && code) {
     return (
-      <div className="flex-1 bg-slate-50">
+      <div className="bg-slate-50">
         <NavBar />
         <div className="px-4 py-10 space-y-6">
           <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Session Lobby</h1>
@@ -140,7 +140,7 @@ export function HostApp() {
 
   if (phase === 'question' && currentQuestion) {
     return (
-      <div className="flex-1 bg-slate-50">
+      <div className="bg-slate-50">
         <NavBar />
         <div className="px-4 py-10">
           <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Question {currentQuestion.questionIndex + 1}</h1>
@@ -162,7 +162,7 @@ export function HostApp() {
 
   if (phase === 'revealed' && currentQuestion && revealData) {
     return (
-      <div className="flex-1 bg-slate-50">
+      <div className="bg-slate-50">
         <NavBar />
         <div className="px-4 py-10">
           <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Answer Revealed</h1>
@@ -179,7 +179,7 @@ export function HostApp() {
 
   if (phase === 'roundLeaderboard') {
     return (
-      <div className="flex-1 bg-slate-50">
+      <div className="bg-slate-50">
         <NavBar />
         <div className="px-4 py-10">
           <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Round Leaderboard</h1>
@@ -197,7 +197,7 @@ export function HostApp() {
 
   if (phase === 'finalLeaderboard') {
     return (
-      <div className="flex-1 bg-slate-50">
+      <div className="bg-slate-50">
         <NavBar />
         <div className="px-4 py-10">
           <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Final Leaderboard</h1>
@@ -209,7 +209,7 @@ export function HostApp() {
 
   // Fallback loading
   return (
-    <div className="flex-1 bg-slate-50">
+    <div className="bg-slate-50">
       <NavBar />
       <div className="flex items-center justify-center min-h-[80vh]">
         <p className="text-slate-400">Connecting…</p>

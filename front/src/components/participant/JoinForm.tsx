@@ -53,7 +53,7 @@ export function JoinForm({ onJoin, error }: JoinFormProps) {
           <button
             type="submit"
             disabled={code.length !== 4}
-            className="w-full bg-gradient-to-b from-wine-500 to-wine-800 text-white rounded-xl py-4 font-semibold text-lg hover:from-wine-600 hover:to-wine-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full bg-wine-600 text-white rounded-xl py-4 font-semibold text-lg hover:bg-wine-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Join
           </button>
