@@ -1,0 +1,25 @@
+git pull origin main and solve conflicts. Then I ask you to clean up the docusaurus content that lies in docs-site . Currently there are too many files (sometimes duplicates content that could lie in only one md file) So merge and optimize the content. Delete unecessary files once merge is done. Update also the navigation. if you have doubts whether the doc is out of date or upd to date you must refer to the code of the repo. The ultimate goal is that this docusaurus site is fluid, easy ton understand and also complete with understandable examples for the reader/contributors
+
+---
+
+You have not yet marked the task as complete using the task_complete tool. If you were planning, stop planning and start implementing. You aren't done until you have fully completed the task.
+
+IMPORTANT: Do NOT call task_complete if:
+- You have open questions or ambiguities - make good decisions and keep working
+- You encountered an error - try to resolve it or find an alternative approach
+- There are remaining steps - complete them first
+
+Keep working autonomously until the task is truly finished, then call task_complete.
+
+---
+
+[[PLAN]] /Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena/.github/agents/qa-subagent.agent.md USe this agent to write unit test and E2E test. I want the tests to be run in CI workflow at /Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena/.github/workflows/tests.yml. Consider the plan done only when all tests pass.
+
+---
+
+[[PLAN]] /Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena/.github/agents/qa-subagent.agent.md USe this agent to write unit test and E2E test. I want the tests to be run in CI workflow at 
+/Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena/.github/workflows/tests.yml. Consider the plan done only when all tests pass.
+
+---
+
+[[PLAN]] I started the web app using docker-compose up. from the home page localhost:3000 the participant and host button links are http://localhost:3000/host or http://localhost:3000/play but when clicked they get changed to http://localhost/host and http://localhost/play . By the way is their an alternative to ngix.config for the e2e tests to be run? Also I'd like my astro front to be served on port 4321 not 3000 so it is just like when doing npm run start, same port. YOu will update the .md doc files (in /docs-site/doc/*.md .
