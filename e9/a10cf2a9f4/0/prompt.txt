@@ -1,0 +1,58 @@
+I am about to draft a new release on the github.com repo . Help me find a title and description.
+
+---
+
+No but I want a release title that is much more generic. Something about the overall web app. LEts give you some context: the first release of the web app was with a nestjs backend. this new release that I am about to draft is changing the backend logic using cloudflare Durable Object and partykit. Also I did lots of layout an style improvments to seemless naviguate between the astro front end site and the docusauris docs-site (using the cloudflare proxy-worker). Added Unit Tests for the front end. Added e2e tests. fixed several bugs and added small improvments to the game design.
+
+---
+
+[[PLAN]] I want to make this page https://sommelier-arena.ducatillon.net/host?code=7273&id=ROBUST-TANNIN a cleaner look and more understandable for the game flow: lets get rid of the host link that we propose to cipy. We should only keep the link to share with participants this make more sense. however currently the participant link is not complete because when a particpant receive it it does not opens directly the good session the participant is still forced to right the code down. After that I want to make all e2e pass. Also I have some doubts about the real usage of the rejoinToken. As per my understanding it is in the code and documentation but it is not "working" or implemented correctly... For the moment as per my understanding only the particpant code and pseudonym enables to rejoin a session, am I Wrong ? Clean the code if relevant and adapt the e2e test AND the .md documentation files in docs-site/docs/* . Consider the plan down only when all tests pass.
+
+---
+
+You have not yet marked the task as complete using the task_complete tool. If you were planning, stop planning and start implementing. You aren't done until you have fully completed the task.
+
+IMPORTANT: Do NOT call task_complete if:
+- You have open questions or ambiguities - make good decisions and keep working
+- You encountered an error - try to resolve it or find an alternative approach
+- There are remaining steps - complete them first
+
+Keep working autonomously until the task is truly finished, then call task_complete.
+
+---
+
+[[PLAN]] Great you did it. Now another small plan: architecture.md is not up to date as well as event-reference.md I guess. rename deployment-and-deploy.md to deployment-guide.md. Ensure all href links are ok. prd.md files has redundant links : features + Features & User Stories . Keep only one. features.md file could be improved: Features and User Stories paragraph are very similar, either it make sense as it is or find another way to display the relevant pieces of information. Also I noticed that when naviguating the .md docs-site/docs/*.md files some links are broken, fix them. Finally on this kind of page/screen : http://localhost:4321/host?code=5250&id=ROBUST-VINE => We are still duplicating the message for the host since we display twice a similar message : 1.Participant link — opening this will auto-join the session: http://localhost:4321/play?code=5250 AND 2. Participants join at localhost:4321/play KEep only only clear instructions for the host with a "working" link ready to share to particpants. Remove the iMessage button, keep only the copy particpant link and whatsapp buttons. Consider the plan done only when e2E tests pass. adapat them if needed. you will implement this plan on the same branch feature/unified-rejoin-srp
+
+---
+
+You have not yet marked the task as complete using the task_complete tool. If you were planning, stop planning and start implementing. You aren't done until you have fully completed the task.
+
+IMPORTANT: Do NOT call task_complete if:
+- You have open questions or ambiguities - make good decisions and keep working
+- You encountered an error - try to resolve it or find an alternative approach
+- There are remaining steps - complete them first
+
+Keep working autonomously until the task is truly finished, then call task_complete.
+
+---
+
+[[PLAN]] I did run the full stack with docker-compose then I ran the e2e and I have some failures, why ? Here are the failed tests: 11 failed [chromium] › tests/host-dashboard.spec.ts:65:7 › Host Dashboard › Created session appears in dashboard with "Open" badge and "Open" button @smoke [chromium] › tests/new-features.spec.ts:147:7 › New features (v2.0) › Participant can change answer before reveal @full [webkit] › tests/new-features.spec.ts:84:7 › New features (v2.0) › Session form has timer slider @smoke [webkit] › tests/participant-rejoin.spec.ts:66:7 › Participant Rejoin › Participant auto-rejoins after page refresh mid-game @smoke [mobile-chrome] › tests/host-session.spec.ts:131:7 › Host Session › Host reconnects via share URL in new context @smoke [mobile-safari] › tests/host-session.spec.ts:50:7 › Host Session › Host Session - happy path creates session and shows 4-digit code @smoke [mobile-safari] › tests/host-session.spec.ts:76:7 › Host Session › Host Session - boundary: submit with empty correct answer shows error @smoke [mobile-safari] › tests/host-session.spec.ts:131:7 › Host Session › Host reconnects via share URL in new context @smoke [mobile-safari] › tests/new-features.spec.ts:75:7 › New features (v2.0) › Session form has wine_name category @smoke [mobile-safari] › tests/participant-rejoin.spec.ts:90:7 › Participant Rejoin › Participant can play again after session ends @smoke [mobile-firefox] › tests/participant-rejoin.spec.ts:66:7 › Participant Rejoin › Participant auto-rejoins after page refresh mid-game @smoke 187 passed (5.6m) Fix them
+
+---
+
+[[PLAN]] Ensure the plan is done once all test (unit + e2Ee) definitely pass this time !
+
+---
+
+You have not yet marked the task as complete using the task_complete tool. If you were planning, stop planning and start implementing. You aren't done until you have fully completed the task.
+
+IMPORTANT: Do NOT call task_complete if:
+- You have open questions or ambiguities - make good decisions and keep working
+- You encountered an error - try to resolve it or find an alternative approach
+- There are remaining steps - complete them first
+
+Keep working autonomously until the task is truly finished, then call task_complete.
+
+---
+
+What commit name can I give ?
