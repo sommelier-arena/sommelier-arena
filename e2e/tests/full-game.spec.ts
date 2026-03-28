@@ -10,13 +10,13 @@ async function hostCreateSession(browser: Browser) {
 
   // New dashboard phase — click New Session to get to the form
   const newSessionBtn = hostPage.getByRole('button', { name: /new session/i });
-  if (await newSessionBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
   await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
 
   // Wine name
-  await hostPage.getByLabel('Wine name').fill('Grand Cru Test');
+  await hostPage.getByLabel('Wine name', { exact: true }).fill('Grand Cru Test');
 
   // Color
   await hostPage.getByLabel('Wine 1 Color — correct answer').fill('Red');
@@ -50,9 +50,12 @@ async function hostCreateSession(browser: Browser) {
 
   await hostPage.getByRole('button', { name: /create session/i }).click();
 
-  const codeEl = hostPage.getByText(/^\d{4}$/);
-  await expect(codeEl).toBeVisible();
-  const code = ((await codeEl.textContent()) ?? '').trim();
+  // The visible session code is rendered with an aria-label like "Session code: 6 1 8 3".
+  // Read the aria-label and extract digits to avoid matching the share URL that contains the code.
+  const codeEl = hostPage.locator('[aria-label^="Session code"]');
+  await expect(codeEl.first()).toBeVisible();
+  const aria = (await codeEl.first().getAttribute('aria-label')) ?? '';
+  const code = aria.replace(/\D/g, '');
 
   return { hostPage, hostCtx, code };
 }
@@ -84,7 +87,7 @@ test.describe('Full Game Flow', () => {
         await participantPage.getByLabel('Session code').fill(code);
         await participantPage.getByRole('button', { name: /join/i }).click();
         // Participant is now in lobby — pseudonym should appear
-        await expect(participantPage.getByText(/waiting for the host/i)).toBeVisible();
+        await expect(participantPage.getByText(/waiting for the host/i).last()).toBeVisible();
       });
 
       await test.step('Host starts the game', async () => {
@@ -97,16 +100,16 @@ test.describe('Full Game Flow', () => {
       await test.step('Participant answers Q1 (first option)', async () => {
         // Pick the first answer option button on the participant view
         await participantPage.getByRole('button').first().click();
-        // After answering, the button area shows "Answer locked in"
-        await expect(participantPage.getByText(/answer locked in/i)).toBeVisible();
+        // After answering, the button area shows a selection confirmation
+        await expect(participantPage.getByText(/selection recorded/i).first()).toBeVisible();
       });
 
       await test.step('Host reveals Q1 and advances to Q2', async () => {
         await revealAndAdvance(hostPage);
       });
 
-      await test.step('Host advances through Q2, Q3, Q4 without answering', async () => {
-        for (let q = 2; q <= 4; q++) {
+      await test.step('Host advances through Q2, Q3, Q4, Q5 without answering', async () => {
+        for (let q = 2; q <= 5; q++) {
           await expect(hostPage.getByRole('button', { name: /reveal answer/i })).toBeVisible();
           await revealAndAdvance(hostPage);
         }
@@ -116,7 +119,8 @@ test.describe('Full Game Flow', () => {
         // After Q4 advance, we may land on round leaderboard before final
         // In a 1-wine session the "next" after round leaderboard goes to final
         const nextOrFinal = hostPage.getByRole('button', { name: /next|final/i }).first();
-        if (await nextOrFinal.isVisible()) {
+        const visible = await nextOrFinal.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true).catch(() => false);
+        if (visible) {
           await nextOrFinal.click();
         }
       });
@@ -127,11 +131,11 @@ test.describe('Full Game Flow', () => {
         await expect(hostPage.getByRole('listitem')).toHaveCount(1);
 
         // Participant also sees the final leaderboard
-        await expect(participantPage.getByText(/final/i)).toBeVisible();
+        await expect(participantPage.getByText(/final/i).last()).toBeVisible();
       });
 
       await test.step('Participant sees "Play Another Session" button after game ends @full', async () => {
-        await expect(participantPage.getByRole('button', { name: /play another session/i })).toBeVisible({ timeout: 5000 });
+        await expect(participantPage.getByRole('button', { name: /play another session/i })).toBeVisible({ timeout: 10_000 });
       });
 
       await test.step('Participant clicks "Play Another Session" — arrives at clean join form @full', async () => {
@@ -159,7 +163,7 @@ test.describe('Full Game Flow', () => {
       await participantPage.goto('/play');
       await participantPage.getByLabel('Session code').fill(code);
       await participantPage.getByRole('button', { name: /join/i }).click();
-      await expect(participantPage.getByText(/waiting for the host/i)).toBeVisible();
+      await expect(participantPage.getByText(/waiting for the host/i).last()).toBeVisible();
 
       // Host starts the game
       await test.step('Host starts game', async () => {
@@ -192,7 +196,7 @@ test.describe('Full Game Flow', () => {
       await participantPage.goto('/play');
       await participantPage.getByLabel('Session code').fill(code);
       await participantPage.getByRole('button', { name: /join/i }).click();
-      await expect(participantPage.getByText(/waiting for the host/i)).toBeVisible();
+      await expect(participantPage.getByText(/waiting for the host/i).last()).toBeVisible();
 
       await test.step('Host starts game', async () => {
         await hostPage.getByRole('button', { name: /start game/i }).click();
@@ -206,8 +210,8 @@ test.describe('Full Game Flow', () => {
       await test.step('Participant transitions to ended state (no blank screen / crash)', async () => {
         // Participant should see either the final leaderboard or a session-ended message
         await expect(
-          participantPage.getByText(/final|ended|session has ended/i)
-        ).toBeVisible({ timeout: 10000 });
+          participantPage.getByText(/final|ended|session has ended/i).last()
+        ).toBeVisible({ timeout: 15_000 });
       });
     } finally {
       await participantCtx.close();

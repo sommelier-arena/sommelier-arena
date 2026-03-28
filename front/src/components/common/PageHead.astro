@@ -1,0 +1,31 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Sommelier Arena',
+  description = 'Real-time blind wine tasting quiz game',
+} = Astro.props;
+---
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{title}</title>
+<meta name="description" content={description} />
+
+<!-- PWA manifest -->
+<link rel="manifest" href="/manifest.webmanifest" />
+
+<!-- Theme color (browser chrome + Android status bar) -->
+<meta name="theme-color" content="#9e3333" />
+
+<!-- iOS "Add to Home Screen" support -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Sommelier" />
+<link rel="apple-touch-icon" href="/icons/icon-192.png" />
+
+<!-- Favicon -->
+<link rel="icon" href="/icons/icon-192.png" type="image/png" />

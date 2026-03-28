@@ -40,3 +40,4 @@ npm-debug.log*
 # If you intentionally want to ignore lockfiles, remove this comment and add the lockfile name here.
 
 .partykit/
+tmp/

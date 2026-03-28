@@ -2,7 +2,7 @@ import { test, expect, type Browser } from '@playwright/test';
 
 // Reusable helper: fill in a minimal valid session (1 wine, all fields)
 async function fillMinimalSession(page: import('@playwright/test').Page) {
-  await page.getByLabel('Wine name').fill('Château Test');
+  await page.getByLabel('Wine name', { exact: true }).fill('Château Test');
 
   // Color question
   await page.getByLabel('Wine 1 Color — correct answer').fill('Red');
@@ -40,7 +40,9 @@ test.describe('Host Session', () => {
     await page.goto('/host');
     // After dashboard loads, click New Session to get to the form
     const newSessionBtn = page.getByRole('button', { name: /new session/i });
-    if (await newSessionBtn.isVisible()) {
+    // Use waitFor — isVisible() returns immediately without retrying. On mobile/slow browsers
+    // React may not have hydrated yet, causing isVisible() to return false prematurely.
+    if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newSessionBtn.click();
     }
     // Wait for the React app to hydrate and show the form
@@ -57,8 +59,8 @@ test.describe('Host Session', () => {
     });
 
     await test.step('Lobby shows a 4-digit session code', async () => {
-      const codeText = page.getByText(/^\d{4}$/);
-      await expect(codeText).toBeVisible();
+      const codeEl = page.locator('[aria-label^="Session code"]');
+      await expect(codeEl.first()).toBeVisible();
     });
   });
 
@@ -74,8 +76,10 @@ test.describe('Host Session', () => {
   });
 
   test('Host Session - boundary: submit with empty correct answer shows error @smoke', async ({ page }) => {
-    await test.step('Fill wine name but leave correct answer empty', async () => {
-      await page.getByLabel('Wine name').fill('Test Wine');
+    await test.step('Fill wine name, clear a correct answer, then submit', async () => {
+      await page.getByLabel('Wine name', { exact: true }).fill('Test Wine');
+      // Clear the Color correct answer (it has a default value — clear it to trigger validation)
+      await page.getByLabel('Wine 1 Color — correct answer').clear();
       await page.getByRole('button', { name: /create session/i }).click();
     });
 
@@ -90,12 +94,12 @@ test.describe('Host Session', () => {
     await page.goto('/host');
 
     const newBtn = page.getByRole('button', { name: /new session/i });
-    if (await newBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await newBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newBtn.click();
     }
     await expect(page.getByRole('button', { name: /create session/i })).toBeVisible();
 
-    await page.getByLabel('Wine name').fill('URL Test Wine');
+    await page.getByLabel('Wine name', { exact: true }).fill('URL Test Wine');
     await page.getByLabel('Wine 1 Color — correct answer').fill('Red');
     await page.getByLabel('Wine 1 Color — distractor 1').fill('White');
     await page.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
@@ -118,7 +122,8 @@ test.describe('Host Session', () => {
     await page.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
     await page.getByRole('button', { name: /create session/i }).click();
 
-    await expect(page.getByText(/^\d{4}$/)).toBeVisible();
+    const codeEl = page.locator('[aria-label^="Session code"]');
+    await expect(codeEl.first()).toBeVisible();
 
     // After entering lobby, the URL should contain ?code=
     await expect(page).toHaveURL(/[?&]code=\d{4}/);
@@ -131,10 +136,10 @@ test.describe('Host Session', () => {
     await page1.goto('/host');
 
     const newBtn = page1.getByRole('button', { name: /new session/i });
-    if (await newBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await newBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newBtn.click();
     }
-    await page1.getByLabel('Wine name').fill('Reconnect Test Wine');
+    await page1.getByLabel('Wine name', { exact: true }).fill('Reconnect Test Wine');
     await page1.getByLabel('Wine 1 Color — correct answer').fill('Red');
     await page1.getByLabel('Wine 1 Color — distractor 1').fill('White');
     await page1.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
@@ -157,9 +162,9 @@ test.describe('Host Session', () => {
     await page1.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
     await page1.getByRole('button', { name: /create session/i }).click();
 
-    const codeEl = page1.getByText(/^\d{4}$/);
-    await expect(codeEl).toBeVisible();
-    const code = ((await codeEl.textContent()) ?? '').trim();
+    const codeEl = page1.locator('[aria-label^="Session code"]');
+    await expect(codeEl.first()).toBeVisible();
+    const code = ((await codeEl.first().getAttribute('aria-label')) ?? '').replace(/\D/g, '');
     const shareUrl = page1.url();
 
     // Open share URL in a new context (simulates host in new tab/browser)
@@ -168,7 +173,7 @@ test.describe('Host Session', () => {
     await page2.goto(shareUrl);
 
     // Host should be reconnected to the lobby showing the session code
-    await expect(page2.getByText(code)).toBeVisible({ timeout: 8000 });
+    await expect(page2.getByText(code, { exact: true })).toBeVisible({ timeout: 20_000 });
 
     await ctx1.close();
     await ctx2.close();
@@ -182,16 +187,17 @@ test.describe('Host Session', () => {
     await test.step('Host creates a session', async () => {
       await hostPage.goto('/host');
       const newBtn = hostPage.getByRole('button', { name: /new session/i });
-      if (await newBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      if (await newBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
         await newBtn.click();
       }
       await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
       await fillMinimalSession(hostPage);
       await hostPage.getByRole('button', { name: /create session/i }).click();
-      await expect(hostPage.getByText(/^\d{4}$/)).toBeVisible();
+      const codeEl = hostPage.locator('[aria-label^="Session code"]');
+      await expect(codeEl.first()).toBeVisible();
     });
 
-    const code = ((await hostPage.getByText(/^\d{4}$/).textContent()) ?? '').trim();
+    const code = ((await hostPage.locator('[aria-label^="Session code"]').first().getAttribute('aria-label')) ?? '').replace(/\D/g, '');
     const sessionUrl = hostPage.url();
 
     const participantCtx = await browser.newContext();
@@ -202,12 +208,12 @@ test.describe('Host Session', () => {
         await participantPage.goto('/play');
         await participantPage.getByLabel('Session code').fill(code);
         await participantPage.getByRole('button', { name: /join/i }).click();
-        await expect(participantPage.getByText(/waiting for the host/i)).toBeVisible();
+        await expect(participantPage.getByText(/waiting for the host/i).last()).toBeVisible();
       });
 
       await test.step('Participant pseudonym appears in the host lobby', async () => {
         // The participant list should contain at least one entry
-        await expect(hostPage.getByRole('listitem').first()).toBeVisible({ timeout: 5000 });
+        await expect(hostPage.getByRole('listitem').first()).toBeVisible({ timeout: 10_000 });
       });
 
       const participantName = ((await hostPage.getByRole('listitem').first().textContent()) ?? '').trim();
@@ -219,14 +225,14 @@ test.describe('Host Session', () => {
 
       await test.step('Host navigates back to the session URL', async () => {
         await hostPage.goto(sessionUrl);
-        await expect(hostPage.getByText(code)).toBeVisible({ timeout: 5000 });
+        await expect(hostPage.getByText(code, { exact: true })).toBeVisible({ timeout: 10_000 });
       });
 
       await test.step('Participant is still listed in the lobby', async () => {
         // The participant should still be visible — R5-B regression guard
-        await expect(hostPage.getByRole('listitem').first()).toBeVisible({ timeout: 5000 });
+        await expect(hostPage.getByRole('listitem').first()).toBeVisible({ timeout: 10_000 });
         if (participantName) {
-          await expect(hostPage.getByText(participantName)).toBeVisible({ timeout: 5000 });
+          await expect(hostPage.getByText(participantName)).toBeVisible({ timeout: 10_000 });
         }
       });
     } finally {

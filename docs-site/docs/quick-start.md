@@ -26,6 +26,18 @@ npx partykit dev
 `npx partykit dev` runs a **local in-memory simulator** — it emulates Cloudflare Durable Objects entirely on your machine with no internet connection required. Note: Cloudflare KV (`HOSTS_KV`) is not available locally; session history comes from browser localStorage only. See [Configuration & Environments](./configuration.md) for the full comparison.
 :::
 
+:::warning After any backend change — redeploy!
+Whenever you modify files under `back/` (`game.ts`, `utils.ts`, `constants.ts`, etc.), you must redeploy to Cloudflare for the changes to take effect in production:
+
+```bash
+npx partykit deploy   # from repo root
+# or
+cd back && npm run deploy
+```
+
+The `proxy-worker` does **not** need redeployment for backend-only changes.
+:::
+
 ```bash
 # Terminal 2 — Astro frontend (port 4321)
 cd front

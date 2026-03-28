@@ -2,13 +2,12 @@
 import { ParticipantApp } from '../components/participant/ParticipantApp';
 import { NavBar } from '../components/common/NavBar';
 import Footer from '../components/common/Footer.astro';
+import PageHead from '../components/common/PageHead.astro';
 ---
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Play — Sommelier Arena</title>
+    <PageHead title="Play — Sommelier Arena" description="Join a live blind wine tasting quiz session." />
   </head>
   <body class="bg-slate-50 min-h-screen flex flex-col">
     <NavBar client:only="react" />

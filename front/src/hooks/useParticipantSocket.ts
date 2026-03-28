@@ -1,7 +1,8 @@
 import { useEffect, useCallback, useRef } from 'react';
 import type PartySocket from 'partysocket';
 import { createSocket } from '../lib/socket';
-import { useParticipantStore, loadRejoinData } from '../stores/participantStore';
+import { useParticipantStore } from '../stores/participantStore';
+import { loadRejoin } from '../lib/rejoin';
 import type {
   QuestionPayload,
   ParticipantRevealPayload,
@@ -13,6 +14,7 @@ import type {
 /** Participant socket hook — connects to a specific session room (4-digit code). */
 export function useParticipantSocket(code: string) {
   const socketRef = useRef<PartySocket | null>(null);
+  const pendingMessagesRef = useRef<object[]>([]);
 
   useEffect(() => {
     if (!code) return;
@@ -20,13 +22,25 @@ export function useParticipantSocket(code: string) {
     socketRef.current = socket;
 
     socket.addEventListener('open', () => {
-      // Auto-rejoin if rejoinToken is stored for this room
-      const rejoinData = loadRejoinData();
+      // Auto-rejoin if a credential is stored for this room
+      const rejoinData = loadRejoin();
       if (rejoinData && rejoinData.code === code) {
         socket.send(JSON.stringify({
           type: 'rejoin_session',
-          rejoinToken: rejoinData.rejoinToken,
+          pseudonym: rejoinData.id,
         }));
+      }
+
+      // Flush any queued messages that were sent before the socket opened
+      if (pendingMessagesRef.current.length) {
+        for (const m of pendingMessagesRef.current) {
+          try {
+            socket.send(JSON.stringify(m));
+          } catch {
+            // If send fails, keep it queued (will try again on next open)
+          }
+        }
+        pendingMessagesRef.current.length = 0;
       }
     });
 
@@ -42,13 +56,18 @@ export function useParticipantSocket(code: string) {
 
       switch (msg.type) {
         case 'participant:joined': {
-          const { pseudonym, rejoinToken } = msg as unknown as {
-            pseudonym: string;
-            rejoinToken: string;
-          };
+          const { pseudonym } = msg as unknown as { pseudonym: string };
           store.setPseudonym(pseudonym);
-          store.setRejoinToken(rejoinToken, code, pseudonym);
+          // Clear any previous join error on successful join
+          store.setJoinError(null);
+          store.setRejoin(pseudonym, code);
           store.setPhase('lobby');
+          break;
+        }
+        case 'error': {
+          // Generic server-side errors (e.g. GAME_STARTED, SESSION_FULL)
+          const err = (msg as any).message as string | undefined;
+          store.setJoinError(err ?? 'An error occurred');
           break;
         }
         case 'participant:state_snapshot': {
@@ -139,7 +158,18 @@ export function useParticipantSocket(code: string) {
   }, [code]);
 
   const send = useCallback((payload: object) => {
-    socketRef.current?.send(JSON.stringify(payload));
+    const socket = socketRef.current;
+    if (!socket) {
+      // Socket not created yet — queue the message
+      pendingMessagesRef.current.push(payload);
+      return;
+    }
+    try {
+      socket.send(JSON.stringify(payload));
+    } catch {
+      // If send throws (not open), queue for flush on open
+      pendingMessagesRef.current.push(payload);
+    }
   }, []);
 
   const joinSession = useCallback(() => {
@@ -155,4 +185,3 @@ export function useParticipantSocket(code: string) {
 
   return { joinSession, submitAnswer };
 }
-

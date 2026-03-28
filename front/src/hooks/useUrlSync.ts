@@ -41,12 +41,13 @@ export function useHostUrlSync(
 
 /**
  * Participant URL sync:
- * - After joining (lobby and beyond): URL becomes /play?code=X
+ * - After joining (lobby and beyond): URL becomes /play?code=X&id=Y
  * - On join form or after reset: URL is reset to /play
  */
 export function useParticipantUrlSync(
   phase: ParticipantPhase,
   sessionCode: string | null,
+  rejoinId: string | null,
 ): void {
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -59,10 +60,11 @@ export function useParticipantUrlSync(
       'finalLeaderboard',
     ];
 
-    if (sessionCode && activePhases.includes(phase)) {
-      history.replaceState(null, '', `/play?code=${encodeURIComponent(sessionCode)}`);
+    if (sessionCode && rejoinId && activePhases.includes(phase)) {
+      const params = new URLSearchParams({ code: sessionCode, id: rejoinId });
+      history.replaceState(null, '', `/play?${params.toString()}`);
     } else {
       history.replaceState(null, '', '/play');
     }
-  }, [phase, sessionCode]);
+  }, [phase, sessionCode, rejoinId]);
 }

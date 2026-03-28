@@ -46,4 +46,4 @@ Key links:
 | Custom domain | Yes — `sommelier-arena.ducatillon.net` on Cloudflare |
 | Integration points | WebSocket event API (see [Event Reference](./event-reference.md)) |
 
-For technical details see [Tech Stack](./tech-stack.md) and [Deployment Guide](./deployment-and-deploy.md).
+For technical details see [Tech Stack](./tech-stack.md) and [Deployment Guide](./deployment-guide.md).

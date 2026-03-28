@@ -16,7 +16,7 @@ The `GameSession` Durable Object persists all state to built-in SQLite-backed st
 |-----|------|-------|
 | `'state'` | `SavedState` | Full session snapshot (phase, wines, questions, currentIndices, timerMs) |
 | `'hostId'` | `string` | `TANNIC-FALCON` — used to authenticate `rejoin_host` |
-| `'participant:{rejoinToken}'` | object | `{ id, pseudonym, score, connected, answeredQuestions: string[] }` |
+| `'participant:{pseudonym}'` | object | `{ id, pseudonym, score, connected, answeredQuestions: string[] }` — keyed by the participant's ADJECTIVE-NOUN pseudonym |
 | `'response:{participantId}:{questionId}'` | object | `{ optionId, correct, points }` |
 
 ### What `SavedState` contains
@@ -74,7 +74,7 @@ The `finalRankings` field is written when the session ends (`host:end`).
 |-------|-----------|-----|
 | DO eviction (idle) | ✅ restored on next connection | ✅ unchanged |
 | Page refresh (host) | ✅ `rejoin_host` restores full state | ✅ unchanged |
-| Page refresh (participant) | ✅ `rejoin_session` + `rejoinToken` | — |
+| Page refresh (participant) | ✅ `rejoin_session { pseudonym }` restores state | — |
 | Server restart (local dev) | ❌ in-memory lost; storage persists | ✅ unchanged |
 | `partykit dev` restart | ❌ local storage cleared | — |
 
@@ -85,7 +85,7 @@ The `finalRankings` field is written when the session ends (`host:end`).
 | Key | Value | Cleared when |
 |-----|-------|-------------|
 | `sommelierArena:hostId` | `TANNIC-FALCON` | Never (user clears browser data) |
-| `sommelierArena:rejoin` | `{ rejoinToken, code, pseudonym }` | `session:ended` received |
+| `sommelierArena:rejoin` | `{ id, code }` — participant's pseudonym and session code | `session:ended` received |
 
 ## In-Memory Data Model
 
@@ -94,7 +94,7 @@ The following shows the runtime data shapes held in memory by the `GameSession` 
 ```
 Game Session (one per room.id / session code):
 ├── wines: Wine[]          — list of wines with questions and options
-├── participants: Map      — keyed by rejoinToken
+├── participants: Map      — keyed by pseudonym (ADJECTIVE-NOUN)
 │   ├── id, socketId, pseudonym
 │   ├── score, connected
 │   └── answeredQuestions: Set

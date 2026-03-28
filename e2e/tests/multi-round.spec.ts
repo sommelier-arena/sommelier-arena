@@ -14,7 +14,7 @@ async function fillWine(
   wineNum: number,
   wineName: string,
 ) {
-  await page.getByLabel(`Wine name`).nth(wineNum - 1).fill(wineName);
+  await page.getByLabel(`Wine name`, { exact: true }).nth(wineNum - 1).fill(wineName);
 
   const prefix = `Wine ${wineNum}`;
   await page.getByLabel(`${prefix} Color — correct answer`).fill('Red');
@@ -50,7 +50,7 @@ async function hostCreateTwoWineSession(browser: Browser) {
   await hostPage.goto('/host');
 
   const newSessionBtn = hostPage.getByRole('button', { name: /new session/i });
-  if (await newSessionBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
   await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
@@ -64,23 +64,25 @@ async function hostCreateTwoWineSession(browser: Browser) {
 
   await hostPage.getByRole('button', { name: /create session/i }).click();
 
-  const codeEl = hostPage.getByText(/^\d{4}$/);
-  await expect(codeEl).toBeVisible();
-  const code = ((await codeEl.textContent()) ?? '').trim();
+  const codeEl = hostPage.locator('[aria-label^="Session code"]');
+  await expect(codeEl.first()).toBeVisible();
+  const code = ((await codeEl.first().getAttribute('aria-label')) ?? '').replace(/\D/g, '');
 
   return { hostPage, hostCtx, code };
 }
 
 /** Skip all questions in the current round without answering. */
 async function skipRound(hostPage: Page) {
-  // Reveal each question and click Next until round leaderboard appears
+  // Reveal each question and click Next until round leaderboard appears.
+  // Use waitFor instead of isVisible — isVisible doesn't retry, so it would
+  // return false immediately if the question hasn't rendered yet after a state change.
   while (true) {
     const revealBtn = hostPage.getByRole('button', { name: /reveal answer/i });
-    const isQuestion = await revealBtn.isVisible({ timeout: 2000 }).catch(() => false);
+    const isQuestion = await revealBtn.waitFor({ state: 'visible', timeout: 10_000 }).then(() => true).catch(() => false);
     if (!isQuestion) break;
     await revealBtn.click();
     const nextBtn = hostPage.getByRole('button', { name: /next/i });
-    await expect(nextBtn).toBeVisible();
+    await expect(nextBtn).toBeVisible({ timeout: 10_000 });
     await nextBtn.click();
   }
 }
@@ -95,9 +97,21 @@ test.describe('Multi-Round Game Flow', () => {
 
     expect(code).toMatch(/^\d{4}$/);
 
+    // A participant must join before "Start Game" becomes enabled
+    const participantCtx = await browser.newContext();
+    const participantPage = await participantCtx.newPage();
+    await test.step('Participant joins the session', async () => {
+      await participantPage.goto('/play');
+      await participantPage.getByRole('textbox').fill(code);
+      await participantPage.getByRole('button', { name: /join/i }).click();
+      await expect(participantPage.getByText(/waiting for host/i).last()).toBeVisible({ timeout: 10_000 });
+      // Wait for host to see the participant (Start Game becomes enabled)
+      await expect(hostPage.getByRole('button', { name: /start game/i })).toBeEnabled({ timeout: 10_000 });
+    });
+
     await test.step('Host starts game', async () => {
       await hostPage.getByRole('button', { name: /start game/i }).click();
-      await expect(hostPage.getByRole('button', { name: /reveal answer/i })).toBeVisible();
+      await expect(hostPage.getByRole('button', { name: /reveal answer/i })).toBeVisible({ timeout: 8000 });
     });
 
     await test.step('Host completes round 1 questions', async () => {
@@ -111,7 +125,7 @@ test.describe('Multi-Round Game Flow', () => {
 
     await test.step('Host clicks "Next Round" — round 2 starts', async () => {
       await hostPage.getByRole('button', { name: /next round/i }).click();
-      await expect(hostPage.getByRole('button', { name: /reveal answer/i })).toBeVisible();
+      await expect(hostPage.getByRole('button', { name: /reveal answer/i })).toBeVisible({ timeout: 8000 });
     });
 
     await test.step('Host completes round 2 questions', async () => {
@@ -129,5 +143,6 @@ test.describe('Multi-Round Game Flow', () => {
     });
 
     await hostCtx.close();
+    await participantCtx.close();
   });
 });

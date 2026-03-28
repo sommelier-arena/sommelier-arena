@@ -6,12 +6,12 @@ async function setupGameAtQuestion(browser: Browser) {
   await hostPage.goto('/host');
   // Dashboard phase — click New Session to get to form
   const newSessionBtn = hostPage.getByRole('button', { name: /new session/i });
-  if (await newSessionBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
   await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
 
-  await hostPage.getByLabel('Wine name').fill('Pause Test Wine');
+  await hostPage.getByLabel('Wine name', { exact: true }).fill('Pause Test Wine');
   await hostPage.getByLabel('Wine 1 Color — correct answer').fill('Red');
   await hostPage.getByLabel('Wine 1 Color — distractor 1').fill('White');
   await hostPage.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
@@ -31,16 +31,16 @@ async function setupGameAtQuestion(browser: Browser) {
 
   await hostPage.getByRole('button', { name: /create session/i }).click();
 
-  const codeEl = hostPage.getByText(/^\d{4}$/);
-  await expect(codeEl).toBeVisible();
-  const code = ((await codeEl.textContent()) ?? '').trim();
+  const codeEl = hostPage.locator('[aria-label^="Session code"]');
+  await expect(codeEl.first()).toBeVisible();
+  const code = ((await codeEl.first().getAttribute('aria-label')) ?? '').replace(/\D/g, '');
 
   const participantCtx = await browser.newContext();
   const participantPage = await participantCtx.newPage();
   await participantPage.goto('/play');
   await participantPage.getByLabel('Session code').fill(code);
   await participantPage.getByRole('button', { name: /join/i }).click();
-  await expect(participantPage.getByText(/waiting for the host/i)).toBeVisible();
+  await expect(participantPage.getByText(/waiting for the host/i).last()).toBeVisible();
 
   await hostPage.getByRole('button', { name: /start game/i }).click();
   await expect(hostPage.getByRole('button', { name: /pause/i })).toBeVisible();

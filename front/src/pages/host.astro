@@ -2,13 +2,12 @@
 import { HostApp } from '../components/host/HostApp';
 import { NavBar } from '../components/common/NavBar';
 import Footer from '../components/common/Footer.astro';
+import PageHead from '../components/common/PageHead.astro';
 ---
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Host — Sommelier Arena</title>
+    <PageHead title="Host — Sommelier Arena" description="Create and manage a live wine tasting quiz session." />
   </head>
   <body class="bg-slate-50 min-h-screen flex flex-col">
     <NavBar client:only="react" />

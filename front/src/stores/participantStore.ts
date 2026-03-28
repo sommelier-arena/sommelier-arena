@@ -4,6 +4,8 @@ import type {
   ParticipantRevealPayload,
   RankingEntry,
 } from '../types/events';
+import { saveRejoin, clearRejoin as clearRejoinStorage } from '../lib/rejoin';
+export type { RejoinCredential as RejoinData } from '../lib/rejoin';
 
 export type ParticipantPhase =
   | 'join'
@@ -14,28 +16,12 @@ export type ParticipantPhase =
   | 'finalLeaderboard'
   | 'ended';
 
-const REJOIN_KEY = 'sommelierArena:rejoin';
-
-export interface RejoinData {
-  rejoinToken: string;
-  code: string;
-  pseudonym: string;
-}
-
-function loadRejoinData(): RejoinData | null {
-  if (typeof window === 'undefined') return null;
-  try {
-    const raw = window.localStorage.getItem(REJOIN_KEY);
-    return raw ? (JSON.parse(raw) as RejoinData) : null;
-  } catch {
-    return null;
-  }
-}
-
 interface ParticipantState {
   phase: ParticipantPhase;
   pseudonym: string | null;
-  rejoinToken: string | null;
+  joinError: string | null;
+  /** The participant's ADJECTIVE-NOUN identity, used for rejoin. */
+  rejoinId: string | null;
   sessionCode: string | null;
   currentQuestion: QuestionPayload | null;
   selectedOptionId: string | null;
@@ -45,13 +31,15 @@ interface ParticipantState {
 
   setPhase: (phase: ParticipantPhase) => void;
   setPseudonym: (pseudonym: string) => void;
-  setRejoinToken: (token: string, code: string, pseudonym: string) => void;
+  /** Persist the participant's identity so they can rejoin after a disconnect. */
+  setRejoin: (pseudonym: string, code: string) => void;
+  setJoinError: (err: string | null) => void;
   setCurrentQuestion: (q: QuestionPayload) => void;
   setSelectedOption: (id: string) => void;
   setRevealData: (data: ParticipantRevealPayload) => void;
   setRankings: (rankings: RankingEntry[]) => void;
   setTimerMs: (ms: number) => void;
-  /** Clears the rejoin token, session code, and pseudonym from store and localStorage. */
+  /** Clears the rejoin credential from store and localStorage. */
   clearRejoin: () => void;
   /** Resets all in-game state so the participant can start a fresh session. */
   resetGame: () => void;
@@ -60,7 +48,8 @@ interface ParticipantState {
 export const useParticipantStore = create<ParticipantState>((set) => ({
   phase: 'join',
   pseudonym: null,
-  rejoinToken: null,
+  rejoinId: null,
+  joinError: null,
   sessionCode: null,
   currentQuestion: null,
   selectedOptionId: null,
@@ -70,15 +59,11 @@ export const useParticipantStore = create<ParticipantState>((set) => ({
 
   setPhase: (phase) => set({ phase }),
   setPseudonym: (pseudonym) => set({ pseudonym }),
-  setRejoinToken: (rejoinToken, code, pseudonym) => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(
-        REJOIN_KEY,
-        JSON.stringify({ rejoinToken, code, pseudonym } satisfies RejoinData),
-      );
-    }
-    set({ rejoinToken, sessionCode: code });
+  setRejoin: (pseudonym, code) => {
+    saveRejoin(pseudonym, code);
+    set({ rejoinId: pseudonym, sessionCode: code });
   },
+  setJoinError: (err: string | null) => set({ joinError: err }),
   setCurrentQuestion: (currentQuestion) =>
     set({ currentQuestion, selectedOptionId: null, revealData: null }),
   setSelectedOption: (selectedOptionId) => set({ selectedOptionId }),
@@ -86,20 +71,17 @@ export const useParticipantStore = create<ParticipantState>((set) => ({
   setRankings: (rankings) => set({ rankings }),
   setTimerMs: (timerMs) => set({ timerMs }),
   clearRejoin: () => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(REJOIN_KEY);
-    }
-    set({ rejoinToken: null, sessionCode: null, pseudonym: null });
+    clearRejoinStorage();
+    set({ rejoinId: null, sessionCode: null, pseudonym: null, joinError: null });
   },
   resetGame: () => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(REJOIN_KEY);
-    }
+    clearRejoinStorage();
     set({
       phase: 'join',
       pseudonym: null,
-      rejoinToken: null,
+      rejoinId: null,
       sessionCode: null,
+      joinError: null,
       currentQuestion: null,
       selectedOptionId: null,
       revealData: null,
@@ -108,6 +90,3 @@ export const useParticipantStore = create<ParticipantState>((set) => ({
     });
   },
 }));
-
-export { loadRejoinData };
-

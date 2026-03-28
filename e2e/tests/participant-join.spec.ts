@@ -6,12 +6,12 @@ async function createSessionAndGetCode(hostContext: BrowserContext): Promise<str
   await hostPage.goto('/host');
   // Dashboard phase — click New Session to get to form
   const newSessionBtn = hostPage.getByRole('button', { name: /new session/i });
-  if (await newSessionBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
   await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
 
-  await hostPage.getByLabel('Wine name').fill('Test Wine');
+  await hostPage.getByLabel('Wine name', { exact: true }).fill('Test Wine');
   await hostPage.getByLabel('Wine 1 Color — correct answer').fill('Red');
   await hostPage.getByLabel('Wine 1 Color — distractor 1').fill('White');
   await hostPage.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
@@ -31,10 +31,10 @@ async function createSessionAndGetCode(hostContext: BrowserContext): Promise<str
 
   await hostPage.getByRole('button', { name: /create session/i }).click();
 
-  const codeEl = hostPage.getByText(/^\d{4}$/);
-  await expect(codeEl).toBeVisible();
-  const code = (await codeEl.textContent()) ?? '';
-  return code.trim();
+  const codeEl = hostPage.locator('[aria-label^="Session code"]');
+  await expect(codeEl.first()).toBeVisible();
+  const aria = (await codeEl.first().getAttribute('aria-label')) ?? '';
+  return aria.replace(/\D/g, '');
 }
 
 test.describe('Participant Join', () => {
@@ -92,8 +92,37 @@ test.describe('Participant Join', () => {
         )).toBeVisible();
       });
 
-      await test.step('URL updates to include ?code= after joining @smoke', async () => {
+      await test.step('URL updates to include ?code= and ?id= after joining @smoke', async () => {
         await expect(participantPage).toHaveURL(/[?&]code=\d{4}/);
+        await expect(participantPage).toHaveURL(/[?&]id=[A-Z]+-[A-Z]+/);
+      });
+    } finally {
+      await hostContext.close();
+      await participantContext.close();
+    }
+  });
+
+  test('Join - direct URL: /play?code=XXXX auto-joins without typing code @smoke', async ({ browser }) => {
+    const hostContext = await browser.newContext();
+    const participantContext = await browser.newContext();
+
+    try {
+      const code = await test.step('Host creates a session', async () => {
+        return createSessionAndGetCode(hostContext);
+      });
+
+      const participantPage = await participantContext.newPage();
+
+      await test.step('Participant opens share link directly', async () => {
+        await participantPage.goto(`/play?code=${code}`);
+      });
+
+      await test.step('Participant lands in lobby without typing code', async () => {
+        await expect(participantPage.getByText(/waiting/i).last()).toBeVisible({ timeout: 10_000 });
+      });
+
+      await test.step('URL includes ?id= (pseudonym assigned)', async () => {
+        await expect(participantPage).toHaveURL(/[?&]id=[A-Z]+-[A-Z]+/);
       });
     } finally {
       await hostContext.close();

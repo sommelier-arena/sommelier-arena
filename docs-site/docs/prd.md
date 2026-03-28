@@ -9,8 +9,7 @@ sidebar_label: PRD
 Single source of truth for the Sommelier Arena MVP.
 
 - [Introduction](/) — concept, core definitions, key rules
-- [Features](features.md) — full feature specification with host controls table and question flow
-- [Features & User Stories](features.md) — host and participant stories, edge cases
+- [Features](features.md) — feature specification, host controls, user stories, and edge cases
 - [Tech Stack & Principles](tech-stack.md) — stack choices, persistence policy, design principles
 - [Architecture](architecture.md) — repo structure, runtime communication
 - [Quick Start](quick-start.md) — local dev setup

@@ -98,6 +98,16 @@ export function useHostSocket(code: string) {
         case 'lobby:updated': {
           const { participants } = msg as unknown as LobbyUpdatedPayload;
           store.setParticipants(participants);
+          // Keep sessions list participantCount in sync so the dashboard always shows
+          // the correct count regardless of which event it reads from.
+          if (store.code) {
+            mergeSession(store.hostId, store.code, { participantCount: participants.length });
+            store.setSessions(
+              store.sessions.map((s) =>
+                s.code === store.code ? { ...s, participantCount: participants.length } : s,
+              ),
+            );
+          }
           break;
         }
         case 'game:question': {

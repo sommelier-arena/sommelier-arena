@@ -49,11 +49,13 @@ Sent by host on socket open to re-authenticate (after page refresh or reconnect)
 
 ### `rejoin_session`
 
-Sent by participant on socket open when a `rejoinToken` is in localStorage.
+Sent by participant on socket open when a rejoin credential (`id`, `code`) is in localStorage.
 
 ```ts
-{ type: 'rejoin_session'; rejoinToken: string }
+{ type: 'rejoin_session'; pseudonym: string }
 ```
+
+> **Cross-device rejoin**: open `https://sommelier-arena.ducatillon.net/play?code=X&id=YOUR-PSEUDONYM` on the new device. The `?id=` param restores the credential before the socket opens.
 
 ### `host:start` / `host:pause` / `host:resume` / `host:reveal` / `host:next` / `host:end`
 
@@ -93,7 +95,7 @@ Sent to host after successful `create_session`.
 Sent to the joining participant.
 
 ```ts
-{ type: 'participant:joined'; pseudonym: string; rejoinToken: string }
+{ type: 'participant:joined'; pseudonym: string }
 ```
 
 ### `lobby:updated`
@@ -240,8 +242,17 @@ Sent to each participant:
 ### `error`
 
 ```ts
-{ type: 'error'; message: string }
+{ type: 'error'; message: string; code: string }
 ```
+
+| `code` | When |
+|--------|------|
+| `SESSION_NOT_FOUND` | `join_session` sent to a room with no wines (session doesn't exist) |
+| `GAME_STARTED` | `join_session` sent after the game has already begun |
+| `SESSION_FULL` | `join_session` when 10 participants already connected |
+| `INVALID_PSEUDONYM` | `rejoin_session` with an unknown pseudonym |
+| `INVALID_HOST_ID` | `rejoin_host` with a mismatched host ID |
+| `SESSION_EXISTS` | `create_session` when a session already exists in this room |
 
 ---
 
@@ -260,7 +271,7 @@ Sent by the backend to **every client** immediately after they connect or reconn
 }
 ```
 
-> Participants use this event to detect when a session has ended while they were disconnected. If `phase === "ended"`, the client transitions to the ended state and clears the rejoin token.
+> Participants use this event to detect when a session has ended while they were disconnected. If `phase === "ended"`, the client transitions to the ended state and clears the rejoin credential from localStorage.
 
 ---
 

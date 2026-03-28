@@ -51,21 +51,21 @@ describe('useParticipantSocket', () => {
       revealData: null,
       rankings: [],
       timerMs: 0,
-      rejoinToken: null,
+      rejoinId: null,
       sessionCode: null,
     });
   });
 
-  it('emits rejoin_session on open when rejoinToken in localStorage', () => {
-    localStorage.setItem(REJOIN_KEY, JSON.stringify({ rejoinToken: 'tok123', code: '1234', pseudonym: 'Alice' }));
+  it('emits rejoin_session on open when credential in localStorage', () => {
+    localStorage.setItem(REJOIN_KEY, JSON.stringify({ id: 'TANNIC-BARREL', code: '1234' }));
     renderHook(() => useParticipantSocket('1234'));
     openListeners.forEach((cb) => cb());
     expect(mockSend).toHaveBeenCalledWith(
-      JSON.stringify({ type: 'rejoin_session', rejoinToken: 'tok123' }),
+      JSON.stringify({ type: 'rejoin_session', pseudonym: 'TANNIC-BARREL' }),
     );
   });
 
-  it('does not emit rejoin_session when no token in localStorage', () => {
+  it('does not emit rejoin_session when no credential in localStorage', () => {
     renderHook(() => useParticipantSocket('1234'));
     openListeners.forEach((cb) => cb());
     expect(mockSend).not.toHaveBeenCalled();
@@ -73,9 +73,9 @@ describe('useParticipantSocket', () => {
 
   it('sets phase to lobby on participant:joined', () => {
     renderHook(() => useParticipantSocket('1234'));
-    emitMessage('participant:joined', { pseudonym: 'Alice', rejoinToken: 'tok123' });
+    emitMessage('participant:joined', { pseudonym: 'TANNIC-BARREL' });
     expect(useParticipantStore.getState().phase).toBe('lobby');
-    expect(useParticipantStore.getState().pseudonym).toBe('Alice');
+    expect(useParticipantStore.getState().pseudonym).toBe('TANNIC-BARREL');
   });
 
   it('sets phase to question on game:question', () => {
@@ -101,7 +101,7 @@ describe('useParticipantSocket', () => {
   });
 
   it('clears localStorage on session:ended', () => {
-    localStorage.setItem(REJOIN_KEY, JSON.stringify({ rejoinToken: 'tok', code: '1234', pseudonym: 'Alice' }));
+    localStorage.setItem(REJOIN_KEY, JSON.stringify({ id: 'TANNIC-BARREL', code: '1234' }));
     renderHook(() => useParticipantSocket('1234'));
     emitMessage('session:ended', {});
     expect(localStorage.getItem(REJOIN_KEY)).toBeNull();
