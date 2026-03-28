@@ -135,7 +135,7 @@ The Playwright E2E tests run against the Docker stack (Mode B). Without nginx:
 | Key | Contents | Used by |
 |---|---|---|
 | `sommelier-arena-host-{hostId}` | `SessionListEntry[]` — host's session history | Host Dashboard |
-| `sommelier-arena-rejoin` | `{ rejoinToken, code, pseudonym }` — participant credentials | Participant rejoin |
+| `sommelier-arena-rejoin` | `{ id, code }` — participant rejoin credential (pseudonym + session code) | Participant rejoin |
 
 Works identically in all environments. Managed by `front/src/lib/sessionStorage.ts`.
 
@@ -147,7 +147,7 @@ Works identically in all environments. Managed by `front/src/lib/sessionStorage.
 |---|---|
 | `'state'` | Full `SavedState` snapshot (restored after DO eviction) |
 | `'hostId'` | Host re-authentication token |
-| `'participant:{rejoinToken}'` | Participant rejoin credentials |
+| `'participant:{pseudonym}'` | Participant state (score, answers) — keyed by their ADJECTIVE-NOUN pseudonym |
 | `'response:{participantId}:{questionId}'` | Answer record for accurate scoring |
 
 - **Local / Docker**: In-memory. Restarting `partykit dev` or `docker-compose down` clears all sessions.

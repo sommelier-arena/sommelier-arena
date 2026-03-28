@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { useParticipantStore, loadRejoinData } from '../../stores/participantStore';
+import { useParticipantStore } from '../../stores/participantStore';
+import { loadRejoin } from '../../lib/rejoin';
 
 const REJOIN_KEY = 'sommelierArena:rejoin';
 
@@ -13,7 +14,7 @@ describe('participantStore', () => {
       revealData: null,
       rankings: [],
       timerMs: 0,
-      rejoinToken: null,
+      rejoinId: null,
       sessionCode: null,
     });
     localStorage.clear();
@@ -24,8 +25,8 @@ describe('participantStore', () => {
       expect(useParticipantStore.getState().phase).toBe('join');
     });
 
-    it('rejoinToken is null initially', () => {
-      expect(useParticipantStore.getState().rejoinToken).toBeNull();
+    it('rejoinId is null initially', () => {
+      expect(useParticipantStore.getState().rejoinId).toBeNull();
     });
   });
 
@@ -43,38 +44,38 @@ describe('participantStore', () => {
     });
   });
 
-  describe('rejoin token', () => {
-    it('setRejoinToken saves token to state', () => {
-      useParticipantStore.getState().setRejoinToken('tok123', '4567', 'Alice');
-      expect(useParticipantStore.getState().rejoinToken).toBe('tok123');
+  describe('rejoin credential', () => {
+    it('setRejoin saves pseudonym to state as rejoinId', () => {
+      useParticipantStore.getState().setRejoin('TANNIC-BARREL', '4567');
+      expect(useParticipantStore.getState().rejoinId).toBe('TANNIC-BARREL');
       expect(useParticipantStore.getState().sessionCode).toBe('4567');
     });
 
-    it('setRejoinToken persists to localStorage', () => {
-      useParticipantStore.getState().setRejoinToken('tok123', '4567', 'Alice');
+    it('setRejoin persists to localStorage', () => {
+      useParticipantStore.getState().setRejoin('TANNIC-BARREL', '4567');
       const stored = JSON.parse(localStorage.getItem(REJOIN_KEY)!);
-      expect(stored).toEqual({ rejoinToken: 'tok123', code: '4567', pseudonym: 'Alice' });
+      expect(stored).toEqual({ id: 'TANNIC-BARREL', code: '4567' });
     });
 
     it('clearRejoin removes localStorage entry', () => {
-      useParticipantStore.getState().setRejoinToken('tok123', '4567', 'Alice');
+      useParticipantStore.getState().setRejoin('TANNIC-BARREL', '4567');
       useParticipantStore.getState().clearRejoin();
       expect(localStorage.getItem(REJOIN_KEY)).toBeNull();
-      expect(useParticipantStore.getState().rejoinToken).toBeNull();
+      expect(useParticipantStore.getState().rejoinId).toBeNull();
       expect(useParticipantStore.getState().sessionCode).toBeNull();
     });
 
     it('clearRejoin also clears pseudonym from store', () => {
-      useParticipantStore.getState().setPseudonym('Alice');
-      useParticipantStore.getState().setRejoinToken('tok123', '4567', 'Alice');
+      useParticipantStore.getState().setPseudonym('TANNIC-BARREL');
+      useParticipantStore.getState().setRejoin('TANNIC-BARREL', '4567');
       useParticipantStore.getState().clearRejoin();
       expect(useParticipantStore.getState().pseudonym).toBeNull();
     });
 
-    it('clearRejoin removes token and code from state', () => {
-      useParticipantStore.getState().setRejoinToken('tok123', '4567', 'Alice');
+    it('clearRejoin removes rejoinId and code from state', () => {
+      useParticipantStore.getState().setRejoin('TANNIC-BARREL', '4567');
       useParticipantStore.getState().clearRejoin();
-      expect(useParticipantStore.getState().rejoinToken).toBeNull();
+      expect(useParticipantStore.getState().rejoinId).toBeNull();
       expect(useParticipantStore.getState().sessionCode).toBeNull();
     });
   });
@@ -86,42 +87,42 @@ describe('participantStore', () => {
       expect(useParticipantStore.getState().phase).toBe('join');
     });
 
-    it('clears pseudonym, rejoinToken, sessionCode', () => {
-      useParticipantStore.getState().setPseudonym('Alice');
-      useParticipantStore.getState().setRejoinToken('tok', '1234', 'Alice');
+    it('clears pseudonym, rejoinId, sessionCode', () => {
+      useParticipantStore.getState().setPseudonym('SILKY-MERLOT');
+      useParticipantStore.getState().setRejoin('SILKY-MERLOT', '1234');
       useParticipantStore.getState().resetGame();
       expect(useParticipantStore.getState().pseudonym).toBeNull();
-      expect(useParticipantStore.getState().rejoinToken).toBeNull();
+      expect(useParticipantStore.getState().rejoinId).toBeNull();
       expect(useParticipantStore.getState().sessionCode).toBeNull();
     });
 
     it('clears rankings and revealData', () => {
-      useParticipantStore.getState().setRankings([{ pseudonym: 'Alice', score: 100 }]);
+      useParticipantStore.getState().setRankings([{ pseudonym: 'SILKY-MERLOT', score: 100 }]);
       useParticipantStore.getState().resetGame();
       expect(useParticipantStore.getState().rankings).toEqual([]);
     });
 
     it('removes localStorage rejoin entry', () => {
-      localStorage.setItem(REJOIN_KEY, JSON.stringify({ rejoinToken: 'tok', code: '1234', pseudonym: 'Alice' }));
+      localStorage.setItem(REJOIN_KEY, JSON.stringify({ id: 'SILKY-MERLOT', code: '1234' }));
       useParticipantStore.getState().resetGame();
       expect(localStorage.getItem(REJOIN_KEY)).toBeNull();
     });
   });
 
-  describe('loadRejoinData', () => {
+  describe('loadRejoin', () => {
     it('returns null when no data in localStorage', () => {
-      expect(loadRejoinData()).toBeNull();
+      expect(loadRejoin()).toBeNull();
     });
 
     it('returns stored data when present', () => {
-      const data = { rejoinToken: 'tok', code: '4567', pseudonym: 'Alice' };
+      const data = { id: 'TANNIC-BARREL', code: '4567' };
       localStorage.setItem(REJOIN_KEY, JSON.stringify(data));
-      expect(loadRejoinData()).toEqual(data);
+      expect(loadRejoin()).toEqual(data);
     });
 
     it('returns null on malformed JSON', () => {
       localStorage.setItem(REJOIN_KEY, 'not-json');
-      expect(loadRejoinData()).toBeNull();
+      expect(loadRejoin()).toBeNull();
     });
   });
 

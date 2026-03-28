@@ -24,7 +24,7 @@ const sidebars: SidebarsConfig = {
         'tech-stack',
         'event-reference',
         'data-persistence',
-        'host-identity',
+        'host-and-participant-identity',
         'networking',
         'proxy-worker',
         'configuration',
@@ -34,7 +34,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Deployment',
       collapsed: false,
-      items: ['deployment-and-deploy'],
+      items: ['deployment-guide'],
     },
     {
       type: 'category',

@@ -25,7 +25,15 @@ sidebar_label: Tech Stack
 1. **No server to maintain** — Durable Objects are managed infrastructure; no VMs, no Docker in production.
 2. **€0/month** — Cloudflare free tier covers all traffic for a casual dinner-party app.
 3. **Islands architecture** — Astro renders everything at build time; React hydrated only for the game UI.
-4. **State machine discipline** — All business logic in `back/game.ts`. The frontend projects server state.
+4. **State machine discipline** — All business logic in the `back/` module (split across `game.ts`, `utils.ts`, `constants.ts`, `scoring.ts`, `timer.ts`). The frontend projects server state.
+
+:::warning Deploy after backend changes
+Any edit to files under `back/` must be deployed to Cloudflare:
+```bash
+npx partykit deploy   # from repo root
+```
+The `proxy-worker` does **not** need redeployment for backend-only changes.
+:::
 5. **Single source of truth** — Session state is DO built-in storage. No database, no ORM.
 
 ## Backend

@@ -9,18 +9,14 @@ export function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-export function generatePseudonym(usedPseudonyms: Set<string>): string {
+/** Generate a unique ADJECTIVE-NOUN identity (e.g. TANNIC-BARREL).
+ *  Used for both host IDs and participant pseudonyms. */
+export function generateIdentity(usedIds: Set<string> = new Set()): string {
   for (let i = 0; i < 400; i++) {
     const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
     const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
-    const candidate = `${adj}${noun}`;
-    if (!usedPseudonyms.has(candidate)) return candidate;
+    const candidate = `${adj.toUpperCase()}-${noun.toUpperCase()}`;
+    if (!usedIds.has(candidate)) return candidate;
   }
-  return `Wine${Math.floor(Math.random() * 9000) + 1000}`;
-}
-
-export function generateHostId(): string {
-  const adj = ADJECTIVES[Math.floor(Math.random() * ADJECTIVES.length)];
-  const noun = NOUNS[Math.floor(Math.random() * NOUNS.length)];
-  return `${adj.toUpperCase()}-${noun.toUpperCase()}`;
+  return `WINE-${Math.floor(Math.random() * 9000) + 1000}`;
 }

@@ -37,7 +37,7 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 
 - **Zero cost, zero cold starts** — Durable Objects wake on demand
 - **Session persistence** — create Monday, resume Wednesday
-- **Participant rejoin** — page refresh during a game reconnects automatically
+- **Participant rejoin** — page refresh or URL (`/play?code=X&id=PSEUDONYM`) reconnects automatically, even from a different device
 - **Host identity dashboard** — see all your past and active sessions from any device
 - **Five questions per wine** — added `wine_name` category
 - **Configurable timer** — 15–120 s slider at session creation
@@ -51,7 +51,7 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 | A **developer** setting up locally | [Quick Start](quick-start.md) |
 | A **developer** understanding the system | [Architecture](architecture.md) · [Tech Stack](tech-stack.md) |
 | A **product person / user** | [Features](features.md) · [Gameplay Workflow](gameplay-workflow.md) |
-| **Deploying** to Cloudflare | [Deployment Guide](deployment-and-deploy.md) |
+| **Deploying** to Cloudflare | [Deployment Guide](deployment-guide.md) |
 | An **automation agent / AI** | [For Automation](for-automation.md) |
 
 ## Quick reference
@@ -63,7 +63,7 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 | [Tech Stack](tech-stack.md) | Stack choices and design principles |
 | [Gameplay Workflow](gameplay-workflow.md) | Phase machine, event flow, answer/scoring rules |
 | [Event Reference](event-reference.md) | All WebSocket message types (client ↔ server) |
-| [Host Identity](host-identity.md) | `TANNIC-FALCON`-style IDs, session dashboard, rejoin |
+| [Host & Participant Identity](host-and-participant-identity.md) | `TANNIC-FALCON`-style IDs, session dashboard, rejoin for host and participant |
 | [Data Persistence](data-persistence.md) | DO storage keys, KV schema, what survives a restart |
-| [Deployment Guide](deployment-and-deploy.md) | Cloudflare Pages + PartyKit + Wrangler deploy |
+| [Deployment Guide](deployment-guide.md) | Cloudflare Pages + PartyKit + Wrangler deploy |
 | [Configuration & Environments](configuration.md) | Env vars, local vs prod, nginx explanation, testing preview |

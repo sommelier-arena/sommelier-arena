@@ -1,5 +1,5 @@
 ---
-id: deployment-and-deploy
+id: deployment-guide
 title: Deployment Guide
 sidebar_label: Deployment Guide
 audience: developer

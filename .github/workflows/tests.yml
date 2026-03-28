@@ -35,19 +35,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            front/package-lock.json
+            e2e/package-lock.json
 
-      # Build and start the full Docker stack (back + front + docs)
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      # ── Backend: PartyKit dev server ──────────────────────────────────────────
+      - name: Install root dependencies (partykit)
+        run: npm ci
 
-      - name: Build Docker stack
-        run: docker compose build
+      - name: Start PartyKit backend
+        run: npx partykit dev --port 1999 &
 
-      - name: Start Docker stack
-        run: docker compose up -d
+      # ── Frontend: build static bundle then serve with astro preview ──────────
+      - name: Install frontend dependencies
+        run: npm --prefix front ci
 
-      # Wait for front (port 4321) and back (port 1999) to become healthy
-      - name: Wait for frontend to be ready
+      - name: Build frontend
+        run: npm --prefix front build
+        env:
+          # Point the frontend bundle at the local PartyKit dev server
+          PUBLIC_PARTYKIT_HOST: localhost:1999
+
+      - name: Start frontend preview server
+        run: npm --prefix front run preview -- --port 4321 &
+
+      # ── Wait for both services to respond ────────────────────────────────────
+      - name: Wait for frontend (port 4321)
         run: |
           for i in $(seq 1 60); do
             if curl -sSf http://localhost:4321/ > /dev/null 2>&1; then
@@ -59,18 +73,27 @@ jobs:
           done
           curl -sSf http://localhost:4321/ || (echo "Frontend never became ready" && exit 1)
 
-      - name: Wait for PartyKit backend to be ready
+      - name: Wait for PartyKit backend (port 1999)
         run: |
+          # PartyKit returns HTTP 404 at root (it's a WebSocket server — 404 is normal).
+          # Accept any HTTP response (status != "000") as "server is up".
           for i in $(seq 1 60); do
-            if curl -sSf http://localhost:1999/ > /dev/null 2>&1; then
-              echo "Backend is up after ${i} attempts"
+            status=$(curl -o /dev/null -s -w "%{http_code}" --max-time 2 http://localhost:1999/ 2>/dev/null || echo "000")
+            if [ "$status" != "000" ]; then
+              echo "Backend is up (HTTP $status) after ${i} attempts"
               break
             fi
             echo "Waiting for backend... attempt $i/60"
             sleep 3
           done
-          curl -sSf http://localhost:1999/ || (echo "Backend never became ready" && exit 1)
+          status=$(curl -o /dev/null -s -w "%{http_code}" --max-time 2 http://localhost:1999/ 2>/dev/null || echo "000")
+          if [ "$status" = "000" ]; then
+            echo "Backend never became ready"
+            exit 1
+          fi
+          echo "Backend confirmed up (HTTP $status)"
 
+      # ── E2E ───────────────────────────────────────────────────────────────────
       - name: Install Playwright + browsers
         working-directory: ./e2e
         run: |
@@ -88,7 +111,3 @@ jobs:
           name: playwright-report
           path: e2e/playwright-report/
           retention-days: 7
-
-      - name: Stop Docker stack
-        if: always()
-        run: docker compose down

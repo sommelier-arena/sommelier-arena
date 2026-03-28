@@ -14,9 +14,9 @@ describe('SessionCreated', () => {
     expect(screen.getByText('TANNIC-FALCON')).toBeInTheDocument();
   });
 
-  it('renders a Copy link button', () => {
+  it('renders a Copy participant link button', () => {
     render(<SessionCreated code="4829" hostId="TANNIC-FALCON" />);
-    expect(screen.getByRole('button', { name: /copy link/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /copy participant link/i })).toBeInTheDocument();
   });
 
   it('renders a WhatsApp share link', () => {
@@ -26,28 +26,24 @@ describe('SessionCreated', () => {
     expect(link.getAttribute('href')).toContain('wa.me');
   });
 
-  it('renders an iMessage share link', () => {
+  it('does not render an iMessage share link (removed in v2)', () => {
     render(<SessionCreated code="4829" hostId="TANNIC-FALCON" />);
-    const link = screen.getByRole('link', { name: /imessage/i });
-    expect(link).toBeInTheDocument();
-    expect(link.getAttribute('href')).toContain('sms:');
+    expect(screen.queryByRole('link', { name: /imessage/i })).not.toBeInTheDocument();
   });
 
-  it('share URL contains the session code and hostId', () => {
+  it('participant share URL contains the session code', () => {
     render(<SessionCreated code="4829" hostId="TANNIC-FALCON" />);
-    // The URL uses window.location.origin in the browser; in jsdom it's 'http://localhost'
-    const urlEl = screen.getByText(/\/host\?code=4829.*TANNIC-FALCON/);
+    // The participant URL includes ?code=4829 for direct auto-join
+    const urlEl = screen.getByText(/\/play\?code=4829/);
     expect(urlEl).toBeInTheDocument();
   });
 
   it('copy button shows "Copied!" feedback', async () => {
-    // Mock clipboard API
     Object.assign(navigator, {
       clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
     });
     render(<SessionCreated code="4829" hostId="TANNIC-FALCON" />);
-    fireEvent.click(screen.getByRole('button', { name: /copy link/i }));
-    // The button text changes after clipboard write completes
+    fireEvent.click(screen.getByRole('button', { name: /copy participant link/i }));
     await screen.findByRole('button', { name: /copied/i });
   });
 });

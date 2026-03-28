@@ -13,12 +13,14 @@ async function createSession(browser: Browser) {
 
   // Dashboard phase — click New Session
   const newSessionBtn = page.getByRole('button', { name: /new session/i });
-  if (await newSessionBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+  // Use waitFor — isVisible() returns immediately without retrying. On mobile/slow browsers
+  // React may not have hydrated yet, causing isVisible() to return false prematurely.
+  if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
   await expect(page.getByRole('button', { name: /create session/i })).toBeVisible();
 
-  await page.getByLabel('Wine name').fill('Test Wine v2');
+  await page.getByLabel('Wine name', { exact: true }).fill('Test Wine v2');
 
   // Fill all 5 categories
   for (const [label, correct] of [
@@ -43,9 +45,9 @@ async function createSession(browser: Browser) {
 
   await page.getByRole('button', { name: /create session/i }).click();
 
-  const codeEl = page.getByText(/^\d{4}$/);
-  await expect(codeEl).toBeVisible();
-  const code = ((await codeEl.textContent()) ?? '').trim();
+  const codeEl = page.locator('[aria-label^="Session code"]');
+  await expect(codeEl.first()).toBeVisible();
+  const code = ((await codeEl.first().getAttribute('aria-label')) ?? '').replace(/\D/g, '');
 
   return { page, ctx, code };
 }
@@ -75,16 +77,16 @@ test.describe('New features (v2.0)', () => {
   test('Session form has wine_name category @smoke', async ({ page }) => {
     await page.goto('/host');
     const newSessionBtn = page.getByRole('button', { name: /new session/i });
-    if (await newSessionBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newSessionBtn.click();
     }
-    await expect(page.getByText('Wine Name')).toBeVisible();
+    await expect(page.getByText('Wine Name', { exact: true })).toBeVisible();
   });
 
   test('Session form has timer slider @smoke', async ({ page }) => {
     await page.goto('/host');
     const newSessionBtn = page.getByRole('button', { name: /new session/i });
-    if (await newSessionBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+    if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newSessionBtn.click();
     }
     const slider = page.getByRole('slider', { name: /timer/i });
@@ -96,7 +98,7 @@ test.describe('New features (v2.0)', () => {
     const { page } = await createSession(browser);
 
     await test.step('Share link section visible', async () => {
-      await expect(page.getByRole('button', { name: /copy link/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /copy participant link/i })).toBeVisible();
       await expect(page.getByRole('link', { name: /whatsapp/i })).toBeVisible();
     });
   });
@@ -112,7 +114,7 @@ test.describe('New features (v2.0)', () => {
     await participantPage.getByRole('button', { name: /join/i }).click();
 
     await test.step('Participant enters waiting lobby', async () => {
-      await expect(participantPage.getByText(/waiting/i)).toBeVisible({ timeout: 10_000 });
+      await expect(participantPage.getByText(/waiting/i).last()).toBeVisible({ timeout: 10_000 });
     });
 
     await participantCtx.close();
@@ -127,7 +129,7 @@ test.describe('New features (v2.0)', () => {
     await participantPage.goto('/play');
     await participantPage.getByLabel(/session code/i).fill(code);
     await participantPage.getByRole('button', { name: /join/i }).click();
-    await expect(participantPage.getByText(/waiting/i)).toBeVisible({ timeout: 10_000 });
+    await expect(participantPage.getByText(/waiting/i).last()).toBeVisible({ timeout: 10_000 });
 
     // Host starts game
     await hostPage.getByRole('button', { name: /start game/i }).click();
@@ -153,12 +155,14 @@ test.describe('New features (v2.0)', () => {
     await participantPage.goto('/play');
     await participantPage.getByLabel(/session code/i).fill(code);
     await participantPage.getByRole('button', { name: /join/i }).click();
-    await expect(participantPage.getByText(/waiting/i)).toBeVisible({ timeout: 10_000 });
+    await expect(participantPage.getByText(/waiting/i).last()).toBeVisible({ timeout: 10_000 });
 
+    // Wait for host to receive lobby:updated (participant count > 0 enables Start Game)
+    await expect(hostPage.getByRole('button', { name: /start game/i })).toBeEnabled({ timeout: 10_000 });
     await hostPage.getByRole('button', { name: /start game/i }).click();
 
-    // Wait for question buttons to appear
-    const optionButtons = participantPage.getByRole('button').filter({ has: participantPage.locator('[aria-pressed]') });
+    // Wait for question buttons to appear (aria-pressed is on the button itself)
+    const optionButtons = participantPage.locator('button[aria-pressed]');
     await expect(optionButtons.first()).toBeVisible({ timeout: 10_000 });
 
     await test.step('Select first option', async () => {

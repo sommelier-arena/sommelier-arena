@@ -13,13 +13,15 @@ export const CATEGORY_PROMPTS: Record<QuestionCategory, string> = {
 export const ADJECTIVES = [
   'Tannic', 'Fruity', 'Oaky', 'Crisp', 'Bold',
   'Silky', 'Robust', 'Floral', 'Velvety', 'Mineral',
-  'Earthy', 'Smoky', 'Spicy', 'Vivid', 'Amber',
-  'Peaty', 'Briny', 'Zesty', 'Plummy', 'Mellow',
+  'Earthy', 'Smoky', 'Spicy', 'Zesty', 'Plummy',
+  'Dry', 'Elegant', 'Lush', 'Round', 'Supple',
+  'Bright', 'Aromatic', 'Creamy', 'Juicy', 'Mellow',
 ];
 
 export const NOUNS = [
-  'Falcon', 'Barrel', 'Vine', 'Cork', 'Cellar',
-  'Magnum', 'Chateau', 'Bouquet', 'Tannin', 'Grape',
-  'Carafe', 'Terroir', 'Decanter', 'Cuvee', 'Goblet',
-  'Riesling', 'Claret', 'Merlot', 'Shiraz', 'Pinot',
+  'Barrel', 'Vine', 'Cork', 'Cellar', 'Magnum',
+  'Chateau', 'Bouquet', 'Tannin', 'Grape', 'Carafe',
+  'Terroir', 'Decanter', 'Cuvee', 'Merlot', 'Pinot',
+  'Riesling', 'Cabernet', 'Chardonnay', 'Sommelier', 'Champagne',
+  'Bordeaux', 'Nectar', 'Domaine', 'Harvest', 'Vintage',
 ];

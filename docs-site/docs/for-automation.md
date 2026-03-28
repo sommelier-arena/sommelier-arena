@@ -14,4 +14,4 @@ This page provides machine-friendly entry points and links to a generated JSON i
 - Frontmatter conventions: `audience`, `tags`, `summary`
 - Suggested tasks: find deployment steps, extract env var names, produce config comparison table
 
-Automation agents should prefer canonical docs (e.g., `deployment-and-deploy.md`) and use the JSON index for fast lookups.
+Automation agents should prefer canonical docs (e.g., `deployment-guide.md`) and use the JSON index for fast lookups.

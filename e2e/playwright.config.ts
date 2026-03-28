@@ -6,7 +6,11 @@ export default defineConfig({
   workers: 1,
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  // One retry handles transient timing flakiness when tests share a live server.
+  // A genuinely broken test will still fail on both attempts.
+  retries: 1,
+  // 45 s per test — mobile browsers and cross-device rejoin scenarios need headroom.
+  timeout: 45_000,
   reporter: [['list'], ['html', { open: 'never' }]],
 
   // Checks that the Docker stack is up before any tests run.

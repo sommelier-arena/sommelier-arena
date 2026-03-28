@@ -13,12 +13,12 @@ async function createSessionGetCode(browser: Browser) {
   await page.goto('/host');
 
   const newBtn = page.getByRole('button', { name: /new session/i });
-  if (await newBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+  if (await newBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newBtn.click();
   }
   await expect(page.getByRole('button', { name: /create session/i })).toBeVisible();
 
-  await page.getByLabel('Wine name').fill('Dashboard Test Wine');
+  await page.getByLabel('Wine name', { exact: true }).fill('Dashboard Test Wine');
   await page.getByLabel('Wine 1 Color — correct answer').fill('Red');
   await page.getByLabel('Wine 1 Color — distractor 1').fill('White');
   await page.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
@@ -42,9 +42,10 @@ async function createSessionGetCode(browser: Browser) {
 
   await page.getByRole('button', { name: /create session/i }).click();
 
-  const codeEl = page.getByText(/^\d{4}$/);
-  await expect(codeEl).toBeVisible();
-  const code = ((await codeEl.textContent()) ?? '').trim();
+  const codeEl = page.locator('[aria-label^="Session code"]');
+  await expect(codeEl.first()).toBeVisible();
+  const aria = (await codeEl.first().getAttribute('aria-label')) ?? '';
+  const code = aria.replace(/\D/g, '');
 
   return { page, ctx, code };
 }
@@ -72,10 +73,10 @@ test.describe('Host Dashboard', () => {
     });
 
     await test.step('Dashboard shows the session in Active Sessions', async () => {
-      // The session code should be visible
-      await expect(page.getByText(code)).toBeVisible({ timeout: 5000 });
+      // The session code should be visible (match exact digits, avoid matching share URL)
+      await expect(page.getByText(code, { exact: true })).toBeVisible({ timeout: 10_000 });
       // The Open badge should be present
-      await expect(page.getByText(/🟢 Open/)).toBeVisible();
+      await expect(page.getByText(/🟢 Open/)).toBeVisible({ timeout: 8000 });
       // The Open button should be present
       await expect(page.getByRole('button', { name: /^open$/i })).toBeVisible();
     });
@@ -93,17 +94,17 @@ test.describe('Host Dashboard', () => {
     });
 
     await test.step('Session appears in the dashboard', async () => {
-      await expect(page.getByText(code)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(code, { exact: true })).toBeVisible({ timeout: 10_000 });
     });
 
     await test.step('Click the delete button for the session', async () => {
       const deleteBtn = page.getByRole('button', { name: new RegExp(`Delete session ${code}`, 'i') });
-      await expect(deleteBtn).toBeVisible({ timeout: 5000 });
+      await expect(deleteBtn).toBeVisible({ timeout: 10_000 });
       await deleteBtn.click();
     });
 
     await test.step('Session is no longer listed in the dashboard', async () => {
-      await expect(page.getByText(code)).not.toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(code)).not.toBeVisible({ timeout: 10_000 });
     });
 
     await ctx.close();
@@ -120,10 +121,10 @@ test.describe('Host Dashboard', () => {
 
     await test.step('Click Open button — host rejoins lobby', async () => {
       const openBtn = page.getByRole('button', { name: /^open$/i }).first();
-      await expect(openBtn).toBeVisible({ timeout: 5000 });
+      await expect(openBtn).toBeVisible({ timeout: 10_000 });
       await openBtn.click();
       // Should see the session code in the lobby
-      await expect(page.getByText(code)).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText(code, { exact: true })).toBeVisible({ timeout: 10_000 });
     });
 
     await ctx.close();

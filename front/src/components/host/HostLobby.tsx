@@ -6,31 +6,9 @@ interface HostLobbyProps {
   onStart: () => void;
 }
 
-const getPlayShareUrl = () => {
-  if (import.meta.env.DEV) {
-    return 'localhost:4321/play';
-  }
-
-  if (typeof window !== 'undefined') {
-    return `${window.location.host}/play`;
-  }
-
-  if (import.meta.env.PUBLIC_PARTYKIT_HOST) {
-    return `${import.meta.env.PUBLIC_PARTYKIT_HOST}/play`;
-  }
-
-  return '/play';
-};
-
 export function HostLobby({ code, participants, onStart }: HostLobbyProps) {
-  const shareUrl = getPlayShareUrl();
   return (
     <div className="w-full max-w-lg mx-auto space-y-8 text-center">
-      <p className="text-slate-400 text-sm">
-        Participants join at{' '}
-        <span className="font-medium text-slate-600">{shareUrl}</span>
-      </p>
-
       <div className="bg-white border border-slate-200 rounded-2xl p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-slate-700">

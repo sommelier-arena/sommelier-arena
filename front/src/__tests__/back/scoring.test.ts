@@ -20,7 +20,6 @@ const makeParticipant = (pseudonym: string, score: number): Participant => ({
   pseudonym,
   score,
   connected: true,
-  rejoinToken: `token-${pseudonym}`,
   answeredQuestions: new Set(),
 });
 
