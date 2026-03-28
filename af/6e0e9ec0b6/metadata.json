@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "af6e0e9ec0b6",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "front/src/components/common/Footer.astro",
+    "front/src/components/host/HostApp.tsx",
+    "front/src/components/host/HostDashboard.tsx",
+    "front/src/components/participant/JoinForm.tsx",
+    "front/src/components/participant/ParticipantApp.tsx",
+    "front/src/pages/host.astro",
+    "front/src/pages/play.astro"
+  ],
+  "sessions": [
+    {
+      "metadata": "/af/6e0e9ec0b6/0/metadata.json",
+      "transcript": "/af/6e0e9ec0b6/0/full.jsonl",
+      "content_hash": "/af/6e0e9ec0b6/0/content_hash.txt",
+      "prompt": "/af/6e0e9ec0b6/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 34775,
+    "api_call_count": 105
+  }
+}

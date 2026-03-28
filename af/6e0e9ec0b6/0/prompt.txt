@@ -1,0 +1,26 @@
+[[PLAN]] I want to create an implementation plan. Please:
+1. Analyze the codebase to understand the current state
+2. Ask clarifying questions if my request is ambiguous
+3. Create a structured plan and save it to the plan file in the session folder
+
+My request: On the astro front pages I now have a common footer. HOwever I don't know why at index page we can directly see it but on the host and play page we need to scrool down a little so see it. Why IS it possible to fix it ?
+
+---
+
+[[PLAN]] start
+
+---
+
+[[PLAN]] I still need to scrool down on http://localhost:4321/host and http://localhost:4321/page to see the footer when running the astro front site you did not fix it as requested in the previous plan
+
+---
+
+[[PLAN]] Actually its a strange behavior especially at http://localhost:4321/play : first the footer appears while the message Rejoining sessions is displayed. then when join code instructions appears the footer disappears...
+
+---
+
+[[PLAN]] - Replace JoinForm's outer container class min-h-screen with min-h-[80vh] or h-full (I can make this smaller change to guarantee behavior). And if you can also definitely fix the same issue at the /host page
+
+---
+
+[[PLAN]] Great you eventually managed to fix the issue at http://localhost:4321/play but I still need to scrol down at http://localhost:4321/host
