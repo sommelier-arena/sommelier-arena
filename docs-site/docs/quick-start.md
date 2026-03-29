@@ -69,7 +69,7 @@ In Mode B, the `front` container runs **nginx** instead of the Astro dev server.
 2. **SPA routing** — nginx's `try_files $uri $uri/index.html /index.html` ensures `/host` and `/play` return `index.html` without a 404.
 3. **Same-origin WebSocket proxy** — nginx forwards `/parties/*` requests to the PartyKit backend container on port 1999, keeping browser–backend traffic on a single origin (no CORS).
 
-`absolute_redirect off` in `front/nginx.conf` ensures nginx uses relative `Location` headers, so the host port (4321) is never stripped from redirects.
+`absolute_redirect off` in `front/nginx.conf` ensures nginx uses relative `Location` headers, which is safer for SPA routing in various proxy environments.
 
 **For daily development, you don't need nginx at all** — Mode A uses Astro's built-in dev server on port 4321, which handles routing and WebSocket proxy natively via `PUBLIC_PARTYKIT_HOST`.
 

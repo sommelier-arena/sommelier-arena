@@ -416,7 +416,7 @@ export default class GameSession implements Party.Server {
 ## Proxy Worker for `/docs` path (`proxy-worker/index.ts`)
 
 ```typescript
-// Routes sommelier-arena.ducatillon.net/docs/* 
+// Routes sommelier-arena.ducatillon.net/docs/*
 // to the separate Docusaurus Cloudflare Pages deployment
 export default {
   async fetch(request: Request): Promise<Response> {

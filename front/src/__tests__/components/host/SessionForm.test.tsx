@@ -63,11 +63,62 @@ describe('SessionForm', () => {
     await userEvent.type(screen.getByPlaceholderText(/château margaux 2015/i), 'Château Test');
 
     // All inputs already have defaults — just submit
-    fireEvent.click(screen.getByRole('button', { name: /create session/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create tasting/i }));
     expect(onSubmit).toHaveBeenCalledOnce();
     const payload = onSubmit.mock.calls[0][0];
     expect(payload).toHaveProperty('wines');
     expect(payload).toHaveProperty('timerSeconds', 60);
     expect(payload).toHaveProperty('hostId', 'TANNIC-FALCON');
+  });
+
+  it('renders optional tasting title input', () => {
+    render(<SessionForm onSubmit={vi.fn()} />);
+    const titleInput = screen.getByRole('textbox', { name: /tasting title/i });
+    expect(titleInput).toBeInTheDocument();
+    expect((titleInput as HTMLInputElement).value).toBe('');
+  });
+
+  it('uses custom title in payload when provided', async () => {
+    const onSubmit = vi.fn();
+    render(<SessionForm onSubmit={onSubmit} hostId="TANNIC-FALCON" />);
+
+    await userEvent.type(screen.getByPlaceholderText(/château margaux 2015/i), 'Château Test');
+    await userEvent.type(screen.getByRole('textbox', { name: /tasting title/i }), 'My Custom Title');
+    fireEvent.click(screen.getByRole('button', { name: /create tasting/i }));
+
+    expect(onSubmit).toHaveBeenCalledOnce();
+    expect(onSubmit.mock.calls[0][0]).toHaveProperty('title', 'My Custom Title');
+  });
+
+  it('falls back to first wine name as title when title input is empty', async () => {
+    const onSubmit = vi.fn();
+    render(<SessionForm onSubmit={onSubmit} hostId="TANNIC-FALCON" />);
+
+    await userEvent.type(screen.getByPlaceholderText(/château margaux 2015/i), 'My Wine');
+    fireEvent.click(screen.getByRole('button', { name: /create tasting/i }));
+
+    expect(onSubmit).toHaveBeenCalledOnce();
+    expect(onSubmit.mock.calls[0][0]).toHaveProperty('title', 'My Wine');
+  });
+
+  it('renders Edit Blind Tasting heading and Update Tasting button when isEditing=true', () => {
+    render(<SessionForm onSubmit={vi.fn()} isEditing />);
+    expect(screen.getByRole('heading', { name: /edit blind tasting/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /update tasting/i })).toBeInTheDocument();
+  });
+
+  it('pre-fills wine fields when initialWines provided', () => {
+    const initialWines = [{
+      name: 'Existing Wine',
+      questions: [
+        { category: 'color' as const, correctAnswer: 'Rouge', distractors: ['Blanc', 'Rosé', 'Orange'] as [string, string, string] },
+        { category: 'country' as const, correctAnswer: 'France', distractors: ['Italy', 'Spain', 'USA'] as [string, string, string] },
+        { category: 'grape_variety' as const, correctAnswer: 'Merlot', distractors: ['Syrah', 'Pinot Noir', 'Cabernet'] as [string, string, string] },
+        { category: 'vintage_year' as const, correctAnswer: '2020', distractors: ['2018', '2019', '2021'] as [string, string, string] },
+        { category: 'wine_name' as const, correctAnswer: 'Test Wine', distractors: ['A', 'B', 'C'] as [string, string, string] },
+      ],
+    }];
+    render(<SessionForm onSubmit={vi.fn()} initialWines={initialWines} />);
+    expect(screen.getByDisplayValue('Existing Wine')).toBeInTheDocument();
   });
 });

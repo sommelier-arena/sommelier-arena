@@ -12,11 +12,11 @@ async function createSessionGetCode(browser: Browser) {
   const page = await ctx.newPage();
   await page.goto('/host');
 
-  const newBtn = page.getByRole('button', { name: /new session/i });
+  const newBtn = page.getByRole('button', { name: /new blind testing/i });
   if (await newBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newBtn.click();
   }
-  await expect(page.getByRole('button', { name: /create session/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   await page.getByLabel('Wine name', { exact: true }).fill('Dashboard Test Wine');
   await page.getByLabel('Wine 1 Color — correct answer').fill('Red');
@@ -40,7 +40,7 @@ async function createSessionGetCode(browser: Browser) {
   await page.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
   await page.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
 
-  await page.getByRole('button', { name: /create session/i }).click();
+  await page.getByRole('button', { name: /create tasting/i }).click();
 
   const codeEl = page.locator('[aria-label^="Session code"]');
   await expect(codeEl.first()).toBeVisible();
@@ -51,9 +51,9 @@ async function createSessionGetCode(browser: Browser) {
 }
 
 test.describe('Host Dashboard', () => {
-  test('Dashboard shows at /host and has "New Session" button @smoke', async ({ page }) => {
+  test('Dashboard shows at /host and has "New Blind Testing" button @smoke', async ({ page }) => {
     await page.goto('/host');
-    await expect(page.getByRole('button', { name: /new session/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /new blind testing/i })).toBeVisible();
   });
 
   test('Dashboard shows host ID @smoke', async ({ page }) => {

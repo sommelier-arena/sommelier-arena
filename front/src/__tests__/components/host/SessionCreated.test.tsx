@@ -9,9 +9,12 @@ describe('SessionCreated', () => {
     expect(screen.getByText('4829')).toBeInTheDocument();
   });
 
-  it('renders the host ID', () => {
+  it('renders the session code without displaying host ID (host ID removed from UI)', () => {
     render(<SessionCreated code="4829" hostId="TANNIC-FALCON" />);
-    expect(screen.getByText('TANNIC-FALCON')).toBeInTheDocument();
+    // Host ID is passed as prop but not displayed in the UI
+    expect(screen.queryByText('TANNIC-FALCON')).not.toBeInTheDocument();
+    // Session code is displayed prominently
+    expect(screen.getByText('4829')).toBeInTheDocument();
   });
 
   it('renders a Copy participant link button', () => {

@@ -65,7 +65,7 @@ All layers in one view:
 | Layer | Setting | Mode A (local) | Mode B (Docker) | Production |
 |---|---|---|---|---|
 | **Frontend** | `PUBLIC_PARTYKIT_HOST` | `front/.env.local` → `localhost:1999` | Docker build arg → `localhost:4321` | Cloudflare Pages env → `<project>.partykit.dev` |
-| **Frontend** | Serving | Astro dev server `:4321` | nginx container (mapped `4321:3000`) | Cloudflare Pages CDN |
+| **Frontend** | Serving | Astro dev server `:4321` | nginx container (mapped `4321:4321`) | Cloudflare Pages CDN |
 | **Backend** | PartyKit | `npx partykit dev --port 1999` | PartyKit container (internal `:1999`) | Cloudflare Workers (Durable Objects) |
 | **Backend** | DO storage | In-memory (resets on restart) | In-memory | SQLite (persistent across DO evictions) |
 | **Backend** | `HOSTS_KV` | Not available | Not available | Cloudflare KV namespace (bound in `partykit.json`) |
@@ -83,10 +83,10 @@ The Docker `front` container uses **nginx** as a static file server. Here's what
 ### What it does
 
 ```nginx
-# 1. Listen on container port 3000 (Docker maps host port 4321 → container 3000)
-listen 3000;
+# 1. Listen on container port 4321 (Docker maps host port 4321 → container 4321)
+listen 4321;
 
-# 2. Use relative Location headers so port mapping doesn't strip the host port
+# 2. Use relative Location headers for safer SPA routing
 absolute_redirect off;
 
 # 3. Proxy WebSocket + HTTP to the PartyKit backend container
@@ -106,7 +106,7 @@ location / {
 **Why nginx:**
 - Astro builds to **pure static files** (`output: static` in `astro.config.mjs`) — no Node.js server runs at request time. nginx serves these HTML/JS/CSS files.
 - The browser must access static files **and** WebSocket on the **same origin** to avoid CORS issues. nginx handles both in one container.
-- `absolute_redirect off` prevents port-stripping bugs: without it, nginx's 301 redirects use the internal port (3000), causing browsers to cache broken redirects to `http://localhost/host` instead of `http://localhost:4321/host`.
+- `absolute_redirect off` keeps Location headers relative (`/host/` instead of `http://localhost:4321/host/`), which is safer for SPA routing in various Docker/proxy setups.
 - `try_files $uri $uri/index.html /index.html` is the standard SPA pattern: nginx checks for the exact file, then `path/index.html`, then falls back to `index.html` — no redirect triggered for `/host` or `/play`.
 
 ### Why we need it for E2E tests

@@ -9,16 +9,16 @@ describe('NavBar', () => {
     expect(screen.getByRole('link', { name: /sommelier arena — home/i })).toBeInTheDocument();
   });
 
-  it('renders Host a Game nav link pointing to /host', () => {
+  it('renders Host a Tasting nav link pointing to /host', () => {
     render(<NavBar />);
-    const link = screen.getByRole('link', { name: /host a game/i });
+    const link = screen.getByRole('link', { name: /host a tasting/i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/host');
   });
 
-  it("renders Let's Play nav link pointing to /play", () => {
+  it("renders Join a Tasting nav link pointing to /play", () => {
     render(<NavBar />);
-    const link = screen.getByRole('link', { name: /let's play/i });
+    const link = screen.getByRole('link', { name: /join a tasting/i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute('href', '/play');
   });

@@ -49,11 +49,11 @@ async function hostCreateTwoWineSession(browser: Browser) {
   const hostPage = await hostCtx.newPage();
   await hostPage.goto('/host');
 
-  const newSessionBtn = hostPage.getByRole('button', { name: /new session/i });
+  const newSessionBtn = hostPage.getByRole('button', { name: /new blind testing/i });
   if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
-  await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
+  await expect(hostPage.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   // Fill wine 1
   await fillWine(hostPage, 1, 'Bordeaux Rouge');
@@ -62,7 +62,7 @@ async function hostCreateTwoWineSession(browser: Browser) {
   await hostPage.getByRole('button', { name: /add wine/i }).click();
   await fillWine(hostPage, 2, 'Burgundy Blanc');
 
-  await hostPage.getByRole('button', { name: /create session/i }).click();
+  await hostPage.getByRole('button', { name: /create tasting/i }).click();
 
   const codeEl = hostPage.locator('[aria-label^="Session code"]');
   await expect(codeEl.first()).toBeVisible();

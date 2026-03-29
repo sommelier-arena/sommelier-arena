@@ -184,7 +184,7 @@ export function ParticipantApp({ showNav = true }: { showNav?: boolean }) {
     return (
       <div className="bg-slate-50">
         {showNav && <NavBar />}
-        <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Session Ended</h1>
+        <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Tasting Ended</h1>
         <SessionEnded />
       </div>
     );

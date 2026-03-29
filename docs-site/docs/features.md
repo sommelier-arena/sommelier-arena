@@ -106,3 +106,20 @@ The host sees a live list of which participants have answered (without revealing
 - Rejoin: same browser auto-rejoins via localStorage credential; different device via `?code=X&id=YOUR-PSEUDONYM` URL.
 - If the host closes the browser, the session ends and participants see a "session ended" message — it cannot be resumed.
 - Participants who don't answer before the timer expires receive 0 points for that question; no other penalty.
+
+## Session title
+
+Hosts can optionally name their tasting session when creating it. The title is displayed in the session list on the Host Dashboard.
+
+- The title field is optional. If left blank, the first wine's name is used as the session title.
+- Titles are stored in Durable Object state and displayed in the Host Dashboard session list.
+
+## Session edition (edit wines before game starts)
+
+As long as the session is in the **waiting** phase (lobby — not yet started), the host can return to the form to edit the wines:
+
+- In the lobby screen, click **✏️ Edit Wines** to open the session form in edit mode.
+- The form shows **Edit Blind Tasting** as heading and **Update Tasting** as the submit button.
+- Submitting the form sends an `update_session` event to the backend, which replaces the wines list and saves the updated state.
+- The host is returned to the lobby after the update.
+- Edition is **blocked once the game has started** — the backend rejects `update_session` events when `phase !== 'waiting'`.

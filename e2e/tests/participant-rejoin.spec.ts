@@ -14,13 +14,13 @@ async function createSessionAndJoin(browser: Browser) {
   const hostPage = await hostCtx.newPage();
   await hostPage.goto('/host');
 
-  const newSessionBtn = hostPage.getByRole('button', { name: /new session/i });
+  const newSessionBtn = hostPage.getByRole('button', { name: /new blind testing/i });
   // Use waitFor — isVisible() returns immediately without retrying. On mobile/slow browsers
   // React may not have hydrated yet, causing isVisible() to return false prematurely.
   if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
-  await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
+  await expect(hostPage.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   await hostPage.getByLabel('Wine name', { exact: true }).fill('Rejoin Test Wine');
   await hostPage.getByLabel('Wine 1 Color — correct answer').fill('Red');
@@ -43,7 +43,7 @@ async function createSessionAndJoin(browser: Browser) {
   await hostPage.getByLabel('Wine 1 Wine Name — distractor 1').fill('Château Margaux');
   await hostPage.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
   await hostPage.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
-  await hostPage.getByRole('button', { name: /create session/i }).click();
+  await hostPage.getByRole('button', { name: /create tasting/i }).click();
 
   const codeEl = hostPage.locator('[aria-label^="Session code"]');
   await expect(codeEl.first()).toBeVisible();

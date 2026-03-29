@@ -12,7 +12,7 @@ const CATEGORIES: { key: QuestionCategory; label: string }[] = [
 // Autocomplete defaults per category — host edits to match their actual wine
 const DISTRACTOR_DEFAULTS: Record<QuestionCategory, [string, string, string]> = {
   color: ['Blanc', 'Rosé', 'Orange'],
-  country: ['Bordeaux (France)', 'Burgundy (France)', 'Tuscany (Italy)'],
+  country: ['Champagne (France)', 'Burgundy (France)', 'Tuscany (Italy)'],
   grape_variety: ['Pinot Noir', 'Syrah', 'Merlot'],
   vintage_year: ['2015', '2016', '2018'],
   wine_name: ['Château Margaux', 'Château Lafite Rothschild', 'Château Latour'],
@@ -20,7 +20,7 @@ const DISTRACTOR_DEFAULTS: Record<QuestionCategory, [string, string, string]> = 
 
 const CORRECT_ANSWER_DEFAULTS: Record<QuestionCategory, string> = {
   color: 'Rouge',
-  country: 'Champagne (France)',
+  country: 'Bordeaux (France)',
   grape_variety: 'Cabernet Sauvignon',
   vintage_year: '2019',
   wine_name: 'Château Pétrus',
@@ -53,14 +53,37 @@ function emptyWine(): WineFormData {
   };
 }
 
+function wineFromPayload(wine: CreateWinePayload): WineFormData {
+  const questions = Object.fromEntries(
+    CATEGORIES.map(({ key }) => {
+      const q = wine.questions.find((q) => q.category === key);
+      return [
+        key,
+        {
+          correctAnswer: q?.correctAnswer ?? CORRECT_ANSWER_DEFAULTS[key],
+          distractors: (q?.distractors ?? DISTRACTOR_DEFAULTS[key]) as [string, string, string],
+        },
+      ];
+    }),
+  ) as WineQuestions;
+  return { name: wine.name, questions };
+}
+
 interface SessionFormProps {
   onSubmit: (payload: CreateSessionPayload) => void;
   hostId?: string;
+  /** Pre-filled wines for editing an existing session */
+  initialWines?: CreateWinePayload[];
+  /** When true, renders in edit mode (different heading + submit label) */
+  isEditing?: boolean;
 }
 
-export function SessionForm({ onSubmit, hostId }: SessionFormProps) {
-  const [wines, setWines] = useState<WineFormData[]>([emptyWine()]);
+export function SessionForm({ onSubmit, hostId, initialWines, isEditing = false }: SessionFormProps) {
+  const [wines, setWines] = useState<WineFormData[]>(() =>
+    initialWines?.length ? initialWines.map(wineFromPayload) : [emptyWine()],
+  );
   const [timerSeconds, setTimerSeconds] = useState(60);
+  const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const updateWineName = (wi: number, value: string) => {
@@ -137,7 +160,7 @@ export function SessionForm({ onSubmit, hostId }: SessionFormProps) {
       ),
       timerSeconds,
       hostId: hostId ?? '',
-      title: wines[0]?.name.trim(),
+      title: title.trim() || wines[0]?.name.trim(),
     };
 
     onSubmit(payload);
@@ -146,8 +169,26 @@ export function SessionForm({ onSubmit, hostId }: SessionFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 w-full max-w-2xl mx-auto">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-slate-800">New Session</h1>
+        <h1 className="text-3xl font-bold text-slate-800">
+          {isEditing ? 'Edit Blind Tasting' : 'New Blind Tasting'}
+        </h1>
         <p className="text-slate-500 mt-1">Add wines and fill in the answers for each question.</p>
+      </div>
+
+      {/* Optional tasting title */}
+      <div className="bg-white border border-slate-200 rounded-2xl p-5">
+        <label htmlFor="tasting-title" className="block text-sm font-semibold text-slate-700 mb-1">
+          Tasting title <span className="font-normal text-slate-400">(optional)</span>
+        </label>
+        <input
+          id="tasting-title"
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder='e.g. "Friday Night Tasting"'
+          className="w-full border border-slate-300 rounded-lg px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-wine-400"
+        />
+        <p className="text-xs text-slate-400 mt-1">Leave blank to use the first wine name as title.</p>
       </div>
 
       {/* Timer slider */}
@@ -271,10 +312,9 @@ export function SessionForm({ onSubmit, hostId }: SessionFormProps) {
           type="submit"
           className="flex-1 bg-wine-600 text-white rounded-xl py-3 font-semibold hover:bg-wine-700 transition-colors"
         >
-          Create Session
+          {isEditing ? 'Update Tasting' : 'Create Tasting'}
         </button>
       </div>
     </form>
   );
 }
-

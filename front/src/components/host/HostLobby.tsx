@@ -4,9 +4,10 @@ interface HostLobbyProps {
   code: string;
   participants: string[];
   onStart: () => void;
+  onEdit?: () => void;
 }
 
-export function HostLobby({ code, participants, onStart }: HostLobbyProps) {
+export function HostLobby({ code, participants, onStart, onEdit }: HostLobbyProps) {
   return (
     <div className="w-full max-w-lg mx-auto space-y-8 text-center">
       <div className="bg-white border border-slate-200 rounded-2xl p-5">
@@ -45,6 +46,16 @@ export function HostLobby({ code, participants, onStart }: HostLobbyProps) {
       >
         Start Game
       </button>
+
+      {onEdit && (
+        <button
+          onClick={onEdit}
+          type="button"
+          className="w-full border border-wine-300 text-wine-600 rounded-xl py-3 font-medium hover:bg-wine-50 transition-colors"
+        >
+          ✏️ Edit Wines
+        </button>
+      )}
     </div>
   );
 }

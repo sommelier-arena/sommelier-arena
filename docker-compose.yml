@@ -24,11 +24,11 @@ services:
       context: ./front
       args:
         # PUBLIC_PARTYKIT_HOST is baked into the Astro static build.
-        # The browser connects to localhost:4321 (host port, Docker maps 4321:3000)
+        # The browser connects to localhost:4321 (host port, Docker maps 4321:4321)
         # which proxies /parties/ requests to the back container on port 1999.
         PUBLIC_PARTYKIT_HOST: localhost:4321
     ports:
-      - '4321:3000'
+      - '4321:4321'
     depends_on:
       back:
         condition: service_healthy

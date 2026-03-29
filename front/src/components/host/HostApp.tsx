@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useHostStore } from '../../stores/hostStore';
 import { loadSessions } from '../../lib/sessionStorage';
 import { useHostSocket } from '../../hooks/useHostSocket';
@@ -12,7 +12,7 @@ import { HostQuestion } from './HostQuestion';
 import { HostReveal } from './HostReveal';
 import { HostRoundLeaderboard } from './HostRoundLeaderboard';
 import { HostFinalLeaderboard } from './HostFinalLeaderboard';
-import type { SessionListEntry } from '../../types/events';
+import type { SessionListEntry, CreateWinePayload } from '../../types/events';
 
 export function HostApp({ showNav = true }: { showNav?: boolean }) {
   const phase = useHostStore((s) => s.phase);
@@ -30,9 +30,15 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
   const totalRounds = useHostStore((s) => s.totalRounds);
   const timerMs = useHostStore((s) => s.timerMs);
 
+  // Wines snapshot for edit mode (captured when host clicks "Edit Wines")
+  const [editingWines, setEditingWines] = useState<CreateWinePayload[] | null>(null);
+  // Store the last submitted wines payload so we can pre-fill the edit form
+  const lastWinesRef = useRef<CreateWinePayload[]>([]);
+
   // Socket connects to the active session room (empty string = no connection yet)
   const {
     createSession,
+    updateSession,
     startGame,
     pauseGame,
     resumeGame,
@@ -110,12 +116,28 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
   }
 
   if (phase === 'setup') {
+    const isEditing = editingWines !== null;
     return (
       <div className="bg-slate-50">
         {showNav && <NavBar />}
         <div className="px-4 py-10">
-          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>New Session</h1>
-          <SessionForm onSubmit={createSession} hostId={hostId} />
+          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>
+            {isEditing ? 'Edit Blind Tasting' : 'New Blind Testing HostApp'}
+          </h1>
+          <SessionForm
+            onSubmit={(payload) => {
+              lastWinesRef.current = payload.wines;
+              if (isEditing) {
+                setEditingWines(null);
+                updateSession(payload);
+              } else {
+                createSession(payload);
+              }
+            }}
+            hostId={hostId}
+            initialWines={editingWines ?? undefined}
+            isEditing={isEditing}
+          />
         </div>
       </div>
     );
@@ -132,6 +154,10 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
             code={code}
             participants={participants}
             onStart={startGame}
+            onEdit={() => {
+              setEditingWines(lastWinesRef.current);
+              useHostStore.getState().setPhase('setup');
+            }}
           />
         </div>
       </div>
@@ -217,4 +243,3 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
     </div>
   );
 }
-
