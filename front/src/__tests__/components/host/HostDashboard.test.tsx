@@ -137,7 +137,7 @@ describe('HostDashboard', () => {
     expect(screen.getByText(/ended/i)).toBeInTheDocument();
   });
 
-  it('shows "No sessions yet" message when sessions list is empty', () => {
+  it('shows "No tastings yet" message when sessions list is empty', () => {
     render(
       <HostDashboard
         hostId="TANNIC-FALCON"
@@ -147,7 +147,7 @@ describe('HostDashboard', () => {
         onNewSession={vi.fn()} onDeleteSession={vi.fn()}
       />,
     );
-    expect(screen.getByText(/No sessions yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/No tastings yet/i)).toBeInTheDocument();
   });
 
   it('calls onNewSession when New Session button is clicked', () => {
@@ -162,7 +162,7 @@ describe('HostDashboard', () => {
         onDeleteSession={vi.fn()}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: /new session/i }));
+    fireEvent.click(screen.getByRole('button', { name: /new blind testing/i }));
     expect(onNewSession).toHaveBeenCalledOnce();
   });
 

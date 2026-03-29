@@ -69,7 +69,7 @@ In Mode B, the `front` container runs **nginx** instead of the Astro dev server.
 2. **SPA routing** — nginx's `try_files $uri $uri/index.html /index.html` ensures `/host` and `/play` return `index.html` without a 404.
 3. **Same-origin WebSocket proxy** — nginx forwards `/parties/*` requests to the PartyKit backend container on port 1999, keeping browser–backend traffic on a single origin (no CORS).
 
-`absolute_redirect off` in `front/nginx.conf` ensures nginx uses relative `Location` headers, so the host port (4321) is never stripped from redirects.
+`absolute_redirect off` in `front/nginx.conf` ensures nginx uses relative `Location` headers, which is safer for SPA routing in various proxy environments.
 
 **For daily development, you don't need nginx at all** — Mode A uses Astro's built-in dev server on port 4321, which handles routing and WebSocket proxy natively via `PUBLIC_PARTYKIT_HOST`.
 
@@ -102,6 +102,30 @@ npm run start:local
 ```
 
 ### Docs site — local search & preview
+
+## Certificates / Playwright trust
+
+If your network performs TLS interception (corporate proxy like Zscaler), Playwright's browser downloads may fail with TLS errors. Convert your organization's root certificate to PEM and use it for the single Playwright install command.
+
+1. Convert DER (`.cer` / `.crt`) to PEM if needed:
+
+```bash
+openssl x509 -in "/path/to/org-root-ca.cer" -inform DER -out "/path/to/org-root-ca.pem" -outform PEM
+```
+
+2. Run the Playwright installer from the e2e directory while trusting the PEM file (one-off):
+
+```bash
+cd e2e
+NODE_EXTRA_CA_CERTS="/path/to/org-root-ca.pem" npx playwright install --with-deps
+```
+
+Notes:
+
+- Use a full filesystem path for `NODE_EXTRA_CA_CERTS` (do not check the PEM into source control).
+- If you are behind an HTTP proxy, prefix the command with `HTTPS_PROXY="http://proxy:port"`.
+- Avoid `NODE_TLS_REJECT_UNAUTHORIZED=0` in CI or shared environments — it disables TLS verification globally.
+
 
 This project uses a local, file-based search plugin for Docusaurus to provide a search box in the docs navbar.
 

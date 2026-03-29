@@ -6,8 +6,8 @@ const DOCS_URL: string = (import.meta as any).env?.PUBLIC_DOCS_URL ||
     : 'https://sommelier-arena.ducatillon.net/docs');
 
 const NAV_LINKS = [
-  { href: '/host', label: 'Host a Game' },
-  { href: '/play', label: "Let's Play" },
+  { href: '/host', label: 'Host a Tasting' },
+  { href: '/play', label: "Join a Tasting" },
   { href: DOCS_URL, label: 'Read the Docs' },
   { href: 'https://github.com/francoiducat/sommelier-arena', label: 'Git Repository' },
 ];

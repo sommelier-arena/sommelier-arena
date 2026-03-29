@@ -2,9 +2,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # PUBLIC_PARTYKIT_HOST is baked into the Astro static build at build time.
-# In Docker Mode B, the browser connects to localhost:3000 (nginx) which
-# proxies /parties/ to the back container. So we set it to localhost:3000.
-ARG PUBLIC_PARTYKIT_HOST=localhost:3000
+# In both Mode A (npm run dev) and Mode B (Docker), the browser connects directly
+# to localhost:1999 where the PartyKit server is exposed.
+ARG PUBLIC_PARTYKIT_HOST=localhost:1999
 ENV PUBLIC_PARTYKIT_HOST=$PUBLIC_PARTYKIT_HOST
 
 COPY package*.json ./
@@ -15,4 +15,4 @@ RUN npm run build
 FROM nginx:alpine AS production
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 3000
+EXPOSE 4321

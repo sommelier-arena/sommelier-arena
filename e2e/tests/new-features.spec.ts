@@ -12,13 +12,13 @@ async function createSession(browser: Browser) {
   await page.goto('/host');
 
   // Dashboard phase — click New Session
-  const newSessionBtn = page.getByRole('button', { name: /new session/i });
+  const newSessionBtn = page.getByRole('button', { name: /new blind testing/i });
   // Use waitFor — isVisible() returns immediately without retrying. On mobile/slow browsers
   // React may not have hydrated yet, causing isVisible() to return false prematurely.
   if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
-  await expect(page.getByRole('button', { name: /create session/i })).toBeVisible();
+  await expect(page.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   await page.getByLabel('Wine name', { exact: true }).fill('Test Wine v2');
 
@@ -43,7 +43,7 @@ async function createSession(browser: Browser) {
   await page.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
   await page.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
 
-  await page.getByRole('button', { name: /create session/i }).click();
+  await page.getByRole('button', { name: /create tasting/i }).click();
 
   const codeEl = page.locator('[aria-label^="Session code"]');
   await expect(codeEl.first()).toBeVisible();
@@ -61,7 +61,7 @@ test.describe('New features (v2.0)', () => {
       await expect(page.getByRole('heading', { name: /sommelier arena/i })).toBeVisible();
     });
     await test.step('New Session button is present', async () => {
-      await expect(page.getByRole('button', { name: /new session/i })).toBeVisible();
+      await expect(page.getByRole('button', { name: /new blind testing/i })).toBeVisible();
     });
   });
 
@@ -76,7 +76,7 @@ test.describe('New features (v2.0)', () => {
 
   test('Session form has wine_name category @smoke', async ({ page }) => {
     await page.goto('/host');
-    const newSessionBtn = page.getByRole('button', { name: /new session/i });
+    const newSessionBtn = page.getByRole('button', { name: /new blind testing/i });
     if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newSessionBtn.click();
     }
@@ -85,7 +85,7 @@ test.describe('New features (v2.0)', () => {
 
   test('Session form has timer slider @smoke', async ({ page }) => {
     await page.goto('/host');
-    const newSessionBtn = page.getByRole('button', { name: /new session/i });
+    const newSessionBtn = page.getByRole('button', { name: /new blind testing/i });
     if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newSessionBtn.click();
     }
@@ -135,12 +135,11 @@ test.describe('New features (v2.0)', () => {
     await hostPage.getByRole('button', { name: /start game/i }).click();
 
     await test.step('Participant sees 4 answer buttons in 2x2 grid', async () => {
-      const buttons = participantPage.getByRole('button').filter({ hasNotText: /join|start|reveal|next|pause|resume|end/i });
-      await expect(buttons).toHaveCount(4, { timeout: 10_000 });
-
-      // Verify 2x2 grid class
+      // Target buttons inside the options grid specifically to avoid NavBar/other buttons
       const grid = participantPage.locator('.grid-cols-2');
-      await expect(grid).toBeVisible();
+      await expect(grid).toBeVisible({ timeout: 10_000 });
+      const buttons = grid.getByRole('button');
+      await expect(buttons).toHaveCount(4);
     });
 
     await participantCtx.close();
@@ -181,5 +180,27 @@ test.describe('New features (v2.0)', () => {
     });
 
     await participantCtx.close();
+  });
+
+  test('Host can edit tasting in lobby before game starts @full', async ({ browser }) => {
+    const { page: hostPage } = await createSession(browser);
+
+    await test.step('Edit Tasting button is visible in lobby', async () => {
+      await expect(hostPage.getByRole('button', { name: /edit tasting/i })).toBeVisible();
+    });
+
+    await test.step('Click Edit Tasting shows the form in edit mode with original title', async () => {
+      await hostPage.getByRole('button', { name: /edit tasting/i }).click();
+      await expect(hostPage.getByRole('button', { name: /update tasting/i })).toBeVisible();
+      await expect(hostPage.getByRole('heading', { name: /edit blind tasting/i }).first()).toBeVisible();
+    });
+
+    await test.step('Submit updated wines returns to lobby', async () => {
+      // Change the wine name
+      await hostPage.getByLabel('Wine name', { exact: true }).fill('Updated Wine');
+      await hostPage.getByRole('button', { name: /update tasting/i }).click();
+      // Should return to lobby (SessionCreated / code display visible)
+      await expect(hostPage.locator('[aria-label^="Session code"]').first()).toBeVisible({ timeout: 10_000 });
+    });
   });
 });

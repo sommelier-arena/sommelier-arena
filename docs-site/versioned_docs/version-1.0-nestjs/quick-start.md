@@ -26,11 +26,12 @@ docker-compose up --build
 
 | Service | URL |
 |---------|-----|
-| **Host / Participant app** | http://localhost:3000 |
-| **Backend API + WebSocket** | http://localhost:3001 |
-| **Documentation site** | http://localhost:3002 |
+| **Host / Participant app** | `http://localhost:3000` |
+| **Backend API + WebSocket** | `http://localhost:3001` |
+| **Documentation site** | `http://localhost:3002` |
 
 Stop everything:
+
 ```bash
 docker-compose down
 ```
@@ -46,6 +47,7 @@ docker-compose down
 Open **three terminals** from the repo root.
 
 ### Terminal 1 — Backend
+
 ```bash
 cd back
 npm install
@@ -53,6 +55,7 @@ npm run start:dev   # hot-reload on :3001
 ```
 
 ### Terminal 2 — Frontend
+
 ```bash
 cd front
 npm install
@@ -60,6 +63,7 @@ npm run dev         # hot-reload on :4321 (Astro 4 default)
 ```
 
 ### Terminal 3 — Docs (optional)
+
 ```bash
 cd docs-site
 npm install
@@ -71,6 +75,7 @@ npm start           # Docusaurus on :3002
 ## Running tests
 
 ### Unit tests
+
 ```bash
 cd back
 npm test
@@ -79,6 +84,7 @@ npm test
 Expected output: **40 passed** across `game.service`, `timer.service`, and `pseudonym.service`.
 
 ### Integration tests
+
 ```bash
 cd back
 npm run test:e2e 2>/dev/null || npm test -- --testPathPattern=integration
@@ -102,11 +108,13 @@ npx playwright test
 ```
 
 View the HTML report after a run:
+
 ```bash
 npx playwright show-report
 ```
 
 Run a single spec for faster iteration:
+
 ```bash
 npx playwright test tests/full-game.spec.ts
 ```
@@ -115,8 +123,8 @@ npx playwright test tests/full-game.spec.ts
 
 ## Beta-test walkthrough (two browser windows)
 
-1. Open **Window 1** → `http://localhost:3000` — click **Host a Session**
-2. Fill in wine names and questions, then click **Create Session** — note the 4-digit code
+1. Open **Window 1** → `http://localhost:3000` — click **Host a Tasting**
+2. Fill in wine names and questions, then click **Create Tasting** — note the 4-digit code
 3. Open **Window 2** → `http://localhost:3000` — click **Join** and enter the code
 4. Back in Window 1 click **Start Game**
 5. Window 2 shows the first question; tap an answer
@@ -126,5 +134,5 @@ npx playwright test tests/full-game.spec.ts
 9. After the last question the round leaderboard appears, then the final leaderboard
 
 ### Pause/resume
-During a question the host can click **Pause** — participants see a countdown freeze — and **Resume** to continue from exactly where it stopped.
 
+During a question the host can click **Pause** — participants see a countdown freeze — and **Resume** to continue from exactly where it stopped.

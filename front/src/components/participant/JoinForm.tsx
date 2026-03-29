@@ -20,7 +20,7 @@ export function JoinForm({ onJoin, error }: JoinFormProps) {
       <div className="w-full max-w-sm space-y-8 text-center">
         <div>
           <p className="text-4xl mb-3">🍷</p>
-          <h1 className="text-3xl font-bold text-slate-800">Join Session</h1>
+          <h1 className="text-3xl font-bold text-slate-800">Join a Testing</h1>
           <p className="text-slate-500 mt-2">Enter the 4-digit code from your host.</p>
         </div>
 

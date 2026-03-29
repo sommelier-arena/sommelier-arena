@@ -110,6 +110,20 @@ export function useHostSocket(code: string) {
           }
           break;
         }
+        case 'host:session_updated': {
+          const { wines, timerSeconds, sessionTitle } = msg as unknown as {
+            wines: unknown[];
+            timerSeconds: number;
+            sessionTitle: string;
+          };
+          store.setTotalRounds(wines.length);
+          // Update localStorage title if it changed
+          if (store.code && sessionTitle) {
+            mergeSession(store.hostId, store.code, { status: 'waiting' });
+          }
+          store.setPhase('lobby');
+          break;
+        }
         case 'game:question': {
           const payload = msg as unknown as QuestionPayload;
           store.setCurrentQuestion(payload);
@@ -185,6 +199,11 @@ export function useHostSocket(code: string) {
     send({ type: 'create_session', ...payload });
   }, [send]);
 
+  const updateSession = useCallback((payload: CreateSessionPayload) => {
+    pendingTitleRef.current = payload.title ?? payload.wines[0]?.name ?? '';
+    send({ type: 'update_session', ...payload });
+  }, [send]);
+
   const startGame = useCallback(() => send({ type: 'host:start' }), [send]);
   const pauseGame = useCallback(() => send({ type: 'host:pause' }), [send]);
   const resumeGame = useCallback(() => send({ type: 'host:resume' }), [send]);
@@ -194,6 +213,7 @@ export function useHostSocket(code: string) {
 
   return {
     createSession,
+    updateSession,
     startGame,
     pauseGame,
     resumeGame,

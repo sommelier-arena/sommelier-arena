@@ -5,11 +5,11 @@ async function createSessionAndGetCode(hostContext: BrowserContext): Promise<str
   const hostPage = await hostContext.newPage();
   await hostPage.goto('/host');
   // Dashboard phase — click New Session to get to form
-  const newSessionBtn = hostPage.getByRole('button', { name: /new session/i });
+  const newSessionBtn = hostPage.getByRole('button', { name: /new blind testing/i });
   if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
-  await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
+  await expect(hostPage.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   await hostPage.getByLabel('Wine name', { exact: true }).fill('Test Wine');
   await hostPage.getByLabel('Wine 1 Color — correct answer').fill('Red');
@@ -29,7 +29,7 @@ async function createSessionAndGetCode(hostContext: BrowserContext): Promise<str
   await hostPage.getByLabel('Wine 1 Vintage Year — distractor 2').fill('2019');
   await hostPage.getByLabel('Wine 1 Vintage Year — distractor 3').fill('2020');
 
-  await hostPage.getByRole('button', { name: /create session/i }).click();
+  await hostPage.getByRole('button', { name: /create tasting/i }).click();
 
   const codeEl = hostPage.locator('[aria-label^="Session code"]');
   await expect(codeEl.first()).toBeVisible();

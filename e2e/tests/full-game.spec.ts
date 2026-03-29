@@ -9,11 +9,11 @@ async function hostCreateSession(browser: Browser) {
   await hostPage.goto('/host');
 
   // New dashboard phase — click New Session to get to the form
-  const newSessionBtn = hostPage.getByRole('button', { name: /new session/i });
+  const newSessionBtn = hostPage.getByRole('button', { name: /new blind testing/i });
   if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
     await newSessionBtn.click();
   }
-  await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
+  await expect(hostPage.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   // Wine name
   await hostPage.getByLabel('Wine name', { exact: true }).fill('Grand Cru Test');
@@ -48,7 +48,7 @@ async function hostCreateSession(browser: Browser) {
   await hostPage.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
   await hostPage.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
 
-  await hostPage.getByRole('button', { name: /create session/i }).click();
+  await hostPage.getByRole('button', { name: /create tasting/i }).click();
 
   // The visible session code is rendered with an aria-label like "Session code: 6 1 8 3".
   // Read the aria-label and extract digits to avoid matching the share URL that contains the code.

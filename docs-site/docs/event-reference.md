@@ -17,9 +17,30 @@ Sent by host to create a new session.
 ```ts
 {
   type: 'create_session';
-  title: string;
+  title?: string;           // optional; falls back to first wine name
   hostId: string;           // e.g. 'TANNIC-FALCON'
   timerSeconds: number;     // 15–120
+  wines: Array<{
+    name: string;
+    questions: Array<{
+      category: 'color' | 'country' | 'grape_variety' | 'vintage_year' | 'wine_name';
+      correctAnswer: string;
+      distractors: [string, string, string];
+    }>;
+  }>;
+}
+```
+
+### `update_session`
+
+Sent by host to update wines while the session is in the `waiting` phase (before game starts). Rejected with an error if `phase !== 'waiting'`.
+
+```ts
+{
+  type: 'update_session';
+  title?: string;           // optional; falls back to first wine name
+  hostId: string;
+  timerSeconds: number;
   wines: Array<{
     name: string;
     questions: Array<{
@@ -88,6 +109,19 @@ Sent to host after successful `create_session`.
 
 ```ts
 { type: 'session:created'; code: string; hostId: string }
+```
+
+### `host:session_updated`
+
+Sent to host after a successful `update_session`.
+
+```ts
+{
+  type: 'host:session_updated';
+  wines: Wine[];           // updated wines list
+  timerSeconds: number;
+  sessionTitle: string;
+}
 ```
 
 ### `participant:joined`
@@ -248,11 +282,12 @@ Sent to each participant:
 | `code` | When |
 |--------|------|
 | `SESSION_NOT_FOUND` | `join_session` sent to a room with no wines (session doesn't exist) |
-| `GAME_STARTED` | `join_session` sent after the game has already begun |
+| `GAME_STARTED` | `join_session` sent after the game has already begun; or `update_session` sent after game has started |
 | `SESSION_FULL` | `join_session` when 10 participants already connected |
 | `INVALID_PSEUDONYM` | `rejoin_session` with an unknown pseudonym |
 | `INVALID_HOST_ID` | `rejoin_host` with a mismatched host ID |
 | `SESSION_EXISTS` | `create_session` when a session already exists in this room |
+| `NO_WINES` | `create_session` or `update_session` sent with an empty wines array |
 
 ---
 

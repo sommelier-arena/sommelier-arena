@@ -38,15 +38,15 @@ async function fillMinimalSession(page: import('@playwright/test').Page) {
 test.describe('Host Session', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/host');
-    // After dashboard loads, click New Session to get to the form
-    const newSessionBtn = page.getByRole('button', { name: /new session/i });
+    // After dashboard loads, click New Blind Testing to get to the form
+    const newSessionBtn = page.getByRole('button', { name: /new blind testing/i });
     // Use waitFor — isVisible() returns immediately without retrying. On mobile/slow browsers
     // React may not have hydrated yet, causing isVisible() to return false prematurely.
     if (await newSessionBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newSessionBtn.click();
     }
     // Wait for the React app to hydrate and show the form
-    await expect(page.getByRole('button', { name: /create session/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /create tasting/i })).toBeVisible();
   });
 
   test('Host Session - happy path creates session and shows 4-digit code @smoke', async ({ page }) => {
@@ -55,7 +55,7 @@ test.describe('Host Session', () => {
     });
 
     await test.step('Submit the form', async () => {
-      await page.getByRole('button', { name: /create session/i }).click();
+      await page.getByRole('button', { name: /create tasting/i }).click();
     });
 
     await test.step('Lobby shows a 4-digit session code', async () => {
@@ -67,7 +67,7 @@ test.describe('Host Session', () => {
   test('Host Session - boundary: submit with empty wine name shows error @smoke', async ({ page }) => {
     await test.step('Leave wine name empty and submit', async () => {
       await page.getByLabel('Wine 1 Color — correct answer').fill('Red');
-      await page.getByRole('button', { name: /create session/i }).click();
+      await page.getByRole('button', { name: /create tasting/i }).click();
     });
 
     await test.step('Inline error is announced via role=alert', async () => {
@@ -80,7 +80,7 @@ test.describe('Host Session', () => {
       await page.getByLabel('Wine name', { exact: true }).fill('Test Wine');
       // Clear the Color correct answer (it has a default value — clear it to trigger validation)
       await page.getByLabel('Wine 1 Color — correct answer').clear();
-      await page.getByRole('button', { name: /create session/i }).click();
+      await page.getByRole('button', { name: /create tasting/i }).click();
     });
 
     await test.step('Alert contains field-specific error', async () => {
@@ -93,11 +93,11 @@ test.describe('Host Session', () => {
     const page = await ctx.newPage();
     await page.goto('/host');
 
-    const newBtn = page.getByRole('button', { name: /new session/i });
+    const newBtn = page.getByRole('button', { name: /new blind testing/i });
     if (await newBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newBtn.click();
     }
-    await expect(page.getByRole('button', { name: /create session/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
     await page.getByLabel('Wine name', { exact: true }).fill('URL Test Wine');
     await page.getByLabel('Wine 1 Color — correct answer').fill('Red');
@@ -120,7 +120,7 @@ test.describe('Host Session', () => {
     await page.getByLabel('Wine 1 Wine Name — distractor 1').fill('Château Margaux');
     await page.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
     await page.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
-    await page.getByRole('button', { name: /create session/i }).click();
+    await page.getByRole('button', { name: /create tasting/i }).click();
 
     const codeEl = page.locator('[aria-label^="Session code"]');
     await expect(codeEl.first()).toBeVisible();
@@ -135,7 +135,7 @@ test.describe('Host Session', () => {
     const page1 = await ctx1.newPage();
     await page1.goto('/host');
 
-    const newBtn = page1.getByRole('button', { name: /new session/i });
+    const newBtn = page1.getByRole('button', { name: /new blind testing/i });
     if (await newBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
       await newBtn.click();
     }
@@ -160,7 +160,7 @@ test.describe('Host Session', () => {
     await page1.getByLabel('Wine 1 Wine Name — distractor 1').fill('Château Margaux');
     await page1.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
     await page1.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
-    await page1.getByRole('button', { name: /create session/i }).click();
+    await page1.getByRole('button', { name: /create tasting/i }).click();
 
     const codeEl = page1.locator('[aria-label^="Session code"]');
     await expect(codeEl.first()).toBeVisible();
@@ -186,13 +186,13 @@ test.describe('Host Session', () => {
 
     await test.step('Host creates a session', async () => {
       await hostPage.goto('/host');
-      const newBtn = hostPage.getByRole('button', { name: /new session/i });
+      const newBtn = hostPage.getByRole('button', { name: /new blind testing/i });
       if (await newBtn.waitFor({ state: 'visible', timeout: 8000 }).then(() => true).catch(() => false)) {
         await newBtn.click();
       }
-      await expect(hostPage.getByRole('button', { name: /create session/i })).toBeVisible();
+      await expect(hostPage.getByRole('button', { name: /create tasting/i })).toBeVisible();
       await fillMinimalSession(hostPage);
-      await hostPage.getByRole('button', { name: /create session/i }).click();
+      await hostPage.getByRole('button', { name: /create tasting/i }).click();
       const codeEl = hostPage.locator('[aria-label^="Session code"]');
       await expect(codeEl.first()).toBeVisible();
     });
@@ -220,7 +220,7 @@ test.describe('Host Session', () => {
 
       await test.step('Host navigates away to the dashboard', async () => {
         await hostPage.goto('/host');
-        await expect(hostPage.getByRole('button', { name: /new session/i })).toBeVisible();
+        await expect(hostPage.getByRole('button', { name: /new blind testing/i })).toBeVisible();
       });
 
       await test.step('Host navigates back to the session URL', async () => {

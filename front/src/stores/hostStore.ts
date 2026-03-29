@@ -77,6 +77,8 @@ interface HostState {
   setTotalRounds: (totalRounds: number) => void;
   setTimerMs: (ms: number) => void;
   resetAnsweredStats: () => void;
+  /** Reset all session-specific state to return to the setup form for a new tasting */
+  resetSession: () => void;
 }
 
 export const useHostStore = create<HostState>((set, get) => ({
@@ -121,5 +123,20 @@ export const useHostStore = create<HostState>((set, get) => ({
   setTotalRounds: (totalRounds) => set({ totalRounds }),
   setTimerMs: (timerMs) => set({ timerMs }),
   resetAnsweredStats: () => set({ answeredCount: 0 }),
+  resetSession: () =>
+    set({
+      phase: 'setup',
+      code: null,
+      participants: [],
+      answeredCount: 0,
+      totalCount: 0,
+      isPaused: false,
+      currentQuestion: null,
+      revealData: null,
+      rankings: [],
+      roundIndex: 0,
+      totalRounds: 0,
+      timerMs: 60000,
+    }),
 }));
 

@@ -7,6 +7,7 @@ import type { GameContext } from './game-context';
 
 import {
   handleCreateSession,
+  handleUpdateSession,
   handleRejoinHost,
   handleJoinSession,
   handleRejoinSession,
@@ -101,6 +102,9 @@ export default class GameSession implements Party.Server, GameContext {
     switch (event.type) {
       case 'create_session':
         await handleCreateSession(this, event, sender);
+        break;
+      case 'update_session':
+        await handleUpdateSession(this, event, sender);
         break;
       case 'rejoin_host':
         await handleRejoinHost(this, event, sender);

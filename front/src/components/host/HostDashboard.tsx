@@ -18,10 +18,12 @@ export function HostDashboard({
   onNewSession,
   onDeleteSession,
 }: HostDashboardProps) {
-  const activeSessions = sessions.filter(
-    (s) => s.status === 'waiting' || s.status === 'active',
-  );
-  const endedSessions = sessions.filter((s) => s.status === 'ended');
+  const activeSessions = sessions
+    .filter((s) => s.status === 'waiting' || s.status === 'active')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const endedSessions = sessions
+    .filter((s) => s.status === 'ended')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
     <div className="min-h-[80vh] bg-slate-50 px-4 py-10">
@@ -41,14 +43,14 @@ export function HostDashboard({
           onClick={onNewSession}
           className="w-full bg-wine-600 text-white rounded-xl py-4 font-semibold text-lg hover:bg-wine-700 transition-colors"
         >
-          + New Session
+          + New Blind Testing
         </button>
 
         {/* Active sessions */}
         {activeSessions.length > 0 && (
           <section aria-labelledby="active-sessions-heading">
             <h2 id="active-sessions-heading" className="text-lg font-semibold text-slate-700 mb-3">
-              Active Sessions
+              Active Tastings
             </h2>
             <ul className="space-y-3">
               {activeSessions.map((session) => (
@@ -99,7 +101,7 @@ export function HostDashboard({
         {endedSessions.length > 0 && (
           <section aria-labelledby="ended-sessions-heading">
             <h2 id="ended-sessions-heading" className="text-lg font-semibold text-slate-700 mb-3">
-              Past Sessions
+              Past Tastings
             </h2>
             <ul className="space-y-3">
               {endedSessions.map((session) => (
@@ -146,7 +148,7 @@ export function HostDashboard({
 
         {sessions.length === 0 && (
           <p className="text-center text-slate-400 py-8">
-            No sessions yet. Create your first one!
+            No tastings yet. Create your first one!
           </p>
         )}
       </div>

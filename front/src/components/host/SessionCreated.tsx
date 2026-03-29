@@ -29,11 +29,12 @@ export function SessionCreated({ code, hostId }: SessionCreatedProps) {  const o
   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
 
   return (
+    <div className="w-full max-w-lg mx-auto space-y-8 text-center">
     <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-5 text-center">
       <div>
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Session created!</p>
+        <p className="text-sm font-medium text-slate-500 uppercase tracking-wide">Tasting created🍷!</p>
         <p className="text-slate-600 mt-1 text-sm">
-          Share this code or link with participants:
+          Share this code to invite players:
         </p>
         <p
           className="text-6xl font-mono font-bold text-wine-600 tracking-widest mt-2"
@@ -41,19 +42,12 @@ export function SessionCreated({ code, hostId }: SessionCreatedProps) {  const o
         >
           {code}
         </p>
-        <p className="text-xs text-slate-500 mt-2">
-          Host ID: <span className="font-mono font-bold text-wine-600">{hostId}</span>
-        </p>
       </div>
 
-      <div className="border-t border-slate-100 pt-5 space-y-3">
-        <p className="text-sm text-slate-600">
-          Share this link — participants who open it will auto-join your session:
-        </p>
+      <div className="border-t border-slate-100 space-y-3">
         <p className="text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 break-all">
           {participantUrl}
         </p>
-
         <div className="flex flex-col sm:flex-row gap-2 pt-1">
           <button
             onClick={handleCopyParticipantLink}
@@ -71,6 +65,7 @@ export function SessionCreated({ code, hostId }: SessionCreatedProps) {  const o
           </a>
         </div>
       </div>
+    </div>
     </div>
   );
 }
