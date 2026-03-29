@@ -24,9 +24,9 @@ services:
       context: ./front
       args:
         # PUBLIC_PARTYKIT_HOST is baked into the Astro static build.
-        # The browser connects to localhost:4321 (host port, Docker maps 4321:4321)
-        # which proxies /parties/ requests to the back container on port 1999.
-        PUBLIC_PARTYKIT_HOST: localhost:4321
+        # The browser connects directly to localhost:1999 (the back container),
+        # same as Mode A (local dev). No nginx proxy needed for WebSocket traffic.
+        PUBLIC_PARTYKIT_HOST: localhost:1999
     ports:
       - '4321:4321'
     depends_on:

@@ -74,16 +74,18 @@ interface SessionFormProps {
   hostId?: string;
   /** Pre-filled wines for editing an existing session */
   initialWines?: CreateWinePayload[];
+  /** Pre-filled title for editing an existing session */
+  initialTitle?: string;
   /** When true, renders in edit mode (different heading + submit label) */
   isEditing?: boolean;
 }
 
-export function SessionForm({ onSubmit, hostId, initialWines, isEditing = false }: SessionFormProps) {
+export function SessionForm({ onSubmit, hostId, initialWines, initialTitle, isEditing = false }: SessionFormProps) {
   const [wines, setWines] = useState<WineFormData[]>(() =>
     initialWines?.length ? initialWines.map(wineFromPayload) : [emptyWine()],
   );
   const [timerSeconds, setTimerSeconds] = useState(60);
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(initialTitle ?? '');
   const [error, setError] = useState<string | null>(null);
 
   const updateWineName = (wi: number, value: string) => {

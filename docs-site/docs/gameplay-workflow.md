@@ -14,7 +14,7 @@ waiting
   ▼
 question_open ◄──── host:resume
   │                      ▲
-  │ host:pause            │
+  │ host:pause           │
   ▼                      │
 question_paused ─────────┘
   │
@@ -35,6 +35,7 @@ ended                      (after final round)
 ## Session creation
 
 The host fills in `SessionForm`:
+
 - **Title** — optional display name for the tasting (shown in session list). If left blank, the first wine's name is used.
 - **Wines** — one or more wines; each wine gets **5 questions** (one per category, fixed order: `color`, `country`, `grape_variety`, `vintage_year`, `wine_name`)
 - **Correct answer** — always blank; host fills in
@@ -73,6 +74,7 @@ After the last question of each wine (5th question), the server emits `game:roun
 ## Session end
 
 Host clicks **End Session** at any time OR the game completes all questions. On end:
+
 1. Final rankings are written to KV (`host:{hostId}` key, `finalRankings` field of the matching session entry)
 2. All clients receive `session:ended`
 3. Phase transitions to `ended`

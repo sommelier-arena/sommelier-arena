@@ -64,9 +64,9 @@ All layers in one view:
 
 | Layer | Setting | Mode A (local) | Mode B (Docker) | Production |
 |---|---|---|---|---|
-| **Frontend** | `PUBLIC_PARTYKIT_HOST` | `front/.env.local` → `localhost:1999` | Docker build arg → `localhost:4321` | Cloudflare Pages env → `<project>.partykit.dev` |
+| **Frontend** | `PUBLIC_PARTYKIT_HOST` | `front/.env.local` → `localhost:1999` | Docker build arg → `localhost:1999` | Cloudflare Pages env → `<project>.partykit.dev` |
 | **Frontend** | Serving | Astro dev server `:4321` | nginx container (mapped `4321:4321`) | Cloudflare Pages CDN |
-| **Backend** | PartyKit | `npx partykit dev --port 1999` | PartyKit container (internal `:1999`) | Cloudflare Workers (Durable Objects) |
+| **Backend** | PartyKit | `npx partykit dev --port 1999` | PartyKit container (exposed `:1999`) | Cloudflare Workers (Durable Objects) |
 | **Backend** | DO storage | In-memory (resets on restart) | In-memory | SQLite (persistent across DO evictions) |
 | **Backend** | `HOSTS_KV` | Not available | Not available | Cloudflare KV namespace (bound in `partykit.json`) |
 | **Docs** | Serving | Docusaurus dev `:3002` | nginx container (mapped `3002:80`) | Cloudflare Pages (`/docs`) |
@@ -89,15 +89,7 @@ listen 4321;
 # 2. Use relative Location headers for safer SPA routing
 absolute_redirect off;
 
-# 3. Proxy WebSocket + HTTP to the PartyKit backend container
-location /parties/ {
-    proxy_pass http://back:1999/parties/;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "upgrade";
-}
-
-# 4. SPA routing: serve index.html for any unknown path (/host, /play, ...)
+# 3. SPA routing: serve index.html for any unknown path (/host, /play, ...)
 location / {
     try_files $uri $uri/index.html /index.html;
 }
@@ -105,22 +97,22 @@ location / {
 
 **Why nginx:**
 - Astro builds to **pure static files** (`output: static` in `astro.config.mjs`) — no Node.js server runs at request time. nginx serves these HTML/JS/CSS files.
-- The browser must access static files **and** WebSocket on the **same origin** to avoid CORS issues. nginx handles both in one container.
 - `absolute_redirect off` keeps Location headers relative (`/host/` instead of `http://localhost:4321/host/`), which is safer for SPA routing in various Docker/proxy setups.
 - `try_files $uri $uri/index.html /index.html` is the standard SPA pattern: nginx checks for the exact file, then `path/index.html`, then falls back to `index.html` — no redirect triggered for `/host` or `/play`.
+
+**WebSocket traffic** goes directly from the browser to `localhost:1999` (the `back` container exposed on host port 1999). nginx does not proxy WebSocket connections — no `/parties/` location block needed.
 
 ### Why we need it for E2E tests
 
 The Playwright E2E tests run against the Docker stack (Mode B). Without nginx:
 1. There's no server to serve the Astro static build
-2. WebSocket connections from the browser to `/parties/*` have no route to the `back` container
 
 ### Alternatives to nginx
 
 | Alternative | Trade-offs |
 |---|---|
 | **Caddy** | Simpler config syntax, auto-HTTPS; same capabilities. Swap `nginx:alpine` for `caddy:alpine` and replace `nginx.conf` with a `Caddyfile`. |
-| **Mode A (no Docker)** | `npm run dev` in `front/` uses Astro's built-in dev server on `:4321`. SPA routing and WebSocket proxy work natively. No nginx needed. This is the **recommended** approach for daily development. |
+| **Mode A (no Docker)** | `npm run dev` in `front/` uses Astro's built-in dev server on `:4321`. SPA routing works natively. No nginx needed. This is the **recommended** approach for daily development. |
 | **Apache httpd** | Heavier; works but nginx:alpine is smaller. |
 | **Node.js + http-proxy-middleware** | More complex Docker setup; not production-like. |
 

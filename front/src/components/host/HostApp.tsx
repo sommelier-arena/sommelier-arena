@@ -30,10 +30,12 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
   const totalRounds = useHostStore((s) => s.totalRounds);
   const timerMs = useHostStore((s) => s.timerMs);
 
-  // Wines snapshot for edit mode (captured when host clicks "Edit Wines")
+  // Wines snapshot for edit mode (captured when host clicks "Edit Tasting")
   const [editingWines, setEditingWines] = useState<CreateWinePayload[] | null>(null);
   // Store the last submitted wines payload so we can pre-fill the edit form
   const lastWinesRef = useRef<CreateWinePayload[]>([]);
+  // Store the last submitted title so we can pre-fill the edit form
+  const lastTitleRef = useRef<string>('');
 
   // Socket connects to the active session room (empty string = no connection yet)
   const {
@@ -127,6 +129,7 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
           <SessionForm
             onSubmit={(payload) => {
               lastWinesRef.current = payload.wines;
+              lastTitleRef.current = payload.title ?? payload.wines[0]?.name ?? '';
               if (isEditing) {
                 setEditingWines(null);
                 updateSession(payload);
@@ -136,6 +139,7 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
             }}
             hostId={hostId}
             initialWines={editingWines ?? undefined}
+            initialTitle={isEditing ? lastTitleRef.current : undefined}
             isEditing={isEditing}
           />
         </div>
@@ -227,7 +231,15 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
         {showNav && <NavBar />}
         <div className="px-4 py-10">
           <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Final Leaderboard</h1>
-          <HostFinalLeaderboard rankings={rankings} />
+          <HostFinalLeaderboard
+            rankings={rankings}
+            onNewTasting={() => {
+              setEditingWines(null);
+              lastWinesRef.current = [];
+              lastTitleRef.current = '';
+              useHostStore.getState().resetSession();
+            }}
+          />
         </div>
       </div>
     );

@@ -121,4 +121,11 @@ describe('SessionForm', () => {
     render(<SessionForm onSubmit={vi.fn()} initialWines={initialWines} />);
     expect(screen.getByDisplayValue('Existing Wine')).toBeInTheDocument();
   });
+
+  it('pre-fills title field when initialTitle provided', () => {
+    render(<SessionForm onSubmit={vi.fn()} initialTitle="Friday Night Tasting" isEditing />);
+    const titleInput = screen.getByRole('textbox', { name: /tasting title/i });
+    expect((titleInput as HTMLInputElement).value).toBe('Friday Night Tasting');
+  });
 });
+

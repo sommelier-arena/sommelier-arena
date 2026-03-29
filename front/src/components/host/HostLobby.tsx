@@ -53,7 +53,7 @@ export function HostLobby({ code, participants, onStart, onEdit }: HostLobbyProp
           type="button"
           className="w-full border border-wine-300 text-wine-600 rounded-xl py-3 font-medium hover:bg-wine-50 transition-colors"
         >
-          ✏️ Edit Wines
+          ✏️ Edit Tasting
         </button>
       )}
     </div>

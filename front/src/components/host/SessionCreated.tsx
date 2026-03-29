@@ -44,11 +44,10 @@ export function SessionCreated({ code, hostId }: SessionCreatedProps) {  const o
         </p>
       </div>
 
-      <div className="border-t border-slate-100 pt-5 space-y-3">
+      <div className="border-t border-slate-100 space-y-3">
         <p className="text-xs font-mono bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-700 break-all">
           {participantUrl}
         </p>
-
         <div className="flex flex-col sm:flex-row gap-2 pt-1">
           <button
             onClick={handleCopyParticipantLink}

@@ -18,10 +18,12 @@ export function HostDashboard({
   onNewSession,
   onDeleteSession,
 }: HostDashboardProps) {
-  const activeSessions = sessions.filter(
-    (s) => s.status === 'waiting' || s.status === 'active',
-  );
-  const endedSessions = sessions.filter((s) => s.status === 'ended');
+  const activeSessions = sessions
+    .filter((s) => s.status === 'waiting' || s.status === 'active')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  const endedSessions = sessions
+    .filter((s) => s.status === 'ended')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
     <div className="min-h-[80vh] bg-slate-50 px-4 py-10">

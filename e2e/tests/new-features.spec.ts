@@ -182,15 +182,15 @@ test.describe('New features (v2.0)', () => {
     await participantCtx.close();
   });
 
-  test('Host can edit wines in lobby before game starts @full', async ({ browser }) => {
+  test('Host can edit tasting in lobby before game starts @full', async ({ browser }) => {
     const { page: hostPage } = await createSession(browser);
 
-    await test.step('Edit Wines button is visible in lobby', async () => {
-      await expect(hostPage.getByRole('button', { name: /edit wines/i })).toBeVisible();
+    await test.step('Edit Tasting button is visible in lobby', async () => {
+      await expect(hostPage.getByRole('button', { name: /edit tasting/i })).toBeVisible();
     });
 
-    await test.step('Click Edit Wines shows the form in edit mode', async () => {
-      await hostPage.getByRole('button', { name: /edit wines/i }).click();
+    await test.step('Click Edit Tasting shows the form in edit mode with original title', async () => {
+      await hostPage.getByRole('button', { name: /edit tasting/i }).click();
       await expect(hostPage.getByRole('button', { name: /update tasting/i })).toBeVisible();
       await expect(hostPage.getByRole('heading', { name: /edit blind tasting/i }).first()).toBeVisible();
     });
