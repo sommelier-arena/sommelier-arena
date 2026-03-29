@@ -26,9 +26,9 @@ docker-compose up --build
 
 | Service | URL |
 |---------|-----|
-| **Host / Participant app** | <http://localhost:3000> |
-| **Backend API + WebSocket** | <http://localhost:3001> |
-| **Documentation site** | <http://localhost:3002> |
+| **Host / Participant app** | `http://localhost:3000` |
+| **Backend API + WebSocket** | `http://localhost:3001` |
+| **Documentation site** | `http://localhost:3002` |
 
 Stop everything:
 
