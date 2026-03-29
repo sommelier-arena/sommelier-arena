@@ -60,7 +60,16 @@ jobs:
       - name: Start frontend preview server
         run: npm --prefix front run preview -- --port 4321 &
 
-      # ── Wait for both services to respond ────────────────────────────────────
+      - name: Install docs-site dependencies
+        run: npm --prefix docs-site ci
+
+      - name: Build docs-site
+        run: npm --prefix docs-site run build
+
+      - name: Start docs-site server
+        run: npm --prefix docs-site run serve --silent &
+
+      # ── Wait for services to respond ──────────────────────────────────────────
       - name: Wait for frontend (port 4321)
         run: |
           for i in $(seq 1 60); do
@@ -72,6 +81,18 @@ jobs:
             sleep 3
           done
           curl -sSf http://localhost:4321/ || (echo "Frontend never became ready" && exit 1)
+
+      - name: Wait for docs-site (port 3002)
+        run: |
+          for i in $(seq 1 60); do
+            if curl -sSf http://localhost:3002/ > /dev/null 2>&1; then
+              echo "Docs site is up after ${i} attempts"
+              break
+            fi
+            echo "Waiting for docs site... attempt $i/60"
+            sleep 3
+          done
+          curl -sSf http://localhost:3002/ || (echo "Docs site never became ready" && exit 1)
 
       - name: Wait for PartyKit backend (port 1999)
         run: |
