@@ -189,6 +189,7 @@ export async function handleJoinSession(
     connected: participant.connected,
     answeredQuestions: [],
   });
+  await ctx.upsertKvSession({ status: 'waiting' });
 
   sender.send(JSON.stringify({
     type: 'participant:joined',

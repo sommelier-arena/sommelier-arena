@@ -76,6 +76,15 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
       }
       store.setPhase('dashboard');
     }
+
+    const storageHandler = (event: StorageEvent) => {
+      if (event.key !== `sommelierArena:sessions:${useHostStore.getState().hostId}`) return;
+      useHostStore.getState().setSessions(loadSessions(useHostStore.getState().hostId));
+    };
+    window.addEventListener('storage', storageHandler);
+    return () => {
+      window.removeEventListener('storage', storageHandler);
+    };
   }, []);
 
   // Keep browser address bar in sync with current phase (enables share/bookmark)
@@ -238,6 +247,7 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
               lastWinesRef.current = [];
               lastTitleRef.current = '';
               useHostStore.getState().resetSession();
+              handleNewSession();
             }}
           />
         </div>
