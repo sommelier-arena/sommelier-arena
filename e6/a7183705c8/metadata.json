@@ -1,0 +1,25 @@
+{
+  "cli_version": "0.5.3",
+  "checkpoint_id": "e6a7183705c8",
+  "strategy": "manual-commit",
+  "branch": "feat/add-wine-answers-collection",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "front/src/components/common/ComboboxInput.tsx"
+  ],
+  "sessions": [
+    {
+      "metadata": "/e6/a7183705c8/0/metadata.json",
+      "transcript": "/e6/a7183705c8/0/full.jsonl",
+      "content_hash": "/e6/a7183705c8/0/content_hash.txt",
+      "prompt": "/e6/a7183705c8/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 32127,
+    "api_call_count": 39
+  }
+}
