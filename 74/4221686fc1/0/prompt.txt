@@ -1,0 +1,4 @@
+Still the same error : 6m 37s
+Run npx playwright test --project=chromium --reporter=github
+Running 48 tests using 1 worker AND this warning Unit Tests (front)
+Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
