@@ -1,16 +1,1 @@
-Plan ➜ back git:(feat/add-wine-answers-collection) ✗ npm run deploy $ > sommelier-arena-back@2.0.0 deploy > cd .. && npx partykit deploy 🎈 PartyKit v0.0.115 --------------------- Deploying... file:///Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena/node_modules/partykit/dist/bin.mjs:96301 throw err; ^ Error: Bindings are only available for custom Cloudflare accounts at fetchResult (file:///Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena/node_modules/partykit/dist/bin.mjs:84998:11) at process.processTicksAndRejections (node:internal/process/task_queues:105:5) at async deploy (file:///Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena/node_modules/partykit/dist/bin.mjs:95750:21) at async _Command.<anonymous> (file:///Users/mac-FDUCAT18/Workspace/FDUCAT/SommelierArena/node_modules/partykit/dist/bin.mjs:96391:3) Node.js v23.6.1
-
----
-
-You have not yet marked the task as complete using the task_complete tool. If you were planning, stop planning and start implementing. You aren't done until you have fully completed the task.
-
-IMPORTANT: Do NOT call task_complete if:
-- You have open questions or ambiguities - make good decisions and keep working
-- You encountered an error - try to resolve it or find an alternative approach
-- There are remaining steps - complete them first
-
-Keep working autonomously until the task is truly finished, then call task_complete.
-
----
-
-[[PLAN]] All .md docs are still not up to date . Examplearchitecture.md stills refers to kv with DO I asked for a thorough review of .md files for the docusaurus site
+Plan All .md docs are still not up to date . Examplearchitecture.md stills refers to kv with DO I asked for a thorough review of .md files for the docusaurus site
