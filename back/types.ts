@@ -3,12 +3,13 @@ export type SessionPhase =
   | 'question_open'
   | 'question_paused'
   | 'question_revealed'
+  | 'question_leaderboard'
   | 'round_leaderboard'
   | 'ended';
 
 export type QuestionCategory =
   | 'color'
-  | 'country'
+  | 'region'
   | 'grape_variety'
   | 'vintage_year'
   | 'wine_name';
@@ -65,4 +66,5 @@ export interface SavedState {
   hostId: string;
   sessionTitle: string;
   createdAt: string;
+  hostDisconnectedAt?: number | null;
 }

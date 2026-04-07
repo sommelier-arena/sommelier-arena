@@ -179,7 +179,7 @@ describe('HostDashboard', () => {
         onDeleteSession={onDeleteSession}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: /delete session 1234/i }));
+    fireEvent.click(screen.getByRole('button', { name: /delete tasting 1234/i }));
     expect(onDeleteSession).toHaveBeenCalledWith('1234');
   });
 
@@ -196,7 +196,7 @@ describe('HostDashboard', () => {
         onDeleteSession={onDeleteSession}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: /delete session 5678/i }));
+    fireEvent.click(screen.getByRole('button', { name: /delete tasting 5678/i }));
     expect(onDeleteSession).toHaveBeenCalledWith('5678');
   });
 });

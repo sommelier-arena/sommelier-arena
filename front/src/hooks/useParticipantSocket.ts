@@ -6,6 +6,7 @@ import { loadRejoin } from '../lib/rejoin';
 import type {
   QuestionPayload,
   ParticipantRevealPayload,
+  QuestionLeaderboardPayload,
   RoundLeaderboardPayload,
   FinalLeaderboardPayload,
   ParticipantStateSnapshot,
@@ -76,12 +77,16 @@ export function useParticipantSocket(code: string) {
           if (snap.question) {
             store.setCurrentQuestion(snap.question as QuestionPayload);
           }
+          if (snap.revealData) {
+            store.setRevealData(snap.revealData);
+          }
           // Restore frontend phase
           const phaseMap: Record<string, Parameters<typeof store.setPhase>[0]> = {
             waiting: 'lobby',
             question_open: 'question',
             question_paused: 'question',
             question_revealed: 'revealed',
+            question_leaderboard: 'questionLeaderboard',
             round_leaderboard: 'roundLeaderboard',
             ended: 'finalLeaderboard',
           };
@@ -105,6 +110,11 @@ export function useParticipantSocket(code: string) {
         case 'game:timer_paused':
         case 'game:timer_resumed': {
           store.setTimerMs((msg as unknown as { remainingMs: number }).remainingMs);
+          break;
+        }
+        case 'game:question_leaderboard': {
+          store.setRankings((msg as unknown as QuestionLeaderboardPayload).rankings);
+          store.setPhase('questionLeaderboard');
           break;
         }
         case 'game:round_leaderboard': {

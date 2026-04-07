@@ -4,7 +4,7 @@ import type { QuestionPayload } from '../../types/events';
 
 const CATEGORY_LABELS: Record<string, string> = {
   color: 'Color',
-  country: 'Country',
+  region: 'Region',
   grape_variety: 'Grape Variety',
   vintage_year: 'Vintage Year',
   wine_name: 'Wine Name',
@@ -57,7 +57,7 @@ export function QuestionView({
                 key={opt.id}
                 onClick={() => onSelect(opt.id)}
                 aria-pressed={isSelected}
-                className={`w-full text-left rounded-xl border px-4 py-4 font-medium text-sm transition-colors min-h-[72px] ${
+                className={`w-full text-left rounded-xl border px-4 py-2.5 font-medium text-sm transition-colors flex items-center ${
                   isSelected
                     ? 'border-wine-400 bg-wine-100 text-wine-800 ring-2 ring-wine-400'
                     : 'border-slate-200 bg-white text-slate-700 hover:border-wine-300 hover:bg-wine-50'

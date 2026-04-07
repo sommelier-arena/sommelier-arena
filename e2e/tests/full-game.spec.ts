@@ -15,44 +15,14 @@ async function hostCreateSession(browser: Browser) {
   }
   await expect(hostPage.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
-  // Wine name
+  // Wine name (combobox answer fields already have valid defaults)
   await hostPage.getByLabel('Wine name', { exact: true }).fill('Grand Cru Test');
-
-  // Color
-  await hostPage.getByLabel('Wine 1 Color — correct answer').fill('Red');
-  await hostPage.getByLabel('Wine 1 Color — distractor 1').fill('White');
-  await hostPage.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
-  await hostPage.getByLabel('Wine 1 Color — distractor 3').fill('Orange');
-
-  // Country
-  await hostPage.getByLabel('Wine 1 Country — correct answer').fill('France');
-  await hostPage.getByLabel('Wine 1 Country — distractor 1').fill('Italy');
-  await hostPage.getByLabel('Wine 1 Country — distractor 2').fill('Spain');
-  await hostPage.getByLabel('Wine 1 Country — distractor 3').fill('USA');
-
-  // Grape variety
-  await hostPage.getByLabel('Wine 1 Grape Variety — correct answer').fill('Merlot');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 1').fill('Cabernet');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 2').fill('Syrah');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 3').fill('Pinot');
-
-  // Vintage year
-  await hostPage.getByLabel('Wine 1 Vintage Year — correct answer').fill('2018');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 1').fill('2015');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 2').fill('2019');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 3').fill('2020');
-
-  // Wine name (new category in v2)
-  await hostPage.getByLabel('Wine 1 Wine Name — correct answer').fill('Grand Cru Test 2018');
-  await hostPage.getByLabel('Wine 1 Wine Name — distractor 1').fill('Château Margaux');
-  await hostPage.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
-  await hostPage.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
 
   await hostPage.getByRole('button', { name: /create tasting/i }).click();
 
-  // The visible session code is rendered with an aria-label like "Session code: 6 1 8 3".
+  // The visible session code is rendered with an aria-label like "Tasting code: 6 1 8 3".
   // Read the aria-label and extract digits to avoid matching the share URL that contains the code.
-  const codeEl = hostPage.locator('[aria-label^="Session code"]');
+  const codeEl = hostPage.locator('[aria-label^="Tasting code"]');
   await expect(codeEl.first()).toBeVisible();
   const aria = (await codeEl.first().getAttribute('aria-label')) ?? '';
   const code = aria.replace(/\D/g, '');
@@ -60,13 +30,17 @@ async function hostCreateSession(browser: Browser) {
   return { hostPage, hostCtx, code };
 }
 
-/** Advance host through a single question: reveal then next. */
+/** Advance host through a single question: reveal → question_leaderboard → next question. */
 async function revealAndAdvance(hostPage: import('@playwright/test').Page) {
   await hostPage.getByRole('button', { name: /reveal answer/i }).click();
-  // After reveal, "Next" or "Next Question" button appears
+  // After reveal, "Next" button appears → goes to question leaderboard
   const nextBtn = hostPage.getByRole('button', { name: /next/i });
   await expect(nextBtn).toBeVisible();
   await nextBtn.click();
+  // After question leaderboard, "Next Question" or "See Round Results" appears
+  const nextBtn2 = hostPage.getByRole('button', { name: /next question|see round results/i });
+  await expect(nextBtn2).toBeVisible();
+  await nextBtn2.click();
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -84,7 +58,7 @@ test.describe('Full Game Flow', () => {
       await test.step('Participant joins session', async () => {
         await participantPage.goto('/play');
         await expect(participantPage.getByRole('button', { name: /join/i })).toBeVisible();
-        await participantPage.getByLabel('Session code').fill(code);
+        await participantPage.getByLabel('Tasting code').fill(code);
         await participantPage.getByRole('button', { name: /join/i }).click();
         // Participant is now in lobby — pseudonym should appear
         await expect(participantPage.getByText(/waiting for the host/i).last()).toBeVisible();
@@ -134,12 +108,12 @@ test.describe('Full Game Flow', () => {
         await expect(participantPage.getByText(/final/i).last()).toBeVisible();
       });
 
-      await test.step('Participant sees "Play Another Session" button after game ends @full', async () => {
-        await expect(participantPage.getByRole('button', { name: /play another session/i })).toBeVisible({ timeout: 10_000 });
+      await test.step('Participant sees "Play Another Tasting" button after game ends @full', async () => {
+        await expect(participantPage.getByRole('button', { name: /play another tasting/i })).toBeVisible({ timeout: 10_000 });
       });
 
-      await test.step('Participant clicks "Play Another Session" — arrives at clean join form @full', async () => {
-        await participantPage.getByRole('button', { name: /play another session/i }).click();
+      await test.step('Participant clicks "Play Another Tasting" — arrives at clean join form @full', async () => {
+        await participantPage.getByRole('button', { name: /play another tasting/i }).click();
         await expect(participantPage).toHaveURL(/\/play/);
         await expect(participantPage.getByRole('textbox')).toHaveValue('');
       });
@@ -161,7 +135,7 @@ test.describe('Full Game Flow', () => {
       // One participant joins normally
       const participantPage = await participantCtx.newPage();
       await participantPage.goto('/play');
-      await participantPage.getByLabel('Session code').fill(code);
+      await participantPage.getByLabel('Tasting code').fill(code);
       await participantPage.getByRole('button', { name: /join/i }).click();
       await expect(participantPage.getByText(/waiting for the host/i).last()).toBeVisible();
 
@@ -174,7 +148,7 @@ test.describe('Full Game Flow', () => {
       await test.step('Late joiner is rejected with an error', async () => {
         const latePage = await lateCtx.newPage();
         await latePage.goto('/play');
-        await latePage.getByLabel('Session code').fill(code);
+        await latePage.getByLabel('Tasting code').fill(code);
         await latePage.getByRole('button', { name: /join/i }).click();
         await expect(latePage.getByRole('alert')).toBeVisible();
       });
@@ -185,7 +159,7 @@ test.describe('Full Game Flow', () => {
     }
   });
 
-  test('CUJ-9: Host closes tab mid-game — participants see ended screen, no crash @full', async ({ browser }) => {
+  test('CUJ-9: Host closes tab mid-game — participants stay in game (1-hour grace period) @full', async ({ browser }) => {
     const { hostPage, hostCtx, code } = await test.step('Host creates session', async () => {
       return hostCreateSession(browser);
     });
@@ -194,7 +168,7 @@ test.describe('Full Game Flow', () => {
     try {
       const participantPage = await participantCtx.newPage();
       await participantPage.goto('/play');
-      await participantPage.getByLabel('Session code').fill(code);
+      await participantPage.getByLabel('Tasting code').fill(code);
       await participantPage.getByRole('button', { name: /join/i }).click();
       await expect(participantPage.getByText(/waiting for the host/i).last()).toBeVisible();
 
@@ -207,11 +181,11 @@ test.describe('Full Game Flow', () => {
         await hostCtx.close();
       });
 
-      await test.step('Participant transitions to ended state (no blank screen / crash)', async () => {
-        // Participant should see either the final leaderboard or a session-ended message
-        await expect(
-          participantPage.getByText(/final|ended|session has ended/i).last()
-        ).toBeVisible({ timeout: 15_000 });
+      await test.step('Participant does NOT see ended state (grace period active)', async () => {
+        // Wait a few seconds and verify participant is still in-game, not ended
+        await participantPage.waitForTimeout(3000);
+        // Participant should still see answer buttons (question phase) — not "ended" or "final"
+        await expect(participantPage.getByText(/final|ended|tasting has ended/i)).not.toBeVisible();
       });
     } finally {
       await participantCtx.close();

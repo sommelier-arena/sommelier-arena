@@ -23,7 +23,7 @@ Sent by host to create a new session.
   wines: Array<{
     name: string;
     questions: Array<{
-      category: 'color' | 'country' | 'grape_variety' | 'vintage_year' | 'wine_name';
+      category: 'color' | 'region' | 'grape_variety' | 'vintage_year' | 'wine_name';
       correctAnswer: string;
       distractors: [string, string, string];
     }>;
@@ -44,7 +44,7 @@ Sent by host to update wines while the session is in the `waiting` phase (before
   wines: Array<{
     name: string;
     questions: Array<{
-      category: 'color' | 'country' | 'grape_variety' | 'vintage_year' | 'wine_name';
+      category: 'color' | 'region' | 'grape_variety' | 'vintage_year' | 'wine_name';
       correctAnswer: string;
       distractors: [string, string, string];
     }>;
@@ -250,6 +250,21 @@ Sent to each participant:
 }
 ```
 
+### `game:question_leaderboard`
+
+Broadcast after each question's answer is revealed, showing current standings.
+
+```ts
+{
+  type: 'game:question_leaderboard';
+  rankings: RankingEntry[];
+  questionIndex: number;
+  totalQuestions: number;
+  roundIndex: number;
+  totalRounds: number;
+}
+```
+
 ### `game:round_leaderboard`
 
 ```ts
@@ -301,7 +316,7 @@ Sent by the backend to **every client** immediately after they connect or reconn
 **Payload:**
 ```json
 {
-  "phase": "waiting | question_open | question_paused | question_revealed | round_leaderboard | ended",
+  "phase": "waiting | question_open | question_paused | question_revealed | question_leaderboard | round_leaderboard | ended",
   "code": "1234"
 }
 ```
@@ -351,8 +366,8 @@ Sent to a **participant** on reconnect to restore their game state.
 ## Types
 
 ```ts
-type QuestionCategory = 'color' | 'country' | 'grape_variety' | 'vintage_year' | 'wine_name';
-type SessionPhase = 'waiting' | 'question_open' | 'question_paused' | 'question_revealed' | 'round_leaderboard' | 'ended';
+type QuestionCategory = 'color' | 'region' | 'grape_variety' | 'vintage_year' | 'wine_name';
+type SessionPhase = 'waiting' | 'question_open' | 'question_paused' | 'question_revealed' | 'question_leaderboard' | 'round_leaderboard' | 'ended';
 
 interface RankingEntry {
   pseudonym: string;

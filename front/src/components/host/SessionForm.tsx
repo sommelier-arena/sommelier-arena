@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { CreateSessionPayload, CreateWinePayload, QuestionCategory } from '../../types/events';
+import { ComboboxInput } from '../common/ComboboxInput';
+import { WINE_ANSWERS_URL } from '../../lib/wine-answers';
 
 const CATEGORIES: { key: QuestionCategory; label: string }[] = [
   { key: 'color', label: 'Color' },
-  { key: 'country', label: 'Country' },
+  { key: 'region', label: 'Region' },
   { key: 'grape_variety', label: 'Grape Variety' },
   { key: 'vintage_year', label: 'Vintage Year' },
   { key: 'wine_name', label: 'Wine Name' },
@@ -12,18 +14,34 @@ const CATEGORIES: { key: QuestionCategory; label: string }[] = [
 // Autocomplete defaults per category — host edits to match their actual wine
 const DISTRACTOR_DEFAULTS: Record<QuestionCategory, [string, string, string]> = {
   color: ['Blanc', 'Rosé', 'Orange'],
-  country: ['Champagne (France)', 'Burgundy (France)', 'Tuscany (Italy)'],
-  grape_variety: ['Pinot Noir', 'Syrah', 'Merlot'],
+  region: ['Loire', 'Bourgogne', 'Languedoc'],
+  grape_variety: ['Pinot Noir', 'Syrah', 'Cabernet Sauvignon'],
   vintage_year: ['2015', '2016', '2018'],
   wine_name: ['Château Margaux', 'Château Lafite Rothschild', 'Château Latour'],
 };
 
 const CORRECT_ANSWER_DEFAULTS: Record<QuestionCategory, string> = {
   color: 'Rouge',
-  country: 'Bordeaux (France)',
-  grape_variety: 'Cabernet Sauvignon',
+  region: 'Bordeaux',
+  grape_variety: 'Merlot',
   vintage_year: '2019',
   wine_name: 'Château Pétrus',
+};
+
+const CORRECT_ANSWER_PLACEHOLDERS: Record<QuestionCategory, string> = {
+  color: 'e.g. Rouge',
+  region: 'e.g. Bordeaux (France)',
+  grape_variety: 'e.g. Cabernet Sauvignon',
+  vintage_year: 'e.g. 2019',
+  wine_name: 'e.g. Château Pétrus',
+};
+
+const DISTRACTOR_PLACEHOLDERS: Record<QuestionCategory, [string, string, string]> = {
+  color: ['e.g. Blanc', 'e.g. Rosé', 'e.g. Orange'],
+  region: ['e.g. Burgundy (France)', 'e.g. Tuscany (Italy)', 'e.g. Rioja (Spain)'],
+  grape_variety: ['e.g. Pinot Noir', 'e.g. Merlot', 'e.g. Syrah'],
+  vintage_year: ['e.g. 2018', 'e.g. 2020', 'e.g. 2016'],
+  wine_name: ['e.g. Château Margaux', 'e.g. Pétrus', 'e.g. Opus One'],
 };
 
 interface QuestionFormData {
@@ -34,13 +52,11 @@ interface QuestionFormData {
 type WineQuestions = Record<QuestionCategory, QuestionFormData>;
 
 interface WineFormData {
-  name: string;
   questions: WineQuestions;
 }
 
 function emptyWine(): WineFormData {
   return {
-    name: '',
     questions: Object.fromEntries(
       CATEGORIES.map(({ key }) => [
         key,
@@ -66,7 +82,7 @@ function wineFromPayload(wine: CreateWinePayload): WineFormData {
       ];
     }),
   ) as WineQuestions;
-  return { name: wine.name, questions };
+  return { questions };
 }
 
 interface SessionFormProps {
@@ -87,14 +103,16 @@ export function SessionForm({ onSubmit, hostId, initialWines, initialTitle, isEd
   const [timerSeconds, setTimerSeconds] = useState(60);
   const [title, setTitle] = useState(initialTitle ?? '');
   const [error, setError] = useState<string | null>(null);
+  const [answerOptions, setAnswerOptions] = useState<Record<string, string[]>>({});
 
-  const updateWineName = (wi: number, value: string) => {
-    setWines((prev) => {
-      const next = [...prev];
-      next[wi] = { ...next[wi], name: value };
-      return next;
-    });
-  };
+  useEffect(() => {
+    fetch(`${WINE_ANSWERS_URL}/answers`)
+      .then(res => res.json())
+      .then(data => setAnswerOptions(data))
+      .catch(() => {
+        // Fallback to empty — the combobox still allows free text
+      });
+  }, []);
 
   const updateAnswer = (
     wi: number,
@@ -128,10 +146,6 @@ export function SessionForm({ onSubmit, hostId, initialWines, initialTitle, isEd
     setError(null);
 
     for (const [wi, wine] of wines.entries()) {
-      if (!wine.name.trim()) {
-        setError(`Wine ${wi + 1}: name is required.`);
-        return;
-      }
       for (const cat of CATEGORIES) {
         const q = wine.questions[cat.key];
         if (!q.correctAnswer.trim()) {
@@ -147,10 +161,37 @@ export function SessionForm({ onSubmit, hostId, initialWines, initialTitle, isEd
       }
     }
 
+    // Collect custom answers to persist
+    const customAnswers: { category: string; value: string }[] = [];
+    for (const wine of wines) {
+      for (const cat of CATEGORIES) {
+        const existing = answerOptions[cat.key] || [];
+        const correctAnswer = wine.questions[cat.key].correctAnswer.trim();
+        if (correctAnswer && !existing.includes(correctAnswer)) {
+          customAnswers.push({ category: cat.key, value: correctAnswer });
+        }
+        for (const d of wine.questions[cat.key].distractors) {
+          const trimmed = d.trim();
+          if (trimmed && !existing.includes(trimmed)) {
+            customAnswers.push({ category: cat.key, value: trimmed });
+          }
+        }
+      }
+    }
+
+    // Fire-and-forget: persist custom answers to the collection
+    for (const { category, value } of customAnswers) {
+      fetch(`${WINE_ANSWERS_URL}/answers/${category}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ value }),
+      }).catch(() => {});  // Best-effort, don't block session creation
+    }
+
     const payload: CreateSessionPayload = {
       wines: wines.map(
-        (wine): CreateWinePayload => ({
-          name: wine.name.trim(),
+        (wine, wi): CreateWinePayload => ({
+          name: wine.questions.wine_name.correctAnswer.trim() || `Wine ${wi + 1}`,
           questions: CATEGORIES.map((cat) => ({
             category: cat.key,
             correctAnswer: wine.questions[cat.key].correctAnswer.trim(),
@@ -162,7 +203,7 @@ export function SessionForm({ onSubmit, hostId, initialWines, initialTitle, isEd
       ),
       timerSeconds,
       hostId: hostId ?? '',
-      title: title.trim() || wines[0]?.name.trim(),
+      title: title.trim() || wines[0]?.questions.wine_name.correctAnswer.trim(),
     };
 
     onSubmit(payload);
@@ -190,7 +231,7 @@ export function SessionForm({ onSubmit, hostId, initialWines, initialTitle, isEd
           placeholder='e.g. "Friday Night Tasting"'
           className="w-full border border-slate-300 rounded-lg px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-wine-400"
         />
-        <p className="text-xs text-slate-400 mt-1">Leave blank to use the first wine name as title.</p>
+        <p className="text-xs text-slate-400 mt-1">Leave blank to use the first wine's name (from the Wine Name answer) as title.</p>
       </div>
 
       {/* Timer slider */}
@@ -222,7 +263,14 @@ export function SessionForm({ onSubmit, hostId, initialWines, initialTitle, isEd
       {wines.map((wine, wi) => (
         <div key={wi} className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-slate-700 text-lg">Wine {wi + 1}</h2>
+            <h2 className="font-semibold text-slate-700 text-lg">
+              Wine {wi + 1}
+              {wine.questions.wine_name.correctAnswer && (
+                <span className="ml-2 font-normal text-slate-500 text-base">
+                  — {wine.questions.wine_name.correctAnswer}
+                </span>
+              )}
+            </h2>
             {wines.length > 1 && (
               <button
                 type="button"
@@ -234,23 +282,6 @@ export function SessionForm({ onSubmit, hostId, initialWines, initialTitle, isEd
             )}
           </div>
 
-          <div>
-            <label
-              htmlFor={`wine-name-${wi}`}
-              className="block text-sm font-medium text-slate-600 mb-1"
-            >
-              Wine name
-            </label>
-            <input
-              id={`wine-name-${wi}`}
-              type="text"
-              value={wine.name}
-              onChange={(e) => updateWineName(wi, e.target.value)}
-              placeholder="e.g. Château Margaux 2015"
-              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-wine-400"
-            />
-          </div>
-
           {CATEGORIES.map((cat) => (
             <div key={cat.key} className="space-y-2">
               <p className="text-sm font-semibold text-wine-600 uppercase tracking-wide">
@@ -258,37 +289,26 @@ export function SessionForm({ onSubmit, hostId, initialWines, initialTitle, isEd
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div className="relative">
-                  <label
-                    htmlFor={`wine-${wi}-${cat.key}-correct`}
-                    className="sr-only"
-                  >
-                    Wine {wi + 1} {cat.label} — correct answer
-                  </label>
-                  <input
+                  <ComboboxInput
                     id={`wine-${wi}-${cat.key}-correct`}
-                    type="text"
+                    options={answerOptions[cat.key] || []}
                     value={wine.questions[cat.key].correctAnswer}
-                    onChange={(e) => updateAnswer(wi, cat.key, 'correctAnswer', e.target.value)}
-                    placeholder="Correct answer"
-                    className="w-full border border-emerald-300 bg-emerald-50 rounded-lg px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                    onChange={(val) => updateAnswer(wi, cat.key, 'correctAnswer', val)}
+                    placeholder={CORRECT_ANSWER_PLACEHOLDERS[cat.key]}
+                    label={`Wine ${wi + 1} ${cat.label} — correct answer`}
+                    inputClassName="w-full border border-emerald-300 bg-emerald-50 rounded-lg px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   />
                   <span className="absolute right-2 top-2 text-xs text-emerald-600 font-medium" aria-hidden="true">✓</span>
                 </div>
                 {wine.questions[cat.key].distractors.map((d, di) => (
                   <div key={di}>
-                    <label
-                      htmlFor={`wine-${wi}-${cat.key}-distractor-${di}`}
-                      className="sr-only"
-                    >
-                      Wine {wi + 1} {cat.label} — distractor {di + 1}
-                    </label>
-                    <input
+                    <ComboboxInput
                       id={`wine-${wi}-${cat.key}-distractor-${di}`}
-                      type="text"
+                      options={answerOptions[cat.key] || []}
                       value={d}
-                      onChange={(e) => updateAnswer(wi, cat.key, di, e.target.value)}
-                      placeholder={`Distractor ${di + 1}`}
-                      className="w-full border border-slate-300 rounded-lg px-3 py-2 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-wine-400"
+                      onChange={(val) => updateAnswer(wi, cat.key, di, val)}
+                      placeholder={DISTRACTOR_PLACEHOLDERS[cat.key][di]}
+                      label={`Wine ${wi + 1} ${cat.label} — distractor ${di + 1}`}
                     />
                   </div>
                 ))}

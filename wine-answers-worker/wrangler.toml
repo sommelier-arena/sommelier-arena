@@ -1,0 +1,12 @@
+name = "sommelier-arena-wine-answers"
+main = "index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+ADMIN_SECRET = "changeme"
+
+# KV namespace binding — create with: npx wrangler kv namespace create WINE_ANSWERS_KV
+# Then paste the id here. For now use a placeholder.
+[[kv_namespaces]]
+binding = "WINE_ANSWERS_KV"
+id = "c6e83a314d254ca5801f0fa90a19c746"

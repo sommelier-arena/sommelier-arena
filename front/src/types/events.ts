@@ -3,7 +3,7 @@
 
 export type QuestionCategory =
   | 'color'
-  | 'country'
+  | 'region'
   | 'grape_variety'
   | 'vintage_year'
   | 'wine_name';
@@ -41,6 +41,12 @@ export interface ParticipantRevealPayload {
   correctOptionId: string;
   myPoints: number;
   myTotalScore: number;
+}
+
+export interface QuestionLeaderboardPayload {
+  rankings: RankingEntry[];
+  questionIndex: number;
+  totalQuestions: number;
 }
 
 export interface RoundLeaderboardPayload {
@@ -115,6 +121,8 @@ export interface HostStateSnapshot {
   currentQuestion: number;
   question: QuestionPayload | null;
   rankings: RankingEntry[];
+  /** Present when phase is question_revealed — restores the reveal screen on reconnect. */
+  revealData?: HostRevealPayload | null;
 }
 
 // Server → Participant: full state snapshot on rejoin
@@ -123,5 +131,7 @@ export interface ParticipantStateSnapshot {
   score: number;
   phase: string;
   question: QuestionPayload | null;
+  /** Present when phase is question_revealed — restores the reveal screen on reconnect. */
+  revealData?: ParticipantRevealPayload | null;
 }
 

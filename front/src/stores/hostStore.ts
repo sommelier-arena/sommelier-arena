@@ -14,6 +14,7 @@ export type HostPhase =
   | 'lobby'
   | 'question'
   | 'revealed'
+  | 'questionLeaderboard'
   | 'roundLeaderboard'
   | 'finalLeaderboard';
 

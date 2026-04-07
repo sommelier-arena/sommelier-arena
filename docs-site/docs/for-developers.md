@@ -10,6 +10,16 @@ tags: [onboarding, dev, setup]
 
 This page is the developer entrypoint. It links to quick start, local vs prod, testing, architecture, and deployment guides.
 
+## Services overview
+
+| Service | Directory | Port | Description |
+|---------|-----------|------|-------------|
+| PartyKit backend | `back/` | 1999 | Real-time game state (Durable Object) |
+| Astro frontend | `front/` | 4321 | Static site + React islands |
+| Wine Answers Worker | `wine-answers-worker/` | 1998 | Curated answer suggestions API (KV-backed) |
+| Docusaurus docs | `docs-site/` | 3002 | Documentation site |
+| Proxy Worker | `proxy-worker/` | — | Routes `/docs/*` to docs Pages (production only) |
+
 Useful links:
 
 - [Quick Start](./quick-start.md) — local development modes (fast dev, docker, docs preview)

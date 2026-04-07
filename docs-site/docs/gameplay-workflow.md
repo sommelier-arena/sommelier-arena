@@ -24,7 +24,12 @@ question_revealed
   │
   │ host:next
   ▼
-round_leaderboard          (only after last question in a round)
+question_leaderboard       (after every question)
+  │
+  │ host:next
+  ▼
+question_open              (next question in same round) OR
+round_leaderboard          (after last question in a round)
   │
   │ host:next
   ▼
@@ -37,7 +42,7 @@ ended                      (after final round)
 The host fills in `SessionForm`:
 
 - **Title** — optional display name for the tasting (shown in session list). If left blank, the first wine's name is used.
-- **Wines** — one or more wines; each wine gets **5 questions** (one per category, fixed order: `color`, `country`, `grape_variety`, `vintage_year`, `wine_name`)
+- **Wines** — one or more wines; each wine gets **5 questions** (one per category, fixed order: `color`, `region`, `grape_variety`, `vintage_year`, `wine_name`)
 - **Correct answer** — always blank; host fills in
 - **Distractors** — 3 per question; pre-filled for most categories (grape_variety is empty)
 - **Timer** — range slider 15–120 s (default 60 s); applies to all questions
@@ -70,6 +75,10 @@ Participants can change their selected option at any time until the host clicks 
 ## Round leaderboard
 
 After the last question of each wine (5th question), the server emits `game:round_leaderboard` instead of proceeding to the next question. After the final wine's last question, it emits `game:final_leaderboard` and transitions to `ended`.
+
+## Host disconnect / reconnect
+
+If the host disconnects (browser close, network loss), the game enters a **1-hour grace period**. Participants remain connected and see a waiting state. If the host reconnects within the grace period, the game resumes from where it left off. If the grace period expires without the host returning, the session ends automatically and participants are notified.
 
 ## Session end
 

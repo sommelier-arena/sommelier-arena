@@ -1,0 +1,16 @@
+{
+  "name": "wine-answers-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev --local --port 1998",
+    "deploy": "wrangler deploy",
+    "seed": "npx tsx scripts/seed.ts --url http://localhost:1998 --secret changeme",
+    "seed:prod": "npx tsx scripts/seed.ts --url ${WINE_ANSWERS_URL:?set WINE_ANSWERS_URL} --secret ${ADMIN_SECRET:?set ADMIN_SECRET}"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "wrangler": "^4.0.0",
+    "@cloudflare/workers-types": "^4.0.0"
+  }
+}

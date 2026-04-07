@@ -103,11 +103,11 @@ The PartyKit WebSocket path is always `/parties/main/{sessionCode}` — `main` m
 
 ## Port reference
 
-| Environment | Frontend URL | PartyKit/WebSocket |
-|-------------|-------------|-------------------|
-| Mode A (local dev) | `http://localhost:4321` | `localhost:1999` (direct) |
-| Mode B (Docker) | `http://localhost:4321` | `localhost:1999` (direct — back exposed on host port 1999) |
-| Production | `https://your-domain.com` | `<project>.partykit.dev` |
+| Environment | Frontend URL | PartyKit/WebSocket | Wine Answers Worker |
+|-------------|-------------|-------------------|---------------------|
+| Mode A (local dev) | `http://localhost:4321` | `localhost:1999` (direct) | `http://localhost:1998` (optional) |
+| Mode B (Docker) | `http://localhost:4321` | `localhost:1999` (direct — back exposed on host port 1999) | `http://localhost:1998` (wine-answers container) |
+| Production | `https://your-domain.com` | `<project>.partykit.dev` | `https://<wine-answers-worker>.workers.dev` |
 
 ---
 
@@ -118,6 +118,9 @@ The PartyKit WebSocket path is always `/parties/main/{sessionCode}` — `main` m
 | `PUBLIC_PARTYKIT_HOST` | `front/.env.local` (Mode A) | `localhost:1999` |
 | `PUBLIC_PARTYKIT_HOST` | `docker-compose.yml` build arg (Mode B) | `localhost:1999` |
 | `PUBLIC_PARTYKIT_HOST` | Cloudflare Pages dashboard (Production) | `<project>.partykit.dev` |
+| `PUBLIC_WINE_ANSWERS_URL` | `front/.env.local` (Mode A) | `http://localhost:1998` |
+| `PUBLIC_WINE_ANSWERS_URL` | `docker-compose.yml` build arg (Mode B) | `http://localhost:1998` |
+| `PUBLIC_WINE_ANSWERS_URL` | Cloudflare Pages dashboard (Production) | `https://<wine-answers-worker>.workers.dev` |
 
 > **Mode B note:** In Docker, the browser connects directly to `localhost:1999` for WebSocket traffic (the `back` container is exposed on host port 1999). nginx in the `front` container only serves static files and handles SPA routing — no WebSocket proxy needed.
 

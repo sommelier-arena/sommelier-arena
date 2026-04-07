@@ -17,6 +17,7 @@ export async function saveState(ctx: GameContext): Promise<void> {
     hostId: ctx.hostId ?? '',
     sessionTitle: ctx.sessionTitle,
     createdAt: ctx.createdAt,
+    hostDisconnectedAt: ctx.hostDisconnectedAt,
   });
 }
 
@@ -30,14 +31,9 @@ export async function upsertKvSession(
   if (!ctx.hostId) return;
   const kvKey = `host:${ctx.hostId}`;
   try {
-    const hostsKv = (ctx.room.context.bindings as unknown as {
-      HOSTS_KV: {
-        get(k: string, t: 'json'): Promise<unknown>;
-        put(k: string, v: string): Promise<void>;
-      };
-    }).HOSTS_KV;
+    const hostsKv = ctx.room.context.bindings.kv.HOSTS_KV;
 
-    const existing = (await hostsKv.get(kvKey, 'json') as SessionListEntry[] | null) ?? [];
+    const existing = (await hostsKv.get(kvKey, { type: 'json' }) as SessionListEntry[] | null) ?? [];
 
     const sessionEntry: SessionListEntry = {
       code: ctx.room.id,

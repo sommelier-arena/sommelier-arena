@@ -1,0 +1,23 @@
+---
+import { AdminApp } from '../components/admin/AdminApp';
+import { NavBar } from '../components/common/NavBar';
+import Footer from '../components/common/Footer.astro';
+import PageHead from '../components/common/PageHead.astro';
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <PageHead title="Admin — Sommelier Arena" description="Manage wine answer collections." />
+  </head>
+  <body class="bg-slate-50 min-h-screen flex flex-col">
+    <NavBar client:only="react" />
+    <main class="flex-1 min-h-0 overflow-auto">
+      <AdminApp client:only="react">
+        <div slot="fallback" class="flex items-center justify-center h-40 text-slate-400">
+          Loading…
+        </div>
+      </AdminApp>
+    </main>
+    <Footer />
+  </body>
+</html>

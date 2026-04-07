@@ -3,6 +3,8 @@
   "main": "back/game.ts",
   "compatibilityDate": "2026-03-22",
   "bindings": {
-    "HOSTS_KV": "98082bb612964007aac177820469dddc"
+    "kv": {
+      "HOSTS_KV": "98082bb612964007aac177820469dddc"
+    }
   }
 }

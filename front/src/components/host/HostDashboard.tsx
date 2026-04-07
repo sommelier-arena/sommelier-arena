@@ -85,8 +85,8 @@ export function HostDashboard({
                     <button
                       onClick={() => onDeleteSession(session.code)}
                       className="border border-slate-300 text-slate-500 rounded-xl px-3 py-2 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors text-sm"
-                      aria-label={`Delete session ${session.code}`}
-                      title="Delete session"
+                      aria-label={`Delete tasting ${session.code}`}
+                      title="Delete tasting"
                     >
                       🗑
                     </button>
@@ -134,8 +134,8 @@ export function HostDashboard({
                     <button
                       onClick={() => onDeleteSession(session.code)}
                       className="border border-slate-300 text-slate-500 rounded-xl px-3 py-2 hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors text-sm"
-                      aria-label={`Delete session ${session.code}`}
-                      title="Delete session"
+                      aria-label={`Delete tasting ${session.code}`}
+                      title="Delete tasting"
                     >
                       🗑
                     </button>

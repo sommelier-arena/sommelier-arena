@@ -12,16 +12,16 @@ tags: [overview, user-guide, partners]
 
 Sommelier Arena is a browser-based blind wine tasting game. No app to install, no account to create.
 
-**To participate in a session:**
+**To participate in a tasting:**
 1. Open the app on your phone at `https://sommelier-arena.ducatillon.net/play`
 2. Enter the 4-digit code the host gives you — you'll get a generated wine-themed pseudonym
 3. Answer each question before the timer runs out; you can change your answer any time until the host reveals it
 4. See the leaderboard after each wine and at the end
 
-**To host a session:**
+**To host a tasting:**
 1. Open `https://sommelier-arena.ducatillon.net/host`
-2. Create a test by entering wine names and their questions (color, country, grape variety, vintage year, wine name) with one correct answer and 3 distractors each
-3. Share the 4-digit code with participants; hit **Start** to begin the game
+2. Create a tasting by entering wine names and their questions (color, region, grape variety, vintage year, wine name) with one correct answer and 3 distractors each
+3. Share the 4-digit code with participants; hit **Start** to begin the tasting
 4. Use **Pause / Resume / Reveal / Next / End** to control the pace
 
 ## Product overview

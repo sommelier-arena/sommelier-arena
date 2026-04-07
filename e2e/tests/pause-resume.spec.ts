@@ -12,33 +12,17 @@ async function setupGameAtQuestion(browser: Browser) {
   await expect(hostPage.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   await hostPage.getByLabel('Wine name', { exact: true }).fill('Pause Test Wine');
-  await hostPage.getByLabel('Wine 1 Color — correct answer').fill('Red');
-  await hostPage.getByLabel('Wine 1 Color — distractor 1').fill('White');
-  await hostPage.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
-  await hostPage.getByLabel('Wine 1 Color — distractor 3').fill('Orange');
-  await hostPage.getByLabel('Wine 1 Country — correct answer').fill('France');
-  await hostPage.getByLabel('Wine 1 Country — distractor 1').fill('Italy');
-  await hostPage.getByLabel('Wine 1 Country — distractor 2').fill('Spain');
-  await hostPage.getByLabel('Wine 1 Country — distractor 3').fill('USA');
-  await hostPage.getByLabel('Wine 1 Grape Variety — correct answer').fill('Merlot');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 1').fill('Cab');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 2').fill('Syrah');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 3').fill('Pinot');
-  await hostPage.getByLabel('Wine 1 Vintage Year — correct answer').fill('2018');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 1').fill('2015');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 2').fill('2019');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 3').fill('2020');
 
   await hostPage.getByRole('button', { name: /create tasting/i }).click();
 
-  const codeEl = hostPage.locator('[aria-label^="Session code"]');
+  const codeEl = hostPage.locator('[aria-label^="Tasting code"]');
   await expect(codeEl.first()).toBeVisible();
   const code = ((await codeEl.first().getAttribute('aria-label')) ?? '').replace(/\D/g, '');
 
   const participantCtx = await browser.newContext();
   const participantPage = await participantCtx.newPage();
   await participantPage.goto('/play');
-  await participantPage.getByLabel('Session code').fill(code);
+  await participantPage.getByLabel('Tasting code').fill(code);
   await participantPage.getByRole('button', { name: /join/i }).click();
   await expect(participantPage.getByText(/waiting for the host/i).last()).toBeVisible();
 

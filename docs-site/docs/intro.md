@@ -11,7 +11,7 @@ A real-time blind wine tasting quiz — Kahoot-style, €0/month to host, zero c
 
 ## How it works
 
-A **host** creates a game session with one or more wines. Each wine gets five questions (color, country, grape variety, vintage year, wine name). **Participants** join via a 4-digit code on their phone, answer live as the host controls the pace, and compete on a leaderboard.
+A **host** creates a tasting with one or more wines. Each wine gets five questions (color, region, grape variety, vintage year, wine name). **Participants** join via a 4-digit code on their phone, answer live as the host controls the pace, and compete on a leaderboard.
 
 Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudflare Pages; the game backend is a PartyKit Durable Object (Cloudflare Workers); session lists are stored in Cloudflare KV.
 
@@ -19,7 +19,7 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 
 - **Session** — a single game instance, identified by a randomly generated 4-digit numeric code (e.g. `4821`).
 - **Round** — one wine. Each round has exactly 5 questions played back-to-back. The leaderboard is shown after all 5 questions, before the next wine begins.
-- **Question** — one of the 5 fixed-category questions for a wine: `color`, `country`, `grape_variety`, `vintage_year`, `wine_name`. The host pre-fills the correct answer and 3 distractors.
+- **Question** — one of the 5 fixed-category questions for a wine: `color`, `region`, `grape_variety`, `vintage_year`, `wine_name`. The host pre-fills the correct answer and 3 distractors.
 
 ## Key rules
 
@@ -51,6 +51,7 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 | A **developer** setting up locally | [Quick Start](quick-start.md) |
 | A **developer** understanding the system | [Architecture](architecture.md) · [Tech Stack](tech-stack.md) |
 | A **product person / user** | [Features](features.md) · [Gameplay Workflow](gameplay-workflow.md) |
+| An **admin** managing answer data | [Quick Start](quick-start.md) — see `/admin` page |
 | **Deploying** to Cloudflare | [Deployment Guide](deployment-guide.md) |
 | An **automation agent / AI** | [For Automation](for-automation.md) |
 

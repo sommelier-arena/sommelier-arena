@@ -19,6 +19,20 @@ services:
       retries: 10
       start_period: 20s
 
+  wine-answers:
+    build:
+      context: ./wine-answers-worker
+    ports:
+      - '1998:1998'
+    environment:
+      - ADMIN_SECRET=dev-secret-123
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:1998/answers',r=>{process.exit(r.statusCode<500?0:1)}).on('error',()=>process.exit(1))"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
   front:
     build:
       context: ./front
@@ -27,10 +41,13 @@ services:
         # The browser connects directly to localhost:1999 (the back container),
         # same as Mode A (local dev). No nginx proxy needed for WebSocket traffic.
         PUBLIC_PARTYKIT_HOST: localhost:1999
+        PUBLIC_WINE_ANSWERS_URL: http://localhost:1998
     ports:
       - '4321:4321'
     depends_on:
       back:
+        condition: service_healthy
+      wine-answers:
         condition: service_healthy
 
   docs:

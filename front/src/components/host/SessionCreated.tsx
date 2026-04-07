@@ -38,7 +38,7 @@ export function SessionCreated({ code, hostId }: SessionCreatedProps) {  const o
         </p>
         <p
           className="text-6xl font-mono font-bold text-wine-600 tracking-widest mt-2"
-          aria-label={`Session code: ${code.split('').join(' ')}`}
+          aria-label={`Tasting code: ${code.split('').join(' ')}`}
         >
           {code}
         </p>

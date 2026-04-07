@@ -32,6 +32,12 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
+      label: 'Administration',
+      collapsed: false,
+      items: ['admin-dashboard', 'adr-wine-answers-storage'],
+    },
+    {
+      type: 'category',
       label: 'Deployment',
       collapsed: false,
       items: ['deployment-guide'],

@@ -3,7 +3,7 @@ import type { QuestionPayload, ParticipantRevealPayload } from '../../types/even
 
 const CATEGORY_LABELS: Record<string, string> = {
   color: 'Color',
-  country: 'Country',
+  region: 'Region',
   grape_variety: 'Grape Variety',
   vintage_year: 'Vintage Year',
 };
@@ -59,7 +59,7 @@ export function RevealView({ question, revealData, selectedOptionId }: RevealVie
             {question.prompt}
           </p>
 
-          <div className="grid grid-cols-1 gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {question.options.map((opt, i) => {
               const isCorrectOpt = opt.id === correctOptionId;
               const isSelected = opt.id === selectedOptionId;
@@ -68,7 +68,7 @@ export function RevealView({ question, revealData, selectedOptionId }: RevealVie
               return (
                 <div
                   key={opt.id}
-                  className={`rounded-xl border px-5 py-3 text-sm font-medium ${
+                  className={`rounded-xl border px-4 py-2.5 text-sm font-medium flex items-center ${
                     isCorrectOpt
                       ? 'border-emerald-400 bg-emerald-50 text-emerald-800'
                       : isWrong

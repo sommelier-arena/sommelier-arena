@@ -8,6 +8,7 @@ import type {
   LobbyUpdatedPayload,
   QuestionPayload,
   HostRevealPayload,
+  QuestionLeaderboardPayload,
   RoundLeaderboardPayload,
   FinalLeaderboardPayload,
   ParticipantAnsweredPayload,
@@ -72,6 +73,9 @@ export function useHostSocket(code: string) {
           if (snap.question) {
             store.setCurrentQuestion(snap.question as QuestionPayload);
           }
+          if (snap.revealData) {
+            store.setRevealData(snap.revealData);
+          }
           store.setRankings(snap.rankings);
           // Restore totalRounds from wines list in the snapshot
           if (snap.wines?.length) {
@@ -83,6 +87,7 @@ export function useHostSocket(code: string) {
             question_open: 'question',
             question_paused: 'question',
             question_revealed: 'revealed',
+            question_leaderboard: 'questionLeaderboard',
             round_leaderboard: 'roundLeaderboard',
             ended: 'finalLeaderboard',
           };
@@ -156,6 +161,12 @@ export function useHostSocket(code: string) {
           store.setIsPaused(false);
           break;
         }
+        case 'game:question_leaderboard': {
+          const qlData = msg as unknown as QuestionLeaderboardPayload;
+          store.setRankings(qlData.rankings);
+          store.setPhase('questionLeaderboard');
+          break;
+        }
         case 'game:round_leaderboard': {
           const { rankings, roundIndex, totalRounds } = msg as unknown as RoundLeaderboardPayload;
           store.setRankings(rankings, roundIndex);
@@ -176,6 +187,13 @@ export function useHostSocket(code: string) {
               finalRankings: finalData.rankings,
             });
           }
+          break;
+        }
+        case 'error': {
+          // Server-side errors (e.g. INVALID_HOST_ID on rejoin failure).
+          // Log to console so the host can see what went wrong in dev tools,
+          // but don't crash the UI — the session may be recoverable.
+          console.warn('[HostSocket] server error:', (msg as Record<string, unknown>).message, (msg as Record<string, unknown>).code);
           break;
         }
       }

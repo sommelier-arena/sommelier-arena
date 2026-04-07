@@ -42,13 +42,13 @@ test.describe('Mobile UX', () => {
     await page.goto('/play');
 
     // Wait for React hydration
-    const input = page.getByLabel(/session code/i);
+    const input = page.getByLabel(/tasting code/i);
     await expect(input).toBeVisible();
 
     const inputMode = await input.getAttribute('inputmode');
     expect(
       inputMode,
-      'Session code field must have inputmode="numeric" so mobile users get a numpad',
+      'Tasting code field must have inputmode="numeric" so mobile users get a numpad',
     ).toBe('numeric');
   });
 
@@ -62,7 +62,7 @@ test.describe('Mobile UX', () => {
     await page.goto('/play');
 
     await test.step('Navigate to join page', async () => {
-      await expect(page.getByLabel(/session code/i)).toBeVisible();
+      await expect(page.getByLabel(/tasting code/i)).toBeVisible();
     });
 
     await test.step('Verify page is usable within mobile viewport', async () => {

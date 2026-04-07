@@ -12,6 +12,7 @@ export type ParticipantPhase =
   | 'lobby'
   | 'question'
   | 'revealed'
+  | 'questionLeaderboard'
   | 'roundLeaderboard'
   | 'finalLeaderboard'
   | 'ended';

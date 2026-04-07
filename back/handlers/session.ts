@@ -119,6 +119,14 @@ export async function handleRejoinHost(
   }
 
   ctx.hostConnectionId = sender.id;
+
+  // Cancel host disconnect grace period if active
+  if (ctx.hostDisconnectedAt) {
+    ctx.hostDisconnectedAt = null;
+    await ctx.room.storage.deleteAlarm();
+    await ctx.saveState();
+  }
+
   sender.send(JSON.stringify({
     type: 'host:state_snapshot',
     phase: ctx.phase,
@@ -129,10 +137,11 @@ export async function handleRejoinHost(
     timerSeconds: ctx.timerSeconds,
     currentRound: ctx.currentRound,
     currentQuestion: ctx.currentQuestion,
-    question: ctx.phase === 'question_open' || ctx.phase === 'question_paused' || ctx.phase === 'question_revealed'
+    question: ctx.phase === 'question_open' || ctx.phase === 'question_paused' || ctx.phase === 'question_revealed' || ctx.phase === 'question_leaderboard'
       ? ctx.buildQuestionPayload()
       : null,
     rankings: buildRankings(ctx.participants),
+    revealData: await buildHostRevealData(ctx),
   }));
 }
 
@@ -227,9 +236,10 @@ export async function handleRejoinSession(
     pseudonym: participant.pseudonym,
     score: participant.score,
     phase: ctx.phase,
-    question: ctx.phase === 'question_open' || ctx.phase === 'question_paused'
+    question: ctx.phase === 'question_open' || ctx.phase === 'question_paused' || ctx.phase === 'question_revealed'
       ? ctx.buildQuestionPayload()
       : null,
+    revealData: await buildParticipantRevealData(ctx, pseudonym, participant.score),
   }));
 
   if (ctx.phase === 'waiting') {
@@ -321,4 +331,59 @@ export async function handleUpdateSession(
     timerSeconds: ctx.timerSeconds,
     sessionTitle: ctx.sessionTitle,
   }));
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Returns host reveal data when the current phase is question_revealed,
+ * so the host can restore the reveal screen on reconnect without a second
+ * round-trip.
+ */
+async function buildHostRevealData(
+  ctx: GameContext,
+): Promise<{ correctOptionId: string; results: { pseudonym: string; points: number; totalScore: number }[] } | null> {
+  if (ctx.phase !== 'question_revealed') return null;
+  const question = ctx.wines[ctx.currentRound]?.questions[ctx.currentQuestion];
+  if (!question) return null;
+  const correctOption = question.options.find((o) => o.correct);
+  if (!correctOption) return null;
+
+  const results: { pseudonym: string; points: number; totalScore: number }[] = [];
+  for (const [, participant] of ctx.participants) {
+    const resp = await ctx.room.storage.get<{ optionId: string; correct: boolean; points: number }>(
+      `response:${participant.id}:${question.id}`,
+    );
+    results.push({
+      pseudonym: participant.pseudonym,
+      points: resp?.points ?? 0,
+      totalScore: participant.score,
+    });
+  }
+  return { correctOptionId: correctOption.id, results };
+}
+
+/**
+ * Returns participant reveal data when the current phase is question_revealed,
+ * so the participant can restore the reveal screen on reconnect.
+ */
+async function buildParticipantRevealData(
+  ctx: GameContext,
+  pseudonym: string,
+  totalScore: number,
+): Promise<{ correctOptionId: string; myPoints: number; myTotalScore: number } | null> {
+  if (ctx.phase !== 'question_revealed') return null;
+  const question = ctx.wines[ctx.currentRound]?.questions[ctx.currentQuestion];
+  if (!question) return null;
+  const correctOption = question.options.find((o) => o.correct);
+  if (!correctOption) return null;
+
+  const resp = await ctx.room.storage.get<{ optionId: string; correct: boolean; points: number }>(
+    `response:${pseudonym}:${question.id}`,
+  );
+  return {
+    correctOptionId: correctOption.id,
+    myPoints: resp?.points ?? 0,
+    myTotalScore: totalScore,
+  };
 }

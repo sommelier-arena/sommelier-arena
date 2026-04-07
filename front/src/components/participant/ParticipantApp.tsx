@@ -8,6 +8,7 @@ import { JoinForm } from './JoinForm';
 import { ParticipantLobby } from './ParticipantLobby';
 import { QuestionView } from './QuestionView';
 import { RevealView } from './RevealView';
+import { QuestionLeaderboard } from './QuestionLeaderboard';
 import { RoundLeaderboard } from './RoundLeaderboard';
 import { FinalLeaderboard } from './FinalLeaderboard';
 import { SessionEnded } from './SessionEnded';
@@ -116,7 +117,7 @@ export function ParticipantApp({ showNav = true }: { showNav?: boolean }) {
       <div className="bg-slate-50">
         {showNav && <NavBar />}
         <div className="flex items-center justify-center min-h-[60vh]">
-          <p className="text-slate-400 animate-pulse">Rejoining session…</p>
+          <p className="text-slate-400 animate-pulse">Rejoining tasting…</p>
         </div>
       </div>
     );
@@ -166,6 +167,16 @@ export function ParticipantApp({ showNav = true }: { showNav?: boolean }) {
           revealData={revealData}
           selectedOptionId={selectedOptionId}
         />
+      </div>
+    );
+  }
+
+  if (phase === 'questionLeaderboard') {
+    return (
+      <div className="bg-slate-50">
+        {showNav && <NavBar />}
+        <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Question Leaderboard</h1>
+        <QuestionLeaderboard rankings={rankings} pseudonym={pseudonym} />
       </div>
     );
   }

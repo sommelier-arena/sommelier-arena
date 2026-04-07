@@ -30,7 +30,7 @@ export function JoinForm({ onJoin, error }: JoinFormProps) {
               htmlFor="session-code"
               className="block text-sm font-medium text-slate-600 text-left"
             >
-              Session code
+              Tasting code
             </label>
             <input
               id="session-code"

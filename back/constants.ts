@@ -4,7 +4,7 @@ export const MAX_PLAYERS = 10;
 
 export const CATEGORY_PROMPTS: Record<QuestionCategory, string> = {
   color: 'What is the color of this wine?',
-  country: 'From which country or region does this wine come?',
+  region: 'From which region does this wine come?',
   grape_variety: 'What is the grape variety of this wine?',
   vintage_year: 'What is the vintage year of this wine?',
   wine_name: 'What is the name of this wine?',

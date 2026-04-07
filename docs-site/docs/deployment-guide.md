@@ -22,12 +22,15 @@ flowchart LR
   Proxy --> Docs[Docs - Docusaurus on Pages]
   PartyKit --> KV[Cloudflare KV - HOSTS_KV]
   PartyKit --> SQLite[SQLite - Worker DO storage]
+  Browser -->|HTTP| WineAnswers[Wine Answers Worker]
+  WineAnswers --> WAKV[Cloudflare KV - WINE_ANSWERS_KV]
 ```
 
 ## Summary of services
 
 - Frontend: Cloudflare Pages (front/)
 - Backend: PartyKit (Cloudflare Workers Durable Objects) — deployed with `npx partykit deploy`
+- Wine Answers Worker: Cloudflare Worker (wine-answers-worker/) — deployed with `npx wrangler deploy`
 - Docs: Cloudflare Pages (docs-site/)
 - Proxy Worker: Cloudflare Worker (proxy-worker/index.ts) — deploy with Wrangler
 
@@ -60,6 +63,32 @@ Create a KV namespace and bind it to PartyKit/Worker deployments. Using Wrangler
 npx wrangler kv:namespace create "SOMMELIER_HOSTS" --account-id $CF_ACCOUNT_ID
 # Wrangler prints the namespace id: add it to partykit.json bindings
 ```
+
+## Wine Answers Worker
+
+The Wine Answers Worker serves curated answer suggestions for the session creation form.
+
+### Deploy
+
+```bash
+cd wine-answers-worker
+npx wrangler deploy
+```
+
+### KV namespace (WINE_ANSWERS_KV)
+
+Create the KV namespace and bind it:
+
+```bash
+npx wrangler kv:namespace create "WINE_ANSWERS_KV" --account-id $CF_ACCOUNT_ID
+# Add the namespace ID to wine-answers-worker/wrangler.toml bindings
+```
+
+### Environment variables
+
+| Variable | Value |
+|----------|-------|
+| `ADMIN_SECRET` | Secret token for admin write access — set via `wrangler secret put ADMIN_SECRET` |
 
 ## Cloudflare Pages (Frontend & Docs)
 
@@ -169,6 +198,11 @@ jobs:
           PARTYKIT_HOST=${PARTYKIT_URL#https://}
           echo "PARTYKIT_HOST=$PARTYKIT_HOST" >> $GITHUB_ENV
 
+      - name: Deploy Wine Answers Worker
+        run: |
+          cd wine-answers-worker
+          npx wrangler deploy
+
       # 2. Build and deploy docs site
       - name: Build docs
         run: npm --prefix docs-site ci && npm --prefix docs-site run build
@@ -202,5 +236,7 @@ jobs:
 | `CF_ACCOUNT_ID` | Your Cloudflare account ID |
 | `CF_PAGES_PROJECT_NAME` | Pages project name for the frontend (e.g. `sommelier-arena`) |
 | `ZONE_ID` | Zone ID for `ducatillon.net` (needed only for custom routes) |
+| `ADMIN_SECRET` | Secret token for Wine Answers Worker admin access |
+| `PUBLIC_WINE_ANSWERS_URL` | URL of the Wine Answers Worker (baked into frontend at build time) |
 
 <!-- end canonical deployment doc -->

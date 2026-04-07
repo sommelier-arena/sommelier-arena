@@ -21,6 +21,7 @@ export interface GameContext {
   sessionTitle: string;
   createdAt: string;
   hostConnectionId: string | null;
+  hostDisconnectedAt: number | null;
   readonly timer: TimerManager;
   participants: Map<string, Participant>;
   inFlightAnswers: Map<string, string>;

@@ -19,30 +19,10 @@ async function createSessionGetCode(browser: Browser) {
   await expect(page.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   await page.getByLabel('Wine name', { exact: true }).fill('Dashboard Test Wine');
-  await page.getByLabel('Wine 1 Color — correct answer').fill('Red');
-  await page.getByLabel('Wine 1 Color — distractor 1').fill('White');
-  await page.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
-  await page.getByLabel('Wine 1 Color — distractor 3').fill('Orange');
-  await page.getByLabel('Wine 1 Country — correct answer').fill('France');
-  await page.getByLabel('Wine 1 Country — distractor 1').fill('Italy');
-  await page.getByLabel('Wine 1 Country — distractor 2').fill('Spain');
-  await page.getByLabel('Wine 1 Country — distractor 3').fill('USA');
-  await page.getByLabel('Wine 1 Grape Variety — correct answer').fill('Merlot');
-  await page.getByLabel('Wine 1 Grape Variety — distractor 1').fill('Cabernet');
-  await page.getByLabel('Wine 1 Grape Variety — distractor 2').fill('Syrah');
-  await page.getByLabel('Wine 1 Grape Variety — distractor 3').fill('Pinot');
-  await page.getByLabel('Wine 1 Vintage Year — correct answer').fill('2020');
-  await page.getByLabel('Wine 1 Vintage Year — distractor 1').fill('2015');
-  await page.getByLabel('Wine 1 Vintage Year — distractor 2').fill('2019');
-  await page.getByLabel('Wine 1 Vintage Year — distractor 3').fill('2018');
-  await page.getByLabel('Wine 1 Wine Name — correct answer').fill('Dashboard Test 2020');
-  await page.getByLabel('Wine 1 Wine Name — distractor 1').fill('Château Margaux');
-  await page.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
-  await page.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
 
   await page.getByRole('button', { name: /create tasting/i }).click();
 
-  const codeEl = page.locator('[aria-label^="Session code"]');
+  const codeEl = page.locator('[aria-label^="Tasting code"]');
   await expect(codeEl.first()).toBeVisible();
   const aria = (await codeEl.first().getAttribute('aria-label')) ?? '';
   const code = aria.replace(/\D/g, '');
@@ -98,7 +78,7 @@ test.describe('Host Dashboard', () => {
     });
 
     await test.step('Click the delete button for the session', async () => {
-      const deleteBtn = page.getByRole('button', { name: new RegExp(`Delete session ${code}`, 'i') });
+      const deleteBtn = page.getByRole('button', { name: new RegExp(`Delete tasting ${code}`, 'i') });
       await expect(deleteBtn).toBeVisible({ timeout: 10_000 });
       await deleteBtn.click();
     });

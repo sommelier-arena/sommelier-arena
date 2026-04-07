@@ -4,7 +4,7 @@ import type { QuestionPayload } from '../../types/events';
 
 const CATEGORY_LABELS: Record<string, string> = {
   color: 'Color',
-  country: 'Country',
+  region: 'Region',
   grape_variety: 'Grape Variety',
   vintage_year: 'Vintage Year',
 };

@@ -45,7 +45,7 @@ cp .env.example .env.local # PUBLIC_PARTYKIT_HOST=localhost:1999
 npm run dev
 ```
 
-Open [http://localhost:4321/host](http://localhost:4321/host) (host) and [http://localhost:4321/play](http://localhost:4321/play) (participant).
+Open [http://localhost:4321/host](http://localhost:4321/host) (host), [http://localhost:4321/play](http://localhost:4321/play) (participant), and [http://localhost:4321/admin](http://localhost:4321/admin) (admin dashboard).
 
 ## Mode B — Full integration (Docker)
 
@@ -59,6 +59,7 @@ docker-compose up --build
 |---------|-----|
 | Frontend (nginx) | [http://localhost:4321](http://localhost:4321) |
 | PartyKit backend | [http://localhost:1999](http://localhost:1999) |
+| Wine Answers Worker | [http://localhost:1998](http://localhost:1998) |
 | Docs (Docusaurus) | [http://localhost:3002](http://localhost:3002) |
 
 ### Why nginx?
@@ -185,6 +186,8 @@ cd e2e && npm test -- --project=chromium
 |----------|-------|-------|
 | `PUBLIC_PARTYKIT_HOST` | `front/.env.local` | `localhost:1999` (local) |
 | `PUBLIC_PARTYKIT_HOST` | Cloudflare Pages dashboard | `sommelier-arena.USERNAME.partykit.dev` (prod) |
+| `PUBLIC_WINE_ANSWERS_URL` | `front/.env.local` | `http://localhost:1998` (local) |
+| `PUBLIC_WINE_ANSWERS_URL` | Cloudflare Pages dashboard | `https://<wine-answers-worker>.workers.dev` (prod) |
 
 See `front/.env.example` for a template.
 

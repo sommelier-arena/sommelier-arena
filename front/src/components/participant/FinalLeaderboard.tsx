@@ -40,7 +40,7 @@ export function FinalLeaderboard({ rankings, pseudonym }: FinalLeaderboardProps)
           onClick={handlePlayAgain}
           className="w-full bg-wine-600 text-white rounded-xl py-3 font-semibold hover:bg-wine-700 transition-colors"
         >
-          Play Another Session
+          Play Another Tasting
         </button>
       </div>
     </div>

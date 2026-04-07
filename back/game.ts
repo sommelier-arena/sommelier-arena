@@ -38,6 +38,7 @@ export default class GameSession implements Party.Server, GameContext {
   sessionTitle = '';
   createdAt = '';
   hostConnectionId: string | null = null;
+  hostDisconnectedAt: number | null = null;
   readonly timer = new TimerManager();
 
   // Keyed by pseudonym (unique per session)
@@ -60,6 +61,7 @@ export default class GameSession implements Party.Server, GameContext {
       this.hostId = state.hostId;
       this.sessionTitle = state.sessionTitle;
       this.createdAt = state.createdAt;
+      this.hostDisconnectedAt = state.hostDisconnectedAt ?? null;
     }
 
     // Restore participants from disk
@@ -145,8 +147,12 @@ export default class GameSession implements Party.Server, GameContext {
     if (conn.id === this.hostConnectionId) {
       this.hostConnectionId = null;
       if (this.phase !== 'waiting' && this.phase !== 'ended') {
+        // Grace period: don't end the game immediately.
+        // Set a 1-hour alarm — if the host doesn't reconnect, the alarm ends it.
         this.timer.clear();
-        void this.endGame();
+        this.hostDisconnectedAt = Date.now();
+        void this.room.storage.setAlarm(Date.now() + 3_600_000);
+        void this.saveState();
       }
       return;
     }
@@ -165,10 +171,17 @@ export default class GameSession implements Party.Server, GameContext {
     }
   }
 
-  // ── Alarm: authoritative timer expiry ────────────────────────────────────
+  // ── Alarm: authoritative timer expiry or host disconnect grace period ────
 
   async alarm() {
-    await handleTimerExpiry(this);
+    if (this.hostDisconnectedAt && !this.hostConnectionId) {
+      // Host grace period expired — end the game
+      this.hostDisconnectedAt = null;
+      await endGame(this);
+    } else {
+      // Normal question timer expiry
+      await handleTimerExpiry(this);
+    }
   }
 
   // ── GameContext interface implementation (delegates to extracted modules) ──

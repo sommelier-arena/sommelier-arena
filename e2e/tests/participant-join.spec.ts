@@ -12,26 +12,10 @@ async function createSessionAndGetCode(hostContext: BrowserContext): Promise<str
   await expect(hostPage.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   await hostPage.getByLabel('Wine name', { exact: true }).fill('Test Wine');
-  await hostPage.getByLabel('Wine 1 Color — correct answer').fill('Red');
-  await hostPage.getByLabel('Wine 1 Color — distractor 1').fill('White');
-  await hostPage.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
-  await hostPage.getByLabel('Wine 1 Color — distractor 3').fill('Orange');
-  await hostPage.getByLabel('Wine 1 Country — correct answer').fill('France');
-  await hostPage.getByLabel('Wine 1 Country — distractor 1').fill('Italy');
-  await hostPage.getByLabel('Wine 1 Country — distractor 2').fill('Spain');
-  await hostPage.getByLabel('Wine 1 Country — distractor 3').fill('USA');
-  await hostPage.getByLabel('Wine 1 Grape Variety — correct answer').fill('Merlot');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 1').fill('Cab');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 2').fill('Syrah');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 3').fill('Pinot');
-  await hostPage.getByLabel('Wine 1 Vintage Year — correct answer').fill('2018');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 1').fill('2015');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 2').fill('2019');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 3').fill('2020');
 
   await hostPage.getByRole('button', { name: /create tasting/i }).click();
 
-  const codeEl = hostPage.locator('[aria-label^="Session code"]');
+  const codeEl = hostPage.locator('[aria-label^="Tasting code"]');
   await expect(codeEl.first()).toBeVisible();
   const aria = (await codeEl.first().getAttribute('aria-label')) ?? '';
   return aria.replace(/\D/g, '');
@@ -43,12 +27,12 @@ test.describe('Participant Join', () => {
     await expect(page.getByRole('button', { name: /join/i })).toBeVisible();
 
     await test.step('Enter 3 digits — button stays disabled', async () => {
-      await page.getByLabel('Session code').fill('123');
+      await page.getByLabel('Tasting code').fill('123');
       await expect(page.getByRole('button', { name: /join/i })).toBeDisabled();
     });
 
     await test.step('Enter 4 digits — button becomes enabled', async () => {
-      await page.getByLabel('Session code').fill('1234');
+      await page.getByLabel('Tasting code').fill('1234');
       await expect(page.getByRole('button', { name: /join/i })).toBeEnabled();
     });
   });
@@ -58,7 +42,7 @@ test.describe('Participant Join', () => {
     await expect(page.getByRole('button', { name: /join/i })).toBeVisible();
 
     await test.step('Submit non-existent code', async () => {
-      await page.getByLabel('Session code').fill('0000');
+      await page.getByLabel('Tasting code').fill('0000');
       await page.getByRole('button', { name: /join/i }).click();
     });
 
@@ -81,7 +65,7 @@ test.describe('Participant Join', () => {
 
       await test.step('Participant enters the code', async () => {
         await expect(participantPage.getByRole('button', { name: /join/i })).toBeVisible();
-        await participantPage.getByLabel('Session code').fill(code);
+        await participantPage.getByLabel('Tasting code').fill(code);
         await participantPage.getByRole('button', { name: /join/i }).click();
       });
 

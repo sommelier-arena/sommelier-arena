@@ -7,7 +7,7 @@ import { JoinForm } from '../../../components/participant/JoinForm';
 describe('JoinForm', () => {
   it('renders a 4-digit code input', () => {
     render(<JoinForm onJoin={vi.fn()} error={null} />);
-    const input = screen.getByLabelText(/session code/i);
+    const input = screen.getByLabelText(/tasting code/i);
     expect(input).toBeInTheDocument();
     expect((input as HTMLInputElement).maxLength).toBe(4);
   });
@@ -15,7 +15,7 @@ describe('JoinForm', () => {
   it('calls onJoin with 4-digit code on submit', async () => {
     const onJoin = vi.fn();
     render(<JoinForm onJoin={onJoin} error={null} />);
-    await userEvent.type(screen.getByLabelText(/session code/i), '1234');
+    await userEvent.type(screen.getByLabelText(/tasting code/i), '1234');
     fireEvent.click(screen.getByRole('button', { name: /join/i }));
     expect(onJoin).toHaveBeenCalledWith('1234');
   });
@@ -23,7 +23,7 @@ describe('JoinForm', () => {
   it('does not call onJoin with less than 4 digits', async () => {
     const onJoin = vi.fn();
     render(<JoinForm onJoin={onJoin} error={null} />);
-    await userEvent.type(screen.getByLabelText(/session code/i), '123');
+    await userEvent.type(screen.getByLabelText(/tasting code/i), '123');
     fireEvent.click(screen.getByRole('button', { name: /join/i }));
     expect(onJoin).not.toHaveBeenCalled();
   });
@@ -31,7 +31,7 @@ describe('JoinForm', () => {
   it('does not call onJoin with non-numeric code', async () => {
     const onJoin = vi.fn();
     render(<JoinForm onJoin={onJoin} error={null} />);
-    await userEvent.type(screen.getByLabelText(/session code/i), 'ABCD');
+    await userEvent.type(screen.getByLabelText(/tasting code/i), 'ABCD');
     fireEvent.click(screen.getByRole('button', { name: /join/i }));
     expect(onJoin).not.toHaveBeenCalled();
   });

@@ -125,7 +125,11 @@ export async function handleHostNext(
   sender: Party.Connection,
 ): Promise<void> {
   if (sender.id !== ctx.hostConnectionId) return;
-  if (ctx.phase !== 'question_revealed' && ctx.phase !== 'round_leaderboard') return;
+  if (
+    ctx.phase !== 'question_revealed' &&
+    ctx.phase !== 'question_leaderboard' &&
+    ctx.phase !== 'round_leaderboard'
+  ) return;
 
   const wine = ctx.wines[ctx.currentRound];
   const isLastQuestion = ctx.currentQuestion >= wine.questions.length - 1;
@@ -144,6 +148,18 @@ export async function handleHostNext(
     return;
   }
 
+  if (ctx.phase === 'question_revealed') {
+    ctx.phase = 'question_leaderboard';
+    await ctx.saveState();
+    ctx.broadcast('game:question_leaderboard', {
+      rankings: buildRankings(ctx.participants),
+      questionIndex: ctx.currentQuestion,
+      totalQuestions: wine.questions.length,
+    });
+    return;
+  }
+
+  // phase === 'question_leaderboard'
   if (isLastQuestion) {
     ctx.phase = 'round_leaderboard';
     await ctx.saveState();

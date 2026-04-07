@@ -10,6 +10,7 @@ import { HostDashboard } from './HostDashboard';
 import { HostLobby } from './HostLobby';
 import { HostQuestion } from './HostQuestion';
 import { HostReveal } from './HostReveal';
+import { HostQuestionLeaderboard } from './HostQuestionLeaderboard';
 import { HostRoundLeaderboard } from './HostRoundLeaderboard';
 import { HostFinalLeaderboard } from './HostFinalLeaderboard';
 import type { SessionListEntry, CreateWinePayload } from '../../types/events';
@@ -161,7 +162,7 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
       <div className="bg-slate-50">
         {showNav && <NavBar />}
         <div className="px-4 py-10 space-y-6">
-          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Session Lobby</h1>
+          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Tasting Lobby</h1>
           <SessionCreated code={code} hostId={hostId} />
           <HostLobby
             code={code}
@@ -208,6 +209,24 @@ export function HostApp({ showNav = true }: { showNav?: boolean }) {
           <HostReveal
             question={currentQuestion}
             revealData={revealData}
+            onNext={nextQuestion}
+            onEnd={endSession}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'questionLeaderboard') {
+    return (
+      <div className="bg-slate-50">
+        {showNav && <NavBar />}
+        <div className="px-4 py-10">
+          <h1 className="sr-only" tabIndex={-1} ref={headingRef}>Question Leaderboard</h1>
+          <HostQuestionLeaderboard
+            rankings={rankings}
+            questionIndex={currentQuestion?.questionIndex ?? 0}
+            totalQuestions={currentQuestion?.totalQuestions ?? 1}
             onNext={nextQuestion}
             onEnd={endSession}
           />

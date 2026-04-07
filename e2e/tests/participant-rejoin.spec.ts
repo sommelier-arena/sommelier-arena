@@ -23,29 +23,9 @@ async function createSessionAndJoin(browser: Browser) {
   await expect(hostPage.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
   await hostPage.getByLabel('Wine name', { exact: true }).fill('Rejoin Test Wine');
-  await hostPage.getByLabel('Wine 1 Color — correct answer').fill('Red');
-  await hostPage.getByLabel('Wine 1 Color — distractor 1').fill('White');
-  await hostPage.getByLabel('Wine 1 Color — distractor 2').fill('Rosé');
-  await hostPage.getByLabel('Wine 1 Color — distractor 3').fill('Orange');
-  await hostPage.getByLabel('Wine 1 Country — correct answer').fill('France');
-  await hostPage.getByLabel('Wine 1 Country — distractor 1').fill('Italy');
-  await hostPage.getByLabel('Wine 1 Country — distractor 2').fill('Spain');
-  await hostPage.getByLabel('Wine 1 Country — distractor 3').fill('USA');
-  await hostPage.getByLabel('Wine 1 Grape Variety — correct answer').fill('Merlot');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 1').fill('Cabernet');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 2').fill('Syrah');
-  await hostPage.getByLabel('Wine 1 Grape Variety — distractor 3').fill('Pinot');
-  await hostPage.getByLabel('Wine 1 Vintage Year — correct answer').fill('2020');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 1').fill('2015');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 2').fill('2019');
-  await hostPage.getByLabel('Wine 1 Vintage Year — distractor 3').fill('2018');
-  await hostPage.getByLabel('Wine 1 Wine Name — correct answer').fill('Rejoin Test 2020');
-  await hostPage.getByLabel('Wine 1 Wine Name — distractor 1').fill('Château Margaux');
-  await hostPage.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
-  await hostPage.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
   await hostPage.getByRole('button', { name: /create tasting/i }).click();
 
-  const codeEl = hostPage.locator('[aria-label^="Session code"]');
+  const codeEl = hostPage.locator('[aria-label^="Tasting code"]');
   await expect(codeEl.first()).toBeVisible();
   const code = ((await codeEl.first().getAttribute('aria-label')) ?? '').replace(/\D/g, '');
 
@@ -114,9 +94,14 @@ test.describe('Participant Rejoin', () => {
         const visible = await revealBtn.waitFor({ state: 'visible', timeout: 15_000 }).then(() => true).catch(() => false);
         if (visible) {
           await revealBtn.click();
+          // First Next: revealed → question leaderboard
           const nextBtn = hostPage.getByRole('button', { name: /next/i });
           await expect(nextBtn).toBeVisible({ timeout: 15_000 });
           await nextBtn.click();
+          // Second Next: question leaderboard → next question or round leaderboard
+          const nextBtn2 = hostPage.getByRole('button', { name: /next question|see round results/i });
+          await expect(nextBtn2).toBeVisible({ timeout: 15_000 });
+          await nextBtn2.click();
         } else {
           break;
         }
@@ -131,16 +116,16 @@ test.describe('Participant Rejoin', () => {
       }
     });
 
-    await test.step('Participant sees final leaderboard with "Play Another Session" button', async () => {
-      await expect(participantPage.getByRole('button', { name: /play another session/i })).toBeVisible({ timeout: 15_000 });
+    await test.step('Participant sees final leaderboard with "Play Another Tasting" button', async () => {
+      await expect(participantPage.getByRole('button', { name: /play another tasting/i })).toBeVisible({ timeout: 15_000 });
     });
 
-    await test.step('Participant clicks "Play Another Session" and lands on join form', async () => {
-      await participantPage.getByRole('button', { name: /play another session/i }).click();
+    await test.step('Participant clicks "Play Another Tasting" and lands on join form', async () => {
+      await participantPage.getByRole('button', { name: /play another tasting/i }).click();
       // Should navigate to /play and show the join form (no stale code pre-filled)
       await expect(participantPage).toHaveURL(/\/play/);
       await expect(participantPage.getByRole('textbox')).toBeVisible({ timeout: 10_000 });
-      // The textbox should be empty (no stale session code)
+      // The textbox should be empty (no stale tasting code)
       await expect(participantPage.getByRole('textbox')).toHaveValue('');
     });
 

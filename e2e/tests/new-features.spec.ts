@@ -22,30 +22,9 @@ async function createSession(browser: Browser) {
 
   await page.getByLabel('Wine name', { exact: true }).fill('Test Wine v2');
 
-  // Fill all 5 categories
-  for (const [label, correct] of [
-    ['Color', 'Red'],
-    ['Country', 'France'],
-    ['Grape Variety', 'Merlot'],
-    ['Vintage Year', '2018'],
-    ['Wine Name', 'Test Wine v2 2018'],
-  ]) {
-    await page.getByLabel(`Wine 1 ${label} — correct answer`).fill(correct);
-  }
-
-  // Fill grape variety distractors (no defaults)
-  await page.getByLabel('Wine 1 Grape Variety — distractor 1').fill('Cabernet');
-  await page.getByLabel('Wine 1 Grape Variety — distractor 2').fill('Syrah');
-  await page.getByLabel('Wine 1 Grape Variety — distractor 3').fill('Pinot');
-
-  // Fill wine name distractors (defaults exist but override for clarity)
-  await page.getByLabel('Wine 1 Wine Name — distractor 1').fill('Château Margaux');
-  await page.getByLabel('Wine 1 Wine Name — distractor 2').fill('Château Lafite');
-  await page.getByLabel('Wine 1 Wine Name — distractor 3').fill('Château Latour');
-
   await page.getByRole('button', { name: /create tasting/i }).click();
 
-  const codeEl = page.locator('[aria-label^="Session code"]');
+  const codeEl = page.locator('[aria-label^="Tasting code"]');
   await expect(codeEl.first()).toBeVisible();
   const code = ((await codeEl.first().getAttribute('aria-label')) ?? '').replace(/\D/g, '');
 
@@ -110,7 +89,7 @@ test.describe('New features (v2.0)', () => {
     const participantPage = await participantCtx.newPage();
 
     await participantPage.goto('/play');
-    await participantPage.getByLabel(/session code/i).fill(code);
+    await participantPage.getByLabel(/tasting code/i).fill(code);
     await participantPage.getByRole('button', { name: /join/i }).click();
 
     await test.step('Participant enters waiting lobby', async () => {
@@ -127,7 +106,7 @@ test.describe('New features (v2.0)', () => {
     const participantPage = await participantCtx.newPage();
 
     await participantPage.goto('/play');
-    await participantPage.getByLabel(/session code/i).fill(code);
+    await participantPage.getByLabel(/tasting code/i).fill(code);
     await participantPage.getByRole('button', { name: /join/i }).click();
     await expect(participantPage.getByText(/waiting/i).last()).toBeVisible({ timeout: 10_000 });
 
@@ -152,7 +131,7 @@ test.describe('New features (v2.0)', () => {
     const participantPage = await participantCtx.newPage();
 
     await participantPage.goto('/play');
-    await participantPage.getByLabel(/session code/i).fill(code);
+    await participantPage.getByLabel(/tasting code/i).fill(code);
     await participantPage.getByRole('button', { name: /join/i }).click();
     await expect(participantPage.getByText(/waiting/i).last()).toBeVisible({ timeout: 10_000 });
 
@@ -200,7 +179,7 @@ test.describe('New features (v2.0)', () => {
       await hostPage.getByLabel('Wine name', { exact: true }).fill('Updated Wine');
       await hostPage.getByRole('button', { name: /update tasting/i }).click();
       // Should return to lobby (SessionCreated / code display visible)
-      await expect(hostPage.locator('[aria-label^="Session code"]').first()).toBeVisible({ timeout: 10_000 });
+      await expect(hostPage.locator('[aria-label^="Tasting code"]').first()).toBeVisible({ timeout: 10_000 });
     });
   });
 });
