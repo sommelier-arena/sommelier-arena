@@ -22,7 +22,7 @@ async function createSession(browser: Browser) {
 
   // All form fields have valid default values — only override wine name for test identity.
   await page.getByLabel('Wine 1 Wine Name — correct answer').fill('Test Wine v2');
-
+  await page.keyboard.press('Escape');
   await page.getByRole('button', { name: /create tasting/i }).click();
 
   const codeEl = page.locator('[aria-label^="Tasting code"]');
@@ -178,6 +178,7 @@ test.describe('New features (v2.0)', () => {
     await test.step('Submit updated wines returns to lobby', async () => {
       // Change the wine name
       await hostPage.getByLabel('Wine 1 Wine Name — correct answer').fill('Updated Wine');
+      await hostPage.keyboard.press('Escape');
       await hostPage.getByRole('button', { name: /update tasting/i }).click();
       // Should return to lobby (SessionCreated / code display visible)
       await expect(hostPage.locator('[aria-label^="Tasting code"]').first()).toBeVisible({ timeout: 10_000 });

@@ -16,6 +16,8 @@ async function fillWine(
 ) {
   // Each wine block has a distinct label: "Wine N Wine Name — correct answer"
   await page.getByLabel(`Wine ${wineNum} Wine Name — correct answer`, { exact: true }).fill(wineName);
+  // Close the dropdown opened by fill() so it doesn't obscure buttons below.
+  await page.keyboard.press('Escape');
 }
 
 /** Create a session with two wines. Returns hostPage, hostCtx, and session code. */

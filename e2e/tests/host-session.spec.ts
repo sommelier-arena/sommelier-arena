@@ -4,6 +4,8 @@ import { test, expect, type Browser } from '@playwright/test';
 async function fillMinimalSession(page: import('@playwright/test').Page) {
   // All form fields have valid default values — only override wine name for test identity.
   await page.getByLabel('Wine 1 Wine Name — correct answer').fill('Château Test');
+  // Close the combobox dropdown (opened by fill) so it doesn't obscure "Create Tasting".
+  await page.keyboard.press('Escape');
 }
 
 test.describe('Host Session', () => {
@@ -38,6 +40,8 @@ test.describe('Host Session', () => {
   test('Host Session - boundary: submit with empty wine name shows error @smoke', async ({ page }) => {
     await test.step('Clear the wine name field and submit', async () => {
       await page.getByLabel('Wine 1 Wine Name — correct answer').clear();
+      // Close the dropdown opened by clear() before clicking the submit button.
+      await page.keyboard.press('Escape');
       await page.getByRole('button', { name: /create tasting/i }).click();
     });
 
@@ -73,6 +77,7 @@ test.describe('Host Session', () => {
     await expect(page.getByRole('button', { name: /create tasting/i })).toBeVisible();
 
     await page.getByLabel('Wine 1 Wine Name — correct answer').fill('URL Test Wine');
+    await page.keyboard.press('Escape');
     await page.getByRole('button', { name: /create tasting/i }).click();
 
     const codeEl = page.locator('[aria-label^="Tasting code"]');
@@ -93,6 +98,7 @@ test.describe('Host Session', () => {
       await newBtn.click();
     }
     await page1.getByLabel('Wine 1 Wine Name — correct answer').fill('Reconnect Test Wine');
+    await page1.keyboard.press('Escape');
     await page1.getByRole('button', { name: /create tasting/i }).click();
 
     const codeEl = page1.locator('[aria-label^="Tasting code"]');

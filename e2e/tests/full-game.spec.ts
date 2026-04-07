@@ -17,7 +17,7 @@ async function hostCreateSession(browser: Browser) {
 
   // All form fields have valid default values — only override wine name for test identity.
   await hostPage.getByLabel('Wine 1 Wine Name — correct answer').fill('Grand Cru Test');
-
+  await hostPage.keyboard.press('Escape');
   await hostPage.getByRole('button', { name: /create tasting/i }).click();
 
   // The visible session code is rendered with an aria-label like "Tasting code: 6 1 8 3".
