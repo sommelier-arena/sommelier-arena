@@ -28,10 +28,6 @@ export function ComboboxInput({
   inputClassName,
 }: ComboboxInputProps) {
   const [query, setQuery] = useState('');
-  // Track whether the user has typed since the last option selection.
-  // Allows clearing the field (setting value to '') while preventing
-  // onBlur from overwriting a freshly-selected dropdown option with ''.
-  const [userTyped, setUserTyped] = useState(false);
 
   const filtered =
     query === ''
@@ -48,7 +44,6 @@ export function ComboboxInput({
       onChange={(v: string) => {
         onChange(v);
         setQuery('');
-        setUserTyped(false);
       }}
     >
       <div className={className ?? ''}>
@@ -62,15 +57,16 @@ export function ComboboxInput({
             className={inputClassName ?? "w-full border border-slate-300 rounded-lg px-3 py-2 text-slate-400 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-wine-400"}
             placeholder={placeholder}
             displayValue={(v: string) => v}
-            onChange={(e) => { setQuery(e.target.value); setUserTyped(true); }}
+            onChange={(e) => {
+              // Propagate every keystroke immediately so the controlled value
+              // is always up-to-date before form submission reads state.
+              setQuery(e.target.value);
+              onChange(e.target.value);
+            }}
             onBlur={() => {
-              // Only update the controlled value when the user actually typed
-              // (not when the field was reset after a dropdown selection).
-              if (userTyped && query.trim() !== value) {
-                onChange(query.trim());
-              }
+              // Reset the display query so the input shows the committed value
+              // via displayValue. The parent state is already current from onChange.
               setQuery('');
-              setUserTyped(false);
             }}
           />
 
