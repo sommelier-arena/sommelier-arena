@@ -13,7 +13,12 @@ export default defineConfig({
   timeout: 45_000,
   // Hard cap on the entire test suite to prevent infinite hangs in CI.
   globalTimeout: 15 * 60 * 1_000,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  // In CI: also emit GitHub Actions ::error annotations for failing tests.
+  // The 'list' reporter shows one line per test (pass or fail) so we get
+  // live progress in the Actions log regardless of whether tests pass or fail.
+  reporter: process.env.CI
+    ? [['github'], ['list'], ['html', { open: 'never' }]]
+    : [['list'], ['html', { open: 'never' }]],
 
   // Checks that the services are up before any tests run.
   globalSetup: './global-setup.ts',

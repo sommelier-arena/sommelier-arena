@@ -150,7 +150,10 @@ jobs:
 
       - name: Run E2E tests (Chromium only)
         working-directory: ./e2e
-        run: npx playwright test --project=chromium --reporter=github
+        # No --reporter flag: use reporters from playwright.config.ts
+        # (github + list + html in CI). 'list' shows one line per test so
+        # passing tests are visible — the github reporter alone is silent on passes.
+        run: npx playwright test --project=chromium
 
       - name: Upload Playwright report on failure
         if: failure()
