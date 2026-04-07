@@ -1,0 +1,32 @@
+{
+  "cli_version": "0.5.3",
+  "checkpoint_id": "4cd662f5de6c",
+  "strategy": "manual-commit",
+  "branch": "feat/add-wine-answers-collection",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "e2e/tests/full-game.spec.ts",
+    "e2e/tests/host-dashboard.spec.ts",
+    "e2e/tests/host-session.spec.ts",
+    "e2e/tests/multi-round.spec.ts",
+    "e2e/tests/new-features.spec.ts",
+    "e2e/tests/participant-join.spec.ts",
+    "e2e/tests/participant-rejoin.spec.ts",
+    "e2e/tests/pause-resume.spec.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/4c/d662f5de6c/0/metadata.json",
+      "transcript": "/4c/d662f5de6c/0/full.jsonl",
+      "content_hash": "/4c/d662f5de6c/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 27975,
+    "api_call_count": 42
+  }
+}

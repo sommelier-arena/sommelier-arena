@@ -1,0 +1,46 @@
+{
+  "cli_version": "0.5.3",
+  "checkpoint_id": "4cd662f5de6c",
+  "session_id": "27599124-5251-4470-9c3a-c26637404d90",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-07T17:09:56.364317Z",
+  "branch": "feat/add-wine-answers-collection",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "e2e/tests/multi-round.spec.ts",
+    "e2e/tests/new-features.spec.ts",
+    "e2e/tests/participant-join.spec.ts",
+    "e2e/tests/participant-rejoin.spec.ts",
+    "e2e/tests/pause-resume.spec.ts",
+    "e2e/tests/full-game.spec.ts",
+    "e2e/tests/host-dashboard.spec.ts",
+    "e2e/tests/host-session.spec.ts"
+  ],
+  "agent": "Copilot CLI",
+  "model": "claude-sonnet-4.6",
+  "turn_id": "5170df213615",
+  "checkpoint_transcript_start": 2843,
+  "transcript_lines_at_start": 2843,
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 27975,
+    "api_call_count": 42
+  },
+  "session_metrics": {
+    "turn_count": 7
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-07T17:09:51.562128Z",
+    "agent_lines": 15,
+    "agent_removed": 5,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 15,
+    "total_lines_changed": 20,
+    "agent_percentage": 100,
+    "metric_version": 2
+  }
+}
