@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { flushSync } from 'react-dom';
 import {
   Combobox,
   ComboboxInput as HeadlessComboboxInput,
@@ -42,8 +41,10 @@ export function ComboboxInput({
   return (
     <Combobox
       value={value}
-      onChange={(v: string) => {
-        onChange(v);
+      onChange={(v: string | null) => {
+        // Headless UI calls onChange(null) when the user clears a single-mode
+        // combobox. Coerce to '' so downstream state is always a string.
+        onChange(v ?? '');
         setQuery('');
       }}
     >
@@ -60,16 +61,9 @@ export function ComboboxInput({
             displayValue={(v: string) => v}
             onChange={(e) => {
               setQuery(e.target.value);
-              // flushSync forces React to commit this state update synchronously,
-              // so handleSubmit always reads the current value even if called
-              // immediately after (React 18 automatic batching would otherwise defer it).
-              flushSync(() => onChange(e.target.value));
+              onChange(e.target.value);
             }}
-            onBlur={() => {
-              // Reset the display query so the input shows the committed value
-              // via displayValue. The parent state is already current from onChange.
-              setQuery('');
-            }}
+            onBlur={() => setQuery('')}
           />
 
           <ComboboxOptions
