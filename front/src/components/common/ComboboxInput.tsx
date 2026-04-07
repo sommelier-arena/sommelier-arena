@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { flushSync } from 'react-dom';
 import {
   Combobox,
   ComboboxInput as HeadlessComboboxInput,
@@ -58,10 +59,11 @@ export function ComboboxInput({
             placeholder={placeholder}
             displayValue={(v: string) => v}
             onChange={(e) => {
-              // Propagate every keystroke immediately so the controlled value
-              // is always up-to-date before form submission reads state.
               setQuery(e.target.value);
-              onChange(e.target.value);
+              // flushSync forces React to commit this state update synchronously,
+              // so handleSubmit always reads the current value even if called
+              // immediately after (React 18 automatic batching would otherwise defer it).
+              flushSync(() => onChange(e.target.value));
             }}
             onBlur={() => {
               // Reset the display query so the input shows the committed value
