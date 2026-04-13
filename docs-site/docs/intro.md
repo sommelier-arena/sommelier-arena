@@ -38,7 +38,7 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 - **Zero cost, zero cold starts** — Durable Objects wake on demand
 - **Session persistence** — create Monday, resume Wednesday
 - **Participant rejoin** — page refresh or URL (`/play?code=X&id=PSEUDONYM`) reconnects automatically, even from a different device
-- **Host identity dashboard** — see all your past and active sessions from any device
+- **Host identity dashboard** — see all your past and active sessions from one device
 - **Five questions per wine** — added `wine_name` category
 - **Configurable timer** — 15–120 s slider at session creation
 - **No-lock answers** — participants can change their answer until the host reveals
