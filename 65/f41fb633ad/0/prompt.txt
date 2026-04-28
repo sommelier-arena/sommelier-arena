@@ -1,0 +1,5 @@
+[[PLAN]] See the logs here .github/issues/bugs/sommelier-arena-front.cf1575e1-1f36-453e-a89c-1d41bf01dda8.log and fix the failed deployment on cloudflare. dont commit and push I can do it.
+
+---
+
+[[PLAN]] I don't very much like the fact to have a specific dedicated file .npmrc only for prod deploymenet to cloudflare, I'd prefer to have something more universal local and prod ready.
