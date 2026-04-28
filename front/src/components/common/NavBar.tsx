@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { href: '/host', label: 'Host a Tasting' },
   { href: '/play', label: "Join a Tasting" },
   { href: DOCS_URL, label: 'Read the Docs' },
-  { href: 'https://github.com/francoiducat/sommelier-arena', label: 'Git Repository' },
+  { href: 'https://github.com/sommelier-arena/sommelier-arena/', label: 'Git Repository' },
 ];
 
 export function NavBar() {
