@@ -1,0 +1,80 @@
+{
+  "cli_version": "0.5.6",
+  "checkpoint_id": "60f55ba8770b",
+  "session_id": "093e8779-159c-4165-99db-6c54ad7bd037",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-28T18:08:17.629182Z",
+  "branch": "fix/iphone-display-bug",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "front/src/styles/tailwind.css",
+    "front/postcss.config.mjs"
+  ],
+  "agent": "Copilot CLI",
+  "model": "",
+  "turn_id": "75b3deeeba90",
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 55838,
+    "api_call_count": 122
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-28T18:08:17.602905Z",
+    "agent_lines": 0,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 11197,
+    "total_committed": 0,
+    "total_lines_changed": 22394,
+    "agent_percentage": 0,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 2789,
+      "user_lines_removed": 11197,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".github/issues/bugs/iphone-bug-display.md": 20,
+        "back/package-lock.json": 620,
+        "back/package.json": 1,
+        "e2e/package-lock.json": 12,
+        "e2e/package.json": 1,
+        "e2e/tests/mobile.spec.ts": 83,
+        "front/Dockerfile": 1,
+        "front/astro.config.mjs": 1,
+        "front/package-lock.json": 1961,
+        "front/package.json": 15,
+        "front/postcss.config.mjs": 5,
+        "front/src/__tests__/components/participant/QuestionView.test.tsx": 10,
+        "front/src/__tests__/hooks/useHostSocket.test.ts": 15,
+        "front/src/__tests__/hooks/useParticipantSocket.test.ts": 17,
+        "front/src/__tests__/lib/socket.test.ts": 10,
+        "front/src/components/common/PageHead.astro": 2,
+        "front/src/components/participant/QuestionView.tsx": 1,
+        "front/src/styles/tailwind.css": 14
+      },
+      "user_removed_per_file": {
+        "back/package-lock.json": 7358,
+        "back/package.json": 2,
+        "e2e/package-lock.json": 12,
+        "e2e/package.json": 1,
+        "e2e/tests/mobile.spec.ts": 1,
+        "front/Dockerfile": 1,
+        "front/astro.config.mjs": 2,
+        "front/package-lock.json": 3746,
+        "front/package.json": 14,
+        "front/src/__tests__/hooks/useHostSocket.test.ts": 13,
+        "front/src/__tests__/hooks/useParticipantSocket.test.ts": 15,
+        "front/src/__tests__/lib/socket.test.ts": 8,
+        "front/src/components/participant/QuestionView.tsx": 1,
+        "front/tailwind.config.mjs": 23
+      }
+    }
+  ]
+}
