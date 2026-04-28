@@ -49,7 +49,7 @@ export function QuestionView({
         </div>
 
         {/* Options — 2×2 grid: A+B on row 1, C+D on row 2 */}
-        <div className="grid grid-cols-2 gap-3 flex-1">
+        <div className="grid grid-cols-2 gap-3">
           {question.options.map((opt, i) => {
             const isSelected = opt.id === selectedOptionId;
             return (

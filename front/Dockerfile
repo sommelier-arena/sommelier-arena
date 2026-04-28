@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 # PUBLIC_PARTYKIT_HOST is baked into the Astro static build at build time.

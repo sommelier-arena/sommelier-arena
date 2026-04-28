@@ -93,4 +93,14 @@ describe('QuestionView', () => {
     );
     expect(screen.getByText(/change it until the host reveals/i)).toBeInTheDocument();
   });
+
+  it('options grid does not use flex-1 (iOS shrink regression guard)', () => {
+    // flex-1 on the grid allows iOS Safari to shrink it below its content height,
+    // causing the "Selection recorded" hint to visually overlap the answer buttons.
+    const { container } = render(
+      <QuestionView question={question} selectedOptionId={null} timerMs={60000} onSelect={vi.fn()} />,
+    );
+    const grid = container.querySelector('.grid-cols-2');
+    expect(grid?.classList.contains('flex-1')).toBe(false);
+  });
 });

@@ -3,14 +3,16 @@ import { createSocket } from '../../lib/socket';
 
 vi.mock('partysocket', () => {
   return {
-    default: vi.fn().mockImplementation((opts: { host: string; room: string }) => ({
-      host: opts.host,
-      room: opts.room,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      send: vi.fn(),
-      close: vi.fn(),
-    })),
+    default: vi.fn().mockImplementation(function (opts: { host: string; room: string }) {
+      return {
+        host: opts.host,
+        room: opts.room,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        send: vi.fn(),
+        close: vi.fn(),
+      };
+    }),
   };
 });
 
