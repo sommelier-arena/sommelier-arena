@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.5.6",
+  "checkpoint_id": "2f7d447887f3",
+  "session_id": "093e8779-159c-4165-99db-6c54ad7bd037",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-28T19:48:07.706424Z",
+  "branch": "main",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "docs-site/docusaurus.config.ts"
+  ],
+  "agent": "Copilot CLI",
+  "model": "claude-sonnet-4.6",
+  "turn_id": "c45729cd1c97",
+  "checkpoint_transcript_start": 1694,
+  "transcript_lines_at_start": 1694,
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 0,
+    "api_call_count": 0
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-28T19:48:07.675058Z",
+    "agent_lines": 1,
+    "agent_removed": 1,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 1,
+    "total_lines_changed": 2,
+    "agent_percentage": 100,
+    "metric_version": 2
+  }
+}
