@@ -8,21 +8,23 @@ let closeListeners: Array<() => void> = [];
 const mockSend = vi.fn();
 
 vi.mock('partysocket', () => ({
-  default: vi.fn().mockImplementation(() => ({
-    addEventListener: vi.fn((event: string, cb: (e: MessageEvent | Event) => void) => {
-      if (event === 'message') {
-        mockListeners['message'] = mockListeners['message'] || [];
-        mockListeners['message'].push(cb as (e: MessageEvent) => void);
-      } else if (event === 'open') {
-        openListeners.push(cb as () => void);
-      } else if (event === 'close') {
-        closeListeners.push(cb as () => void);
-      }
-    }),
-    removeEventListener: vi.fn(),
-    send: mockSend,
-    close: vi.fn(),
-  })),
+  default: vi.fn().mockImplementation(function () {
+    return {
+      addEventListener: vi.fn((event: string, cb: (e: MessageEvent | Event) => void) => {
+        if (event === 'message') {
+          mockListeners['message'] = mockListeners['message'] || [];
+          mockListeners['message'].push(cb as (e: MessageEvent) => void);
+        } else if (event === 'open') {
+          openListeners.push(cb as () => void);
+        } else if (event === 'close') {
+          closeListeners.push(cb as () => void);
+        }
+      }),
+      removeEventListener: vi.fn(),
+      send: mockSend,
+      close: vi.fn(),
+    };
+  }),
 }));
 
 import { useParticipantSocket } from '../../hooks/useParticipantSocket';
