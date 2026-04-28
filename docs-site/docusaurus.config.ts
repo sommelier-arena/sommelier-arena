@@ -106,7 +106,7 @@ const config: Config = {
           label: 'Read the Docs',
         },
         {
-          href: 'https://github.com/francoiducat/sommelier-arena',
+          href: 'https://github.com/sommelier-arena/sommelier-arena/',
           label: 'Contribute to Git Repository',
           position: 'left',
         },
