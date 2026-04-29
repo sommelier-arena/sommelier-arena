@@ -14,11 +14,9 @@ This page is the single reference for how Sommelier Arena is configured across t
 |---|---|---|---|
 | **Frontend** | Astro dev server `http://localhost:4321` | nginx container `http://localhost:4321` | Cloudflare Pages (CDN) |
 | **PartyKit backend** | `npx partykit dev` `ws://localhost:1999` | PartyKit container (internal, nginx proxied) | Cloudflare Workers + Durable Objects |
-| **Wine Answers Worker** | `npx wrangler dev` `http://localhost:1998` (optional) | wine-answers container `http://localhost:1998` | Cloudflare Worker |
 | **Documentation** | Docusaurus dev `http://localhost:3002` | Docusaurus container `http://localhost:3002` | Cloudflare Pages (separate project) |
 | **DO storage** (`room.storage`) | ⚠️ In-memory | ⚠️ In-memory | ✅ SQLite per DO |
-| **Cloudflare KV** (`HOSTS_KV`) | ❌ Not available | ❌ Not available | ❌ Disabled (see note) |
-| **Cloudflare KV** (`WINE_ANSWERS_KV`) | ❌ Not available (worker uses file-based local KV in `.wrangler/state/`) | ❌ Not available (worker uses file-based local KV in `.wrangler/state/`) | ✅ Real KV namespace |
+| **Cloudflare KV** (`HOSTS_KV`) | ❌ Not available | ❌ Not available | ✅ Real KV namespace |
 | **Browser localStorage** | ✅ Works | ✅ Works | ✅ Works |
 
 ---
@@ -36,30 +34,41 @@ cd front && cp .env.example .env.local
 | Variable | Mode A (local) | Mode B (Docker) | Production |
 |---|---|---|---|
 | `PUBLIC_PARTYKIT_HOST` | `localhost:1999` (direct to `partykit dev`) | `localhost:1999` (baked at Docker build time; frontend build is configured to connect to PartyKit at host port 1999; nginx serves static files only) | `sommelier-arena.<username>.partykit.dev` |
-| `PUBLIC_WINE_ANSWERS_URL` | `http://localhost:1998` (direct to wine-answers dev) | `http://localhost:1998` (wine-answers container exposed on host port 1998) | `https://<wine-answers-worker>.workers.dev` |
 | `PUBLIC_DOCS_URL` | *(optional)* `http://localhost:3002/docs` | *(optional)* `http://localhost:3002/docs` | `https://your-domain/docs` |
+
+## Certificates / Playwright trust
+
+If your network performs TLS interception (corporate proxy like Zscaler), Playwright's browser downloads may fail with TLS errors. To avoid this during the one-off Playwright browser install, provide your organization's root CA to Node via `NODE_EXTRA_CA_CERTS`.
+
+1. Convert your org certificate (DER `.cer` or `.crt`) to PEM if needed:
+
+```bash
+openssl x509 -in "/path/to/org-root-ca.cer" -inform DER -out "/path/to/org-root-ca.pem" -outform PEM
+```
+
+2. Run the Playwright installer while trusting the PEM file (one-off):
+
+```bash
+cd e2e
+NODE_EXTRA_CA_CERTS="/path/to/org-root-ca.pem" npx playwright install --with-deps
+```
+
+Notes:
+
+- Use a full filesystem path for `NODE_EXTRA_CA_CERTS` (do not check the PEM into source control).
+- If you are behind an HTTP proxy, prefix the command with `HTTPS_PROXY="http://proxy:port"`.
+- Avoid `NODE_TLS_REJECT_UNAUTHORIZED=0` in CI or shared environments — it disables TLS verification globally.
+
 
 > **Docker note:** In Mode B, `PUBLIC_PARTYKIT_HOST` is a Docker build arg baked into the Astro static build — do **not** rely on `.env.local` for Docker builds. Pass it via `docker-compose.yml` or `docker build --build-arg`.
 
-### Backend & Storage
+### Backend (`back/`)
 
-The backend is a **PartyKit Durable Object** (`back/game.ts`). PartyKit and Durable Object storage are two sides of the same coin — PartyKit IS the DO runtime, and `room.storage` IS its built-in SQLite-backed storage. There is no separate database.
-
-Configuration comes from:
+The backend is a PartyKit Durable Object (`back/game.ts`). It has **no `.env` file**. Configuration comes from:
 - `partykit.json` — KV namespace bindings, DO class names
-- `wrangler secret put` or CI secrets — production secrets (no `.env` file)
+- `wrangler secret put` or CI secrets — production secrets
 
-| Storage key | Contents |
-|---|---|
-| `'state'` | Full `SavedState` snapshot (restored after DO eviction) |
-| `'hostId'` | Host re-authentication token |
-| `'participant:{pseudonym}'` | Participant state (score, answers) — keyed by `ADJECTIVE-NOUN` pseudonym |
-| `'response:{participantId}:{questionId}'` | Answer record for accurate scoring |
-
-- **Local / Docker**: storage is in-memory. Restarting `partykit dev` or `docker-compose down` clears all sessions.
-- **Production**: SQLite-backed. `onStart()` in `back/game.ts` reads saved state when the DO wakes from cold storage.
-
-> The `HOSTS_KV` binding has been removed from `partykit.json` (Cloudflare free plan blocks DO creation on custom accounts). Session history is **localStorage-only** everywhere. See [Data Persistence](./data-persistence.md#cloudflare-kv--hosts_kv-disabled) for re-enabling instructions.
+### Docs site (`docs-site/`)
 
 Copy `docs-site/.env.example` → `docs-site/.env`:
 
@@ -80,14 +89,10 @@ All layers in one view:
 | Layer | Setting | Mode A (local) | Mode B (Docker) | Production |
 |---|---|---|---|---|
 | **Frontend** | `PUBLIC_PARTYKIT_HOST` | `front/.env.local` → `localhost:1999` | Docker build arg → `localhost:1999` | Cloudflare Pages env → `<project>.partykit.dev` |
-| **Frontend** | `PUBLIC_WINE_ANSWERS_URL` | `front/.env.local` → `http://localhost:1998` | Docker build arg → `http://localhost:1998` | Cloudflare Pages env → `https://<worker>.workers.dev` |
 | **Frontend** | Serving | Astro dev server `:4321` | nginx container (mapped `4321:4321`) | Cloudflare Pages CDN |
 | **Backend** | PartyKit | `npx partykit dev --port 1999` | PartyKit container (exposed `:1999`) | Cloudflare Workers (Durable Objects) |
 | **Backend** | DO storage | In-memory (resets on restart) | In-memory | SQLite (persistent across DO evictions) |
-| **Backend** | `HOSTS_KV` | Disabled in all environments — binding removed from `partykit.json` (CF free plan incompatibility with custom account deploys). Session history is localStorage-only. |
-| **Wine Answers** | Serving | `npx wrangler dev` `:1998` (optional) | wine-answers container (mapped `1998:1998`) | Cloudflare Worker |
-| **Wine Answers** | `WINE_ANSWERS_KV` | File-based local KV (`.wrangler/state/`) — seeded via `npm run seed` | File-based local KV (`.wrangler/state/`) — seeded via `npm run seed` | Cloudflare KV namespace |
-| **Wine Answers** | `ADMIN_SECRET` | Set in `.dev.vars` or env | Docker env var | `wrangler secret put ADMIN_SECRET` |
+| **Backend** | `HOSTS_KV` | Not available | Not available | Cloudflare KV namespace (bound in `partykit.json`) |
 | **Docs** | Serving | Docusaurus dev `:3002` | nginx container (mapped `3002:80`) | Cloudflare Pages (`/docs`) |
 | **Docs** | `DOCS_BASE_URL` | `/` | `/docs` | `/docs` |
 | **Proxy Worker** | `DOCS_ORIGIN` | N/A | N/A | Injected via Wrangler `--var` or Worker env |
@@ -150,10 +155,7 @@ The Playwright E2E tests run against the Docker stack (Mode B). Without nginx:
 
 Works identically in all environments. Managed by `front/src/lib/sessionStorage.ts`.
 
-> ⚠️ **Session history note**: The `HOSTS_KV` binding has been removed from `partykit.json`
-> (Cloudflare free plan blocks DO creation on custom accounts; PartyKit does not support the
-> required migration config). Session history is **localStorage-only** in all environments —
-> local dev, Docker, and production. Use the 🗑 button in the Host Dashboard to clean up stale sessions.
+> ⚠️ **Local dev note**: Because KV is not available locally, the Host Dashboard session list comes **only** from localStorage. Use the 🗑 button to clean up stale sessions.
 
 ### 2. Durable Object storage (`room.storage`) — in-memory locally
 
@@ -167,9 +169,35 @@ Works identically in all environments. Managed by `front/src/lib/sessionStorage.
 - **Local / Docker**: In-memory. Restarting `partykit dev` or `docker-compose down` clears all sessions.
 - **Production**: SQLite-backed. `onStart()` in `back/game.ts` reads saved state when the DO wakes from cold storage.
 
-### 3. Cloudflare KV (`WINE_ANSWERS_KV`) — production only
+### 3. Cloudflare KV (`HOSTS_KV`) — production only
 
-Curated answer suggestions for the session creation form. Managed by the Wine Answers Worker. See [Data Persistence](./data-persistence.md) for the full KV schema.
+Cross-session host index. Key: `host:{hostId}` → `SessionListEntry[]`.
+
+Not available in Mode A or Mode B. The backend wraps all KV writes in `try/catch` and silently skips them locally — the app continues working via localStorage.
+
+---
+
+## How a static site runs multiplayer
+
+Astro builds to HTML + JS + CSS. No server runs at request time. Yet the app is live-multiplayer. How?
+
+1. **Astro static build** → pure files deployed to Cloudflare Pages CDN globally.
+2. **PartySocket bundled in JS** → compiled into the JS bundle at build time.
+3. **Browser opens WebSocket** to `ws://your-domain.com/parties/main/{sessionCode}` (or `ws://localhost:4321/parties/main/{code}` in Mode B via nginx proxy).
+4. **All game state flows over WebSocket** — no REST API. Events: `host:start`, `participant:submit_answer`, `game:question`, `game:timer_tick`, `game:answer_revealed`, etc.
+5. **React islands handle reactivity** — Zustand stores (`hostStore`, `participantStore`) hold client-side state, updated by socket hooks.
+
+```
+Browser                           Cloudflare (production)
+  │                                       │
+  │  GET https://your-domain.com/host     │
+  │──────────────────────────────────────>│  Pages CDN → static HTML + JS
+  │<──────────────────────────────────────│
+  │                                       │
+  │  WS wss://your-domain.com/parties/main/1234
+  │──────────────────────────────────────>│  Workers → Durable Object (game.ts)
+  │<══════════════════════════════════════│  real-time game events (JSON)
+```
 
 ---
 

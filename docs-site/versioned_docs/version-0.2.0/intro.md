@@ -11,15 +11,15 @@ A real-time blind wine tasting quiz — Kahoot-style, €0/month to host, zero c
 
 ## How it works
 
-A **host** creates a tasting with one or more wines. Each wine gets five questions (color, region, grape variety, vintage year, wine name). **Participants** join via a 4-digit code on their phone, answer live as the host controls the pace, and compete on a leaderboard.
+A **host** creates a game session with one or more wines. Each wine gets five questions (color, country, grape variety, vintage year, wine name). **Participants** join via a 4-digit code on their phone, answer live as the host controls the pace, and compete on a leaderboard.
 
-Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudflare Pages; the game backend is a PartyKit Durable Object (Cloudflare Workers); session lists are stored in **browser localStorage**.
+Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudflare Pages; the game backend is a PartyKit Durable Object (Cloudflare Workers); session lists are stored in Cloudflare KV.
 
 ## Core concepts
 
 - **Session** — a single game instance, identified by a randomly generated 4-digit numeric code (e.g. `4821`).
 - **Round** — one wine. Each round has exactly 5 questions played back-to-back. The leaderboard is shown after all 5 questions, before the next wine begins.
-- **Question** — one of the 5 fixed-category questions for a wine: `color`, `region`, `grape_variety`, `vintage_year`, `wine_name`. The host pre-fills the correct answer and 3 distractors.
+- **Question** — one of the 5 fixed-category questions for a wine: `color`, `country`, `grape_variety`, `vintage_year`, `wine_name`. The host pre-fills the correct answer and 3 distractors.
 
 ## Key rules
 
@@ -33,11 +33,16 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 | Mid-session joins | Not allowed once first round starts |
 | Persistence | DO storage (SQLite) in production; in-memory in local dev |
 
-## What's new in v0.4.0
+## What's new in v2.0 (PartyKit)
 
-- **Stack upgrade** — Astro 6, React 19, TypeScript 6, Tailwind CSS v4 (CSS-first config), Node.js ≥22.12
-- **Wine Answers Collection** — curated answer suggestions in the session creation form, powered by a dedicated Cloudflare KV Worker
-- **Admin dashboard** at `/admin` — manage the curated answer lists
+- **Zero cost, zero cold starts** — Durable Objects wake on demand
+- **Session persistence** — create Monday, resume Wednesday
+- **Participant rejoin** — page refresh or URL (`/play?code=X&id=PSEUDONYM`) reconnects automatically, even from a different device
+- **Host identity dashboard** — see all your past and active sessions from any device
+- **Five questions per wine** — added `wine_name` category
+- **Configurable timer** — 15–120 s slider at session creation
+- **No-lock answers** — participants can change their answer until the host reveals
+- **2 × 2 option grid** — cleaner layout on mobile
 
 ## Who are you?
 
@@ -46,9 +51,8 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 | A **developer** setting up locally | [Quick Start](quick-start.md) |
 | A **developer** understanding the system | [Architecture](architecture.md) · [Tech Stack](tech-stack.md) |
 | A **product person / user** | [Features](features.md) · [Gameplay Workflow](gameplay-workflow.md) |
-| An **admin** managing answer data | [Admin Dashboard](admin-dashboard.md) |
 | **Deploying** to Cloudflare | [Deployment Guide](deployment-guide.md) |
-| An **automation agent / AI** | [For Developers](for-developers.md#automation--ai-entry-points) |
+| An **automation agent / AI** | [For Automation](for-automation.md) |
 
 ## Quick reference
 
@@ -63,4 +67,3 @@ Everything runs on **Cloudflare**: the frontend is a static Astro site on Cloudf
 | [Data Persistence](data-persistence.md) | DO storage keys, KV schema, what survives a restart |
 | [Deployment Guide](deployment-guide.md) | Cloudflare Pages + PartyKit + Wrangler deploy |
 | [Configuration & Environments](configuration.md) | Env vars, local vs prod, nginx explanation, testing preview |
-| [Admin Dashboard](admin-dashboard.md) | Manage wine answer suggestions |

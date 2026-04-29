@@ -69,12 +69,17 @@ const config: Config = {
           lastVersion: 'current',
           versions: {
             current: {
-              label: '2.0 PartyKit',
+              label: '0.4.0 — Wine Answers',
               path: '/',
             },
-            '1.0-nestjs': {
-              label: '1.0 NestJS (legacy)',
-              path: '/v1',
+            '0.2.0': {
+              label: '0.2.0 — PartyKit',
+              path: '/v0.2.0',
+              banner: 'none',
+            },
+            '0.1.0': {
+              label: '0.1.0 — NestJS',
+              path: '/v0.1.0',
               banner: 'unmaintained',
             },
           },
