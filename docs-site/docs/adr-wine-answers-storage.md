@@ -14,7 +14,7 @@ Accepted
 
 Sommelier Arena is a real-time blind wine tasting quiz. The existing infrastructure uses **Cloudflare Durable Objects** (via PartyKit) to manage game sessions — each session is a stateful room with its own lifecycle, real-time WebSocket connections, and an in-memory state machine (`SessionPhase`). A **Cloudflare KV** namespace (`SOMMELIER_HOSTS`) was initially used as a lightweight host session index, but that binding has since been removed (free-plan incompatibility — see [Data Persistence](./data-persistence.md#cloudflare-kv--hosts_kv-disabled)); session history is now localStorage-only.
 
-A new feature introduces a **shared wine answer collection**: reference data that hosts browse and select from when building tastings. The dataset spans five categories — color, country, grape variety, vintage year, and wine name — totalling roughly 200 entries. The data characteristics are fundamentally different from game session state:
+A new feature introduces a **shared wine answer collection**: reference data that hosts browse and select from when building tastings. The dataset spans five categories — color, region, grape variety, vintage year, and wine name — totalling roughly 200 entries. The data characteristics are fundamentally different from game session state:
 
 | Characteristic | Game sessions | Wine answers |
 |---|---|---|
@@ -28,7 +28,7 @@ The project follows a **zero-cost philosophy**, staying within Cloudflare's free
 
 ## Decision
 
-Use **Cloudflare KV** via a dedicated stateless Worker (`wine-answers-worker/`) to store and serve the wine answer collection. Each category is stored as a single KV key (e.g., `answers:color`, `answers:country`) containing a JSON array of answer entries.
+Use **Cloudflare KV** via a dedicated stateless Worker (`wine-answers-worker/`) to store and serve the wine answer collection. Each category is stored as a single KV key (e.g., `answers:color`, `answers:region`) containing a JSON array of answer entries.
 
 The Worker exposes a simple REST API for CRUD operations. All reads are stateless KV lookups with no Durable Object involvement. Writes use a read-modify-write pattern against KV.
 

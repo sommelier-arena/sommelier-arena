@@ -10,7 +10,7 @@ Three development modes depending on what you're testing.
 
 ## Prerequisites
 
-- Node.js ≥22.12
+- Node.js 20+
 - `git clone` the repo and `cd SommelierArena`
 
 ## Mode A — Fast daily dev (recommended)
@@ -23,7 +23,7 @@ npx partykit dev
 ```
 
 :::tip No Cloudflare account needed for local dev
-`npx partykit dev` runs a **local in-memory simulator** — it emulates Cloudflare Durable Objects entirely on your machine with no internet connection required. Note: Cloudflare KV (`HOSTS_KV`) is **disabled in all environments** (binding removed — see [Data Persistence](./data-persistence.md#cloudflare-kv--hosts_kv-disabled)); session history comes from browser localStorage only.
+`npx partykit dev` runs a **local in-memory simulator** — it emulates Cloudflare Durable Objects entirely on your machine with no internet connection required. Note: Cloudflare KV (`HOSTS_KV`) is not available locally; session history comes from browser localStorage only. See [Configuration & Environments](./configuration.md) for the full comparison.
 :::
 
 :::warning After any backend change — redeploy!
@@ -45,7 +45,7 @@ cp .env.example .env.local # PUBLIC_PARTYKIT_HOST=localhost:1999
 npm run dev
 ```
 
-Open [http://localhost:4321/host](http://localhost:4321/host) (host), [http://localhost:4321/play](http://localhost:4321/play) (participant), and [http://localhost:4321/admin](http://localhost:4321/admin) (admin dashboard).
+Open [http://localhost:4321/host](http://localhost:4321/host) (host) and [http://localhost:4321/play](http://localhost:4321/play) (participant).
 
 ## Mode B — Full integration (Docker)
 
@@ -59,7 +59,6 @@ docker-compose up --build
 |---------|-----|
 | Frontend (nginx) | [http://localhost:4321](http://localhost:4321) |
 | PartyKit backend | [http://localhost:1999](http://localhost:1999) |
-| Wine Answers Worker | [http://localhost:1998](http://localhost:1998) |
 | Docs (Docusaurus) | [http://localhost:3002](http://localhost:3002) |
 
 ### Why nginx?
@@ -68,12 +67,13 @@ In Mode B, the `front` container runs **nginx** instead of the Astro dev server.
 
 1. **Astro builds to static files** — `npm run build` produces plain HTML/JS/CSS; there's no Node.js server at request time, so something must serve them.
 2. **SPA routing** — nginx's `try_files $uri $uri/index.html /index.html` ensures `/host` and `/play` return `index.html` without a 404.
+3. **Same-origin WebSocket proxy** — nginx forwards `/parties/*` requests to the PartyKit backend container on port 1999, keeping browser–backend traffic on a single origin (no CORS).
 
 `absolute_redirect off` in `front/nginx.conf` ensures nginx uses relative `Location` headers, which is safer for SPA routing in various proxy environments.
 
-> **WebSocket traffic is direct** — nginx does **not** proxy WebSocket connections. The browser connects directly to `ws://localhost:1999/parties/main/{code}` (the `back` container is exposed on host port 1999). This keeps the nginx config simple with no `/parties/` location block.
+**For daily development, you don't need nginx at all** — Mode A uses Astro's built-in dev server on port 4321, which handles routing and WebSocket proxy natively via `PUBLIC_PARTYKIT_HOST`.
 
-**For daily development, you don't need nginx at all** — Mode A uses Astro's built-in dev server on port 4321, which handles routing natively via `PUBLIC_PARTYKIT_HOST`.
+**Alternative:** [Caddy](https://caddyserver.com/) provides equivalent functionality with a simpler config syntax. See [Configuration & Environments](./configuration.md) for the full nginx walkthrough and Caddy comparison.
 
 ### Docker cheat sheet
 
@@ -102,6 +102,30 @@ npm run start:local
 ```
 
 ### Docs site — local search & preview
+
+## Certificates / Playwright trust
+
+If your network performs TLS interception (corporate proxy like Zscaler), Playwright's browser downloads may fail with TLS errors. Convert your organization's root certificate to PEM and use it for the single Playwright install command.
+
+1. Convert DER (`.cer` / `.crt`) to PEM if needed:
+
+```bash
+openssl x509 -in "/path/to/org-root-ca.cer" -inform DER -out "/path/to/org-root-ca.pem" -outform PEM
+```
+
+2. Run the Playwright installer from the e2e directory while trusting the PEM file (one-off):
+
+```bash
+cd e2e
+NODE_EXTRA_CA_CERTS="/path/to/org-root-ca.pem" npx playwright install --with-deps
+```
+
+Notes:
+
+- Use a full filesystem path for `NODE_EXTRA_CA_CERTS` (do not check the PEM into source control).
+- If you are behind an HTTP proxy, prefix the command with `HTTPS_PROXY="http://proxy:port"`.
+- Avoid `NODE_TLS_REJECT_UNAUTHORIZED=0` in CI or shared environments — it disables TLS verification globally.
+
 
 This project uses a local, file-based search plugin for Docusaurus to provide a search box in the docs navbar.
 
@@ -140,32 +164,10 @@ If you prefer to preview the site at root (`/`), build with `DOCS_BASE_URL=/` an
 
 Notes
 
-- The plugin dependency (`@cmfcmf/docusaurus-search-local`) is declared in `package.json` and will be installed by `npm ci`.
-- If you build inside Docker or CI, `npm ci` in the Dockerfile ensures the plugin is available.
-- See the [Configuration & Environments](./configuration.md) page for env var details and storage layer breakdown.
-
-## Certificates / Playwright trust
-
-If your network performs TLS interception (corporate proxy like Zscaler), Playwright's browser downloads may fail with TLS errors. Convert your organization's root certificate to PEM and use it for the single Playwright install command.
-
-1. Convert DER (`.cer` / `.crt`) to PEM if needed:
-
-```bash
-openssl x509 -in "/path/to/org-root-ca.cer" -inform DER -out "/path/to/org-root-ca.pem" -outform PEM
-```
-
-2. Run the Playwright installer from the e2e directory while trusting the PEM file (one-off):
-
-```bash
-cd e2e
-NODE_EXTRA_CA_CERTS="/path/to/org-root-ca.pem" npx playwright install --with-deps
-```
-
-Notes:
-
-- Use a full filesystem path for `NODE_EXTRA_CA_CERTS` (do not check the PEM into source control).
-- If you are behind an HTTP proxy, prefix the command with `HTTPS_PROXY="http://proxy:port"`.
-- Avoid `NODE_TLS_REJECT_UNAUTHORIZED=0` in CI or shared environments — it disables TLS verification globally.
+- The plugin dependency (@cmfcmf/docusaurus-search-local) is declared in package.json and will be installed by `npm ci`.
+- The site configuration in docusaurus.config.ts will load the plugin if installed. If you build the docs inside Docker or CI, `npm ci` in the Dockerfile will ensure the plugin is available at build time.
+- If `npm ci` fails in your environment, inspect the npm logs and ensure a network/proxy is configured correctly.
+- See the [Configuration & Environments](./configuration.md) page for env var details, nginx explanation, and storage layer breakdown.
 
 ## Run tests
 
@@ -183,8 +185,6 @@ cd e2e && npm test -- --project=chromium
 |----------|-------|-------|
 | `PUBLIC_PARTYKIT_HOST` | `front/.env.local` | `localhost:1999` (local) |
 | `PUBLIC_PARTYKIT_HOST` | Cloudflare Pages dashboard | `sommelier-arena.USERNAME.partykit.dev` (prod) |
-| `PUBLIC_WINE_ANSWERS_URL` | `front/.env.local` | `http://localhost:1998` (local) |
-| `PUBLIC_WINE_ANSWERS_URL` | Cloudflare Pages dashboard | `https://<wine-answers-worker>.workers.dev` (prod) |
 
 See `front/.env.example` for a template.
 

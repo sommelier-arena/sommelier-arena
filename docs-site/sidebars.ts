@@ -25,10 +25,13 @@ const sidebars: SidebarsConfig = {
         'event-reference',
         'data-persistence',
         'host-and-participant-identity',
-        'networking',
-        'proxy-worker',
-        'configuration',
       ],
+    },
+    {
+      type: 'category',
+      label: 'Configuration & Deployment',
+      collapsed: false,
+      items: ['configuration', 'deployment-guide', 'proxy-worker'],
     },
     {
       type: 'category',
@@ -38,15 +41,9 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: 'category',
-      label: 'Deployment',
-      collapsed: false,
-      items: ['deployment-guide'],
-    },
-    {
-      type: 'category',
       label: 'Contributing',
       collapsed: true,
-      items: ['prd', 'for-developers', 'for-product', 'for-automation'],
+      items: ['for-product', 'for-developers', 'prd'],
     },
   ],
 };

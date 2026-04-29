@@ -6,19 +6,6 @@ sidebar_label: Architecture
 
 # Architecture
 
-## Containers view
-
-```mermaid
-flowchart LR
-  Browser -->|HTTPS| Pages[Cloudflare Pages - Frontend]
-  Browser -->|WSS| PartyKit[PartyKit - Cloudflare Workers DO]
-  Pages --> Proxy[Proxy Worker]
-  Proxy --> Docs[Docs - Docusaurus on Pages]
-  PartyKit --> SQLite[SQLite - Worker DO storage]
-  Browser -->|HTTP| WineAnswers[Wine Answers Worker]
-  WineAnswers --> WAKV[Cloudflare KV - WINE_ANSWERS_KV]
-```
-
 ## Repository layout
 
 ```
@@ -55,9 +42,7 @@ flowchart LR
 ├── docs-site/                    ← Docusaurus docs
 ├── proxy-worker/
 │   └── index.ts                  ← Cloudflare Worker: routes /docs/* to docs Pages
-├── wine-answers-worker/          ← Cloudflare Worker: curated wine answer suggestions (KV-backed)
-│   └── index.ts                  ← GET/POST/DELETE endpoints for answer collections
-├── partykit.json                 ← PartyKit config (no KV binding — see data-persistence.md)
+├── partykit.json                 ← PartyKit config + KV binding
 ├── package.json                  ← root: partykit + partysocket
 └── docker-compose.yml            ← Mode B: full-stack with PartyKit in Docker
 ```
@@ -77,12 +62,13 @@ Browser (Host)          Browser (Participant)
   │                                        │
   │   this.room.storage  ← game state      │
   │   this.room.broadcast ← fan-out msgs   │
-  └────────────────────────────────────────┘
+  └──────────────────┬─────────────────────┘
+                     │  KV write
+                     ▼
+           Cloudflare KV
+           SOMMELIER_HOSTS
+           key: host:{TANNIC-FALCON}
 ```
-
-> **Session history**: the DO does not write to Cloudflare KV — the `HOSTS_KV` binding has
-> been removed (CF free-plan incompatibility). Session history is `localStorage`-only.
-> See [Data Persistence](./data-persistence.md#cloudflare-kv--hosts_kv-disabled).
 
 ## Durable Object lifecycle
 
@@ -92,7 +78,7 @@ Browser (Host)          Browser (Participant)
 | `onConnect(ws)` | Client opens WebSocket | Register connection (host or participant) |
 | `onMessage(ws, msg)` | Message arrives | Parse `{ type }`, dispatch to handler |
 | `alarm()` | Timer alarm fires | Auto-reveal current question |
-| `onClose(ws)` | Client disconnects | Mark participant offline; start 1-hour host disconnect grace period if host drops |
+| `onClose(ws)` | Client disconnects | Mark participant offline; detect host drop |
 
 ## Host vs participant socket flow
 
@@ -102,40 +88,6 @@ Browser (Host)          Browser (Participant)
 
 **Participant rejoins** → localStorage `{ id, code }` detected on mount → sends `rejoin_session { pseudonym }` → server sends `participant:state_snapshot`
 
-## Static Frontend, Dynamic Experience
-
-Astro generates a **fully static site** — plain HTML, CSS, and JS served from a CDN. Yet Sommelier Arena delivers real-time multiplayer gameplay, live leaderboards, and instant answer reveals. There is no application server behind the pages. Three runtime protocols bridge the gap:
-
-### WebSocket (PartyKit) — real-time game state
-
-The PartyKit Durable Object (`back/game.ts`) holds all session state in memory and on Durable Object storage. Host and participant browsers open a `PartySocket` connection to the room (keyed by the 4-digit session code). Every game event — question broadcast, answer submission, timer expiry, leaderboard update — flows over this single WebSocket. No REST endpoints are needed for gameplay.
-
-### React Islands (Zustand) — client-side interactivity
-
-Astro pages (`/`, `/host`, `/play`, `/admin`) are static shells with zero JavaScript by default. Interactive components mount with `client:only="react"` and manage all UI state through two Zustand stores (`hostStore`, `participantStore`). These stores mirror the backend phase machine (`waiting → question_open → … → ended`), so the frontend is always a projection of server state received over the WebSocket.
-
-### HTTP REST (Wine Answers Worker) — reference data
-
-The `wine-answers-worker/` Cloudflare Worker serves curated answer collections via simple `GET`/`POST`/`DELETE` endpoints. This data is read-heavy, rarely written, and not time-sensitive — a classic fit for REST over HTTP rather than WebSocket.
-
-### Why this works
-
-Static hosting means **zero server cost** for serving pages and **instant page loads** from a CDN. The "server" lives at the edge — Cloudflare Durable Objects for real-time state, Workers for reference data. The static shell loads first, then runtime connections bring it to life.
-
-```
-┌──────────────────────────────────────┐
-│        Static Astro Shell            │
-│  (HTML/CSS/JS — served from CDN)     │
-├──────────────────────────────────────┤
-│  React Islands + Zustand Stores      │
-│  (hydrated client-side)              │
-├──────────┬──────────┬────────────────┤
-│ WebSocket│  REST    │  localStorage  │
-│ PartyKit │  Worker  │  (rejoin data) │
-│ (game)   │  (data)  │                │
-└──────────┴──────────┴────────────────┘
-```
-
 ## Docker vs PartyKit dev
 
 | | Mode A (partykit dev) | Mode B (docker) |
@@ -143,6 +95,3 @@ Static hosting means **zero server cost** for serving pages and **instant page l
 | Backend | `npx partykit dev` on `:1999` | `partykit` Docker container on `:1999` |
 | Frontend | `npm run dev` on `:4321` | nginx on `:4321` |
 | Docs | `cd docs-site && npm start` | Docker container on `:3002` |
-| Wine Answers | Not running (or `npx wrangler dev` on `:1998`) | `wine-answers` Docker container on `:1998` |
-
-All services run on Cloudflare's infrastructure: zero VMs, zero servers to maintain. The frontend is a static CDN deployment; game state lives in a Durable Object; answer suggestions come from a KV-backed Worker. See [Deployment Guide](./deployment-guide.md) for step-by-step deploy commands.
