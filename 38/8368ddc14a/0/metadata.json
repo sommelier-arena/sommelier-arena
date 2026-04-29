@@ -1,0 +1,171 @@
+{
+  "cli_version": "0.5.6",
+  "checkpoint_id": "388368ddc14a",
+  "session_id": "093e8779-159c-4165-99db-6c54ad7bd037",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-29T19:24:15.400747Z",
+  "branch": "doc-site-update",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "docs-site/docs/adr-wine-answers-storage.md",
+    "docs-site/docs/architecture.md",
+    "docs-site/docs/configuration.md",
+    "docs-site/docs/features.md",
+    "docs-site/docs/for-automation.md",
+    "docs-site/docs/for-developers.md",
+    "docs-site/docs/intro.md",
+    "docs-site/docs/networking.md",
+    "docs-site/docs/quick-start.md",
+    "docs-site/docs/tech-stack.md",
+    "docs-site/docusaurus.config.ts",
+    "docs-site/sidebars.ts",
+    "docs-site/versioned_docs/version-0.1.0/architecture.md",
+    "docs-site/versioned_docs/version-0.1.0/database-model.md",
+    "docs-site/versioned_docs/version-0.1.0/features.md",
+    "docs-site/versioned_docs/version-0.1.0/intro.md",
+    "docs-site/versioned_docs/version-0.1.0/overview.md",
+    "docs-site/versioned_docs/version-0.1.0/prd.md",
+    "docs-site/versioned_docs/version-0.1.0/quick-start.md",
+    "docs-site/versioned_docs/version-0.1.0/tech-stack.md",
+    "docs-site/versioned_docs/version-0.1.0/user-stories.md",
+    "docs-site/versioned_docs/version-0.2.0/architecture.md",
+    "docs-site/versioned_docs/version-0.2.0/configuration.md",
+    "docs-site/versioned_docs/version-0.2.0/data-persistence.md",
+    "docs-site/versioned_docs/version-0.2.0/deployment-guide.md",
+    "docs-site/versioned_docs/version-0.2.0/docs-index.json",
+    "docs-site/versioned_docs/version-0.2.0/event-reference.md",
+    "docs-site/versioned_docs/version-0.2.0/features.md",
+    "docs-site/versioned_docs/version-0.2.0/for-automation.md",
+    "docs-site/versioned_docs/version-0.2.0/for-developers.md",
+    "docs-site/versioned_docs/version-0.2.0/for-product.md",
+    "docs-site/versioned_docs/version-0.2.0/gameplay-workflow.md",
+    "docs-site/versioned_docs/version-0.2.0/host-and-participant-identity.md",
+    "docs-site/versioned_docs/version-0.2.0/intro.md",
+    "docs-site/versioned_docs/version-0.2.0/networking.md",
+    "docs-site/versioned_docs/version-0.2.0/prd.md",
+    "docs-site/versioned_docs/version-0.2.0/proxy-worker.md",
+    "docs-site/versioned_docs/version-0.2.0/quick-start.md",
+    "docs-site/versioned_docs/version-0.2.0/tech-stack.md",
+    "docs-site/versioned_docs/version-1.0-nestjs/architecture.md",
+    "docs-site/versioned_docs/version-1.0-nestjs/database-model.md",
+    "docs-site/versioned_docs/version-1.0-nestjs/features.md",
+    "docs-site/versioned_docs/version-1.0-nestjs/intro.md",
+    "docs-site/versioned_docs/version-1.0-nestjs/overview.md",
+    "docs-site/versioned_docs/version-1.0-nestjs/prd.md",
+    "docs-site/versioned_docs/version-1.0-nestjs/quick-start.md",
+    "docs-site/versioned_docs/version-1.0-nestjs/tech-stack.md",
+    "docs-site/versioned_docs/version-1.0-nestjs/user-stories.md",
+    "docs-site/versioned_sidebars/version-0.1.0-sidebars.json",
+    "docs-site/versioned_sidebars/version-0.2.0-sidebars.json",
+    "docs-site/versioned_sidebars/version-1.0-nestjs-sidebars.json",
+    "docs-site/versions.json"
+  ],
+  "agent": "Copilot CLI",
+  "model": "claude-sonnet-4.5",
+  "turn_id": "7c0aacbf945e",
+  "checkpoint_transcript_start": 1694,
+  "transcript_lines_at_start": 1694,
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 76068,
+    "api_call_count": 177
+  },
+  "session_metrics": {
+    "turn_count": 9
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-29T19:24:15.307709Z",
+    "agent_lines": 1605,
+    "agent_removed": 243,
+    "human_added": 0,
+    "human_modified": 457,
+    "human_removed": 7,
+    "total_committed": 2062,
+    "total_lines_changed": 2312,
+    "agent_percentage": 79.93079584775087,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 13,
+      "user_lines_removed": 14,
+      "agent_lines_added": 2456,
+      "agent_lines_removed": 266,
+      "user_added_per_file": {
+        "docs-site/docs/architecture.md": 13
+      },
+      "user_removed_per_file": {
+        "docs-site/docs/architecture.md": 13,
+        "docs-site/docs/intro.md": 1
+      }
+    },
+    {
+      "checkpoint_number": 3,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 188,
+      "agent_lines_removed": 266
+    },
+    {
+      "checkpoint_number": 4,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 2091,
+      "agent_lines_removed": 266
+    },
+    {
+      "checkpoint_number": 5,
+      "user_lines_added": 444,
+      "user_lines_removed": 450,
+      "agent_lines_added": 2091,
+      "agent_lines_removed": 266,
+      "user_added_per_file": {
+        "docs-site/docusaurus.config.ts": 4,
+        "docs-site/sidebars.ts": 1,
+        "docs-site/versioned_docs/version-0.1.0/architecture.md": 19,
+        "docs-site/versioned_docs/version-0.1.0/database-model.md": 77,
+        "docs-site/versioned_docs/version-0.1.0/features.md": 69,
+        "docs-site/versioned_docs/version-0.1.0/intro.md": 25,
+        "docs-site/versioned_docs/version-0.1.0/overview.md": 25,
+        "docs-site/versioned_docs/version-0.1.0/prd.md": 19,
+        "docs-site/versioned_docs/version-0.1.0/quick-start.md": 138,
+        "docs-site/versioned_docs/version-0.1.0/tech-stack.md": 23,
+        "docs-site/versioned_docs/version-0.1.0/user-stories.md": 35,
+        "docs-site/versioned_sidebars/version-0.1.0-sidebars.json": 8,
+        "docs-site/versions.json": 1
+      },
+      "user_removed_per_file": {
+        "docs-site/docusaurus.config.ts": 4,
+        "docs-site/sidebars.ts": 7,
+        "docs-site/versioned_docs/version-1.0-nestjs/architecture.md": 19,
+        "docs-site/versioned_docs/version-1.0-nestjs/database-model.md": 77,
+        "docs-site/versioned_docs/version-1.0-nestjs/features.md": 69,
+        "docs-site/versioned_docs/version-1.0-nestjs/intro.md": 25,
+        "docs-site/versioned_docs/version-1.0-nestjs/overview.md": 25,
+        "docs-site/versioned_docs/version-1.0-nestjs/prd.md": 19,
+        "docs-site/versioned_docs/version-1.0-nestjs/quick-start.md": 138,
+        "docs-site/versioned_docs/version-1.0-nestjs/tech-stack.md": 23,
+        "docs-site/versioned_docs/version-1.0-nestjs/user-stories.md": 35,
+        "docs-site/versioned_sidebars/version-1.0-nestjs-sidebars.json": 8,
+        "docs-site/versions.json": 1
+      }
+    },
+    {
+      "checkpoint_number": 6,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 2526,
+      "agent_lines_removed": 707
+    }
+  ]
+}

@@ -1,0 +1,104 @@
+[[PLAN]] give me a quick description for the new release of my app describing the stack upgrade and latests bug fixes. In the previous version here is what changed : Add Wine Answers Collection and admin page. by @francoiducat in #8
+fix: remove HOSTS_KV binding; update docs for localStorage-only sessi… by @francoiducat in #9 . Maybe use git log to find all details.
+
+---
+
+[[PLAN]] Good but when I copy paste it in https://github.com/sommelier-arena/sommelier-arena/releases/new the dependenciy upgrades table is broken in style
+
+---
+
+[[PLAN]] Now I want to update all .md files in docs-site/docs so that it reflects the current code base. This would be nice to create a new docusaurus version that reflect the release version v.0.4.0. Also the mermaid that describes the architecture in the deployment guide could also be displayed in the architecture page under technical reference. In configuration un der technical reference the PartyKit backend AND DO storage could be maybe "together" because they are linked aren't they ?  Well overall, let's makle it super clear for human BUT stay synthetic don't bullshit please. I also find that lot's of explanation are duplicated (eg configuration.md ) so don't hesitate to review the .md files content or even optimize the .md files them self (delete and or merge some if necesseray) and documentation structure: for that see what are the best practices in terms of documentation and what the best companies are doing. (I still like the entry "product", "business", "dev/tech/softwareEngineer") Don't commit and push Ill do it.
+
+---
+
+<system_notification>
+Agent "docs-audit" (explore) has completed successfully. Use read_agent with agent_id "docs-audit" to retrieve the full results.
+</system_notification>
+
+---
+
+You have not yet marked the task as complete using the task_complete tool. If you were planning, stop planning and start implementing. You aren't done until you have fully completed the task.
+
+IMPORTANT: Do NOT call task_complete if:
+- You have open questions or ambiguities - make good decisions and keep working
+- You encountered an error - try to resolve it or find an alternative approach
+- There are remaining steps - complete them first
+
+Keep working autonomously until the task is truly finished, then call task_complete.
+
+---
+
+Not bad but the versions in docusaurus menu is 0.4.0 (archived)? where has the 0.2.0 been gone ? I used to have 0.1.0 and 0.2.0 and now I want 0.4.0 to follow the git tags
+
+---
+
+continue
+
+---
+
+continue
+
+---
+
+continue
+
+---
+
+You have not yet marked the task as complete using the task_complete tool. If you were planning, stop planning and start implementing. You aren't done until you have fully completed the task.
+
+IMPORTANT: Do NOT call task_complete if:
+- You have open questions or ambiguities - make good decisions and keep working
+- You encountered an error - try to resolve it or find an alternative approach
+- There are remaining steps - complete them first
+
+Keep working autonomously until the task is truly finished, then call task_complete.
+
+---
+
+[[PLAN]] this is still not good I want to keep 1.0 NestJS (legacy), 0.2.0 partykit and now the latest is 0.4.0 stack upgrade
+
+---
+
+You have not yet marked the task as complete using the task_complete tool. If you were planning, stop planning and start implementing. You aren't done until you have fully completed the task.
+
+IMPORTANT: Do NOT call task_complete if:
+- You have open questions or ambiguities - make good decisions and keep working
+- You encountered an error - try to resolve it or find an alternative approach
+- There are remaining steps - complete them first
+
+Keep working autonomously until the task is truly finished, then call task_complete.
+
+---
+
+If this is possible to rename 0.4.0 into 0.4.0 Answers autosuggestions or somethin sililar
+
+---
+
+You have not yet marked the task as complete using the task_complete tool. If you were planning, stop planning and start implementing. You aren't done until you have fully completed the task.
+
+IMPORTANT: Do NOT call task_complete if:
+- You have open questions or ambiguities - make good decisions and keep working
+- You encountered an error - try to resolve it or find an alternative approach
+- There are remaining steps - complete them first
+
+Keep working autonomously until the task is truly finished, then call task_complete.
+
+---
+
+Is it possible to rename 1.0 NestJS (legacy) into 0.1.0 - NestJS? and 0.2.0 PartyKit into 0.2.0 - PartyKit? to be consistent...
+
+---
+
+Move the For... pages (/for-developers... ) into the Contributing section. I prefer to highlight the game itself on top of the sections!
+
+---
+
+some files are still not correct like docs-site/versioned_sidebars/version-1.0-nestjs-sidebars.json
+
+---
+
+docs-site/versions.json this file seems not correct also
+
+---
+
+ok before I push is there anything to do with the packagelock since I had issues on cloudflare with thre front end I don't want any issues with the docusaurus deployment
